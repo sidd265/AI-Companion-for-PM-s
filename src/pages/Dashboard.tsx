@@ -28,6 +28,7 @@ import { currentUser } from '@/data/mockData';
 import { useNavigate } from 'react-router-dom';
 import TicketTrendChart from '@/components/charts/TicketTrendChart';
 import SprintBurndownChart from '@/components/charts/SprintBurndownChart';
+import PRActivityChart from '@/components/charts/PRActivityChart';
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -243,7 +244,7 @@ const Dashboard = () => {
       </div>
 
       {/* Charts Section */}
-      <div className="grid grid-cols-2 gap-[24px] mb-notion-xxl">
+      <div className="grid grid-cols-2 gap-[24px] mb-[24px]">
         {/* Ticket Trend Chart */}
         <div>
           <h2 className="notion-section-header mb-[12px]">Ticket Trends</h2>
@@ -258,6 +259,14 @@ const Dashboard = () => {
           <div className="notion-card p-[16px]">
             <SprintBurndownChart />
           </div>
+        </div>
+      </div>
+
+      {/* PR Activity Chart - Full Width */}
+      <div className="mb-notion-xxl">
+        <h2 className="notion-section-header mb-[12px]">PR Activity</h2>
+        <div className="notion-card p-[16px]">
+          <PRActivityChart />
         </div>
       </div>
 
