@@ -26,6 +26,8 @@ import {
 } from '@/data/mockData';
 import { currentUser } from '@/data/mockData';
 import { useNavigate } from 'react-router-dom';
+import TicketTrendChart from '@/components/charts/TicketTrendChart';
+import SprintBurndownChart from '@/components/charts/SprintBurndownChart';
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -237,6 +239,25 @@ const Dashboard = () => {
             <Zap className="w-[14px] h-[14px]" />
             Integrations
           </button>
+        </div>
+      </div>
+
+      {/* Charts Section */}
+      <div className="grid grid-cols-2 gap-[24px] mb-notion-xxl">
+        {/* Ticket Trend Chart */}
+        <div>
+          <h2 className="notion-section-header mb-[12px]">Ticket Trends</h2>
+          <div className="notion-card p-[16px]">
+            <TicketTrendChart />
+          </div>
+        </div>
+
+        {/* Sprint Burndown Chart */}
+        <div>
+          <h2 className="notion-section-header mb-[12px]">Sprint Burndown</h2>
+          <div className="notion-card p-[16px]">
+            <SprintBurndownChart />
+          </div>
         </div>
       </div>
 
