@@ -7,7 +7,6 @@ import {
   Settings 
 } from 'lucide-react';
 import { currentUser } from '@/data/mockData';
-import { ThemeToggle } from '@/components/ThemeToggle';
 
 const navItems = [
   { to: '/', icon: LayoutDashboard, label: 'Dashboard' },
@@ -21,14 +20,14 @@ export const Sidebar = () => {
   const location = useLocation();
 
   return (
-    <aside className="w-notion-sidebar h-screen flex flex-col bg-sidebar border-r border-sidebar-border">
+    <aside className="w-notion-sidebar h-screen flex flex-col bg-notion-sidebar border-r border-notion-border">
       {/* Logo Area */}
       <div className="px-[14px] py-[12px]">
         <div className="flex items-center gap-2">
-          <div className="w-[22px] h-[22px] bg-foreground rounded-[4px] flex items-center justify-center">
-            <span className="text-background text-[12px] font-bold">A</span>
+          <div className="w-[22px] h-[22px] bg-notion-text rounded-[4px] flex items-center justify-center">
+            <span className="text-white text-[12px] font-bold">A</span>
           </div>
-          <span className="text-[14px] font-semibold text-foreground">AM PM</span>
+          <span className="text-[14px] font-semibold text-notion-text">AM PM</span>
         </div>
       </div>
 
@@ -54,13 +53,8 @@ export const Sidebar = () => {
         })}
       </nav>
 
-      {/* Theme Toggle */}
-      <div className="px-[6px] py-[4px] border-t border-sidebar-border">
-        <ThemeToggle />
-      </div>
-
       {/* User Profile */}
-      <div className="px-[14px] py-[8px] border-t border-sidebar-border">
+      <div className="px-[14px] py-[8px] border-t border-notion-border">
         <div className="flex items-center gap-[12px] px-[4px] py-[4px]">
           <div 
             className="notion-avatar w-[32px] h-[32px] text-[12px] text-white"
@@ -69,10 +63,10 @@ export const Sidebar = () => {
             {currentUser.initials}
           </div>
           <div className="flex-1 min-w-0">
-            <div className="text-[14px] font-medium text-foreground truncate">
+            <div className="text-[14px] font-medium text-notion-text truncate">
               {currentUser.name}
             </div>
-            <div className="text-[12px] text-muted-foreground truncate">
+            <div className="text-[12px] text-notion-text-secondary truncate">
               {currentUser.role}
             </div>
           </div>
