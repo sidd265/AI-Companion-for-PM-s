@@ -54,13 +54,17 @@ const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
   return null;
 };
 
-const TicketTrendChart = () => {
+interface TicketTrendChartProps {
+  compact?: boolean;
+}
+
+const TicketTrendChart = ({ compact = false }: TicketTrendChartProps) => {
   return (
-    <div className="h-[280px] w-full">
+    <div className={compact ? "h-full w-full" : "h-[280px] w-full"}>
       <ResponsiveContainer width="100%" height="100%">
         <AreaChart
           data={ticketTrendData}
-          margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
+          margin={compact ? { top: 5, right: 5, left: -20, bottom: 0 } : { top: 10, right: 10, left: -20, bottom: 0 }}
         >
           <defs>
             <linearGradient id="colorCreated" x1="0" y1="0" x2="0" y2="1">
@@ -81,24 +85,26 @@ const TicketTrendChart = () => {
             dataKey="date" 
             axisLine={false}
             tickLine={false}
-            tick={{ fontSize: 11, fill: 'hsl(37 4% 46%)' }}
-            dy={10}
+            tick={{ fontSize: compact ? 9 : 11, fill: 'hsl(37 4% 46%)' }}
+            dy={compact ? 5 : 10}
           />
           <YAxis 
             axisLine={false}
             tickLine={false}
-            tick={{ fontSize: 11, fill: 'hsl(37 4% 46%)' }}
+            tick={{ fontSize: compact ? 9 : 11, fill: 'hsl(37 4% 46%)' }}
             dx={-5}
           />
-          <Tooltip content={<CustomTooltip />} />
-          <Legend 
-            verticalAlign="top" 
-            height={36}
-            iconType="circle"
-            iconSize={8}
-            wrapperStyle={{ fontSize: '12px' }}
-          />
-          <Area 
+          {!compact && <Tooltip content={<CustomTooltip />} />}
+          {!compact && (
+            <Legend 
+              verticalAlign="top" 
+              height={36}
+              iconType="circle"
+              iconSize={8}
+              wrapperStyle={{ fontSize: '12px' }}
+            />
+          )}
+          <Area
             type="monotone" 
             dataKey="inProgress" 
             name="In Progress"

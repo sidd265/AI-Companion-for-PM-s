@@ -57,12 +57,47 @@ const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
   return null;
 };
 
-const SprintBurndownChart = () => {
+interface SprintBurndownChartProps {
+  compact?: boolean;
+}
+
+const SprintBurndownChart = ({ compact = false }: SprintBurndownChartProps) => {
   // Calculate sprint progress
   const currentDay = 9;
   const totalPoints = 32;
   const completedPoints = 18;
   const percentComplete = Math.round((completedPoints / totalPoints) * 100);
+
+  if (compact) {
+    return (
+      <div className="h-full w-full flex flex-col">
+        <div className="flex items-center justify-between mb-[8px]">
+          <div className="flex items-center gap-[8px]">
+            <span className="text-[16px] font-bold text-notion-text">{percentComplete}%</span>
+            <span className="text-[10px] text-notion-text-tertiary">Day {currentDay}/12</span>
+          </div>
+          <div className={`px-[6px] py-[2px] rounded-[3px] text-[10px] font-medium ${
+            percentComplete >= 75 ? 'bg-notion-green/10 text-notion-green' : 
+            percentComplete >= 50 ? 'bg-notion-orange/10 text-notion-orange' : 
+            'bg-notion-red/10 text-notion-red'
+          }`}>
+            {percentComplete >= 75 ? 'On Track' : percentComplete >= 50 ? 'At Risk' : 'Behind'}
+          </div>
+        </div>
+        <div className="flex-1">
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart data={sprintData} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="hsl(40 17% 91%)" vertical={false} />
+              <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{ fontSize: 9, fill: 'hsl(37 4% 46%)' }} />
+              <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 9, fill: 'hsl(37 4% 46%)' }} domain={[0, 35]} />
+              <Line type="monotone" dataKey="ideal" stroke="hsl(37 4% 46%)" strokeWidth={1} strokeDasharray="3 3" dot={false} connectNulls />
+              <Line type="monotone" dataKey="remaining" stroke="hsl(210 79% 51%)" strokeWidth={2} dot={{ fill: 'hsl(210 79% 51%)', strokeWidth: 0, r: 2 }} connectNulls />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div>

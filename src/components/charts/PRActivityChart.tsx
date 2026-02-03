@@ -103,7 +103,11 @@ const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
   return null;
 };
 
-const PRActivityChart = () => {
+interface PRActivityChartProps {
+  compact?: boolean;
+}
+
+const PRActivityChart = ({ compact = false }: PRActivityChartProps) => {
   const [selectedRepo, setSelectedRepo] = useState('all');
 
   const chartData = useMemo(() => {
@@ -114,6 +118,31 @@ const PRActivityChart = () => {
   const totalOpened = chartData.reduce((sum, day) => sum + day.opened, 0);
   const totalMerged = chartData.reduce((sum, day) => sum + day.merged, 0);
   const mergeRate = totalOpened > 0 ? Math.round((totalMerged / totalOpened) * 100) : 0;
+
+  if (compact) {
+    return (
+      <div className="h-full w-full flex flex-col">
+        <div className="flex items-center justify-between mb-[8px]">
+          <div className="flex items-center gap-[8px]">
+            <span className="text-[10px] text-notion-blue font-medium">{totalOpened} opened</span>
+            <span className="text-[10px] text-notion-green font-medium">{totalMerged} merged</span>
+          </div>
+          <span className="text-[10px] text-notion-text-tertiary">{mergeRate}% rate</span>
+        </div>
+        <div className="flex-1">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={chartData} margin={{ top: 5, right: 5, left: -20, bottom: 0 }} barGap={2}>
+              <CartesianGrid strokeDasharray="3 3" stroke="hsl(40 17% 91%)" vertical={false} />
+              <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{ fontSize: 9, fill: 'hsl(37 4% 46%)' }} />
+              <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 9, fill: 'hsl(37 4% 46%)' }} />
+              <Bar dataKey="opened" fill="hsl(210 79% 51%)" radius={[2, 2, 0, 0]} maxBarSize={16} />
+              <Bar dataKey="merged" fill="hsl(169 78% 27%)" radius={[2, 2, 0, 0]} maxBarSize={16} />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div>
