@@ -2,95 +2,77 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
+/* NOTION DESIGN SYSTEM - EXACT REPLICA */
 
 @layer base {
   :root {
+    /* Notion Light Mode Colors - EXACT VALUES */
     --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
-
+    --foreground: 37 29% 20%;
+    
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
-
+    --card-foreground: 37 29% 20%;
+    
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
-
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
-
-    --radius: 0.5rem;
-
-    --sidebar-background: 0 0% 98%;
-
-    --sidebar-foreground: 240 5.3% 26.1%;
-
-    --sidebar-primary: 240 5.9% 10%;
-
+    --popover-foreground: 37 29% 20%;
+    
+    /* Notion Primary Blue */
+    --primary: 210 79% 51%;
+    --primary-foreground: 0 0% 100%;
+    
+    /* Notion Secondary - Warm Gray */
+    --secondary: 40 14% 96%;
+    --secondary-foreground: 37 29% 20%;
+    
+    /* Notion Muted */
+    --muted: 40 14% 96%;
+    --muted-foreground: 37 6% 46%;
+    
+    /* Notion Accent */
+    --accent: 40 14% 96%;
+    --accent-foreground: 37 29% 20%;
+    
+    /* Notion Colors */
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+    
+    /* Notion Borders */
+    --border: 40 17% 91%;
+    --input: 40 17% 91%;
+    --ring: 210 79% 51%;
+    
+    --radius: 6px;
+    
+    /* Notion Specific Variables */
+    --notion-bg: 0 0% 100%;
+    --notion-sidebar: 40 23% 96%;
+    --notion-text: 37 29% 20%;
+    --notion-text-secondary: 37 4% 46%;
+    --notion-text-tertiary: 37 3% 60%;
+    --notion-border: 40 17% 91%;
+    --notion-blue: 210 79% 51%;
+    --notion-blue-light: 212 79% 95%;
+    --notion-red: 0 72% 56%;
+    --notion-orange: 28 92% 45%;
+    --notion-yellow: 46 100% 44%;
+    --notion-green: 169 78% 27%;
+    --notion-purple: 276 45% 56%;
+    --notion-pink: 331 79% 61%;
+    --notion-brown: 17 36% 49%;
+    
+    /* Notion Hover/Active States */
+    --notion-hover: 37 29% 20% / 0.04;
+    --notion-active: 0 0% 0% / 0.05;
+    
+    /* Sidebar Variables */
+    --sidebar-background: 40 23% 96%;
+    --sidebar-foreground: 37 29% 20%;
+    --sidebar-primary: 37 29% 20%;
     --sidebar-primary-foreground: 0 0% 98%;
-
-    --sidebar-accent: 240 4.8% 95.9%;
-
-    --sidebar-accent-foreground: 240 5.9% 10%;
-
-    --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
-  }
-
-  .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-accent: 40 17% 91%;
+    --sidebar-accent-foreground: 37 29% 20%;
+    --sidebar-border: 40 17% 91%;
+    --sidebar-ring: 210 79% 51%;
   }
 }
 
@@ -98,8 +80,165 @@ All colors MUST be HSL.
   * {
     @apply border-border;
   }
-
+  
   body {
     @apply bg-background text-foreground;
+    font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol";
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
+}
+
+/* Notion Typography Classes */
+@layer components {
+  .notion-title {
+    @apply text-[40px] font-bold leading-[1.2] tracking-tight;
+    color: hsl(var(--notion-text));
+  }
+  
+  .notion-h1 {
+    @apply text-[30px] font-bold;
+    color: hsl(var(--notion-text));
+  }
+  
+  .notion-h2 {
+    @apply text-[24px] font-semibold;
+    color: hsl(var(--notion-text));
+  }
+  
+  .notion-h3 {
+    @apply text-[18px] font-semibold;
+    color: hsl(var(--notion-text));
+  }
+  
+  .notion-body {
+    @apply text-[16px] font-normal leading-[1.5];
+    color: hsl(var(--notion-text));
+  }
+  
+  .notion-small {
+    @apply text-[14px] font-normal;
+    color: hsl(var(--notion-text));
+  }
+  
+  .notion-caption {
+    @apply text-[12px] font-normal;
+    color: hsl(var(--notion-text-secondary));
+  }
+  
+  .notion-section-header {
+    @apply text-[14px] font-semibold uppercase tracking-[0.06em];
+    color: hsl(var(--notion-text-secondary));
+  }
+}
+
+/* Notion Component Styles */
+@layer components {
+  .notion-card {
+    @apply bg-white border border-notion-border rounded-[6px] transition-colors duration-150;
+  }
+  
+  .notion-card:hover {
+    background: #FAFAF9;
+  }
+  
+  .notion-sidebar-item {
+    @apply flex items-center gap-2 px-[14px] py-[4px] mx-[6px] my-[1px] rounded-[4px] text-[14px] transition-colors duration-150 cursor-pointer;
+    color: hsl(var(--notion-text));
+  }
+  
+  .notion-sidebar-item:hover {
+    background: rgba(0, 0, 0, 0.03);
+  }
+  
+  .notion-sidebar-item.active {
+    background: rgba(0, 0, 0, 0.05);
+  }
+  
+  .notion-btn-primary {
+    @apply bg-notion-blue text-white border-none rounded-[6px] px-3 py-[6px] text-[14px] font-medium cursor-pointer transition-colors duration-150;
+  }
+  
+  .notion-btn-primary:hover {
+    background: #1a6fcc;
+  }
+  
+  .notion-btn-secondary {
+    @apply bg-transparent border border-notion-border rounded-[6px] px-3 py-[6px] text-[14px] font-medium cursor-pointer transition-colors duration-150;
+    color: hsl(var(--notion-text));
+  }
+  
+  .notion-btn-secondary:hover {
+    background: #F7F6F3;
+  }
+  
+  .notion-input {
+    @apply border border-notion-border rounded-[6px] px-3 py-2 text-[14px] bg-white transition-all duration-150;
+    color: hsl(var(--notion-text));
+  }
+  
+  .notion-input:hover {
+    border-color: #D3D1CB;
+  }
+  
+  .notion-input:focus {
+    @apply border-notion-blue outline-none;
+    box-shadow: 0 0 0 1px hsl(var(--notion-blue));
+  }
+  
+  .notion-badge {
+    @apply inline-flex items-center px-[6px] py-[2px] rounded-[3px] text-[12px] font-medium border;
+    background: #F7F6F3;
+    color: hsl(var(--notion-text-secondary));
+    border-color: hsl(var(--notion-border));
+  }
+  
+  .notion-tag {
+    @apply inline-block px-2 py-[2px] rounded-[3px] text-[12px] mr-1 mb-1 border;
+    background: #F7F6F3;
+    color: hsl(var(--notion-text));
+    border-color: hsl(var(--notion-border));
+  }
+  
+  .notion-avatar {
+    @apply rounded-[4px] font-semibold flex items-center justify-center;
+    background: #E9E7E3;
+  }
+  
+  .notion-toast {
+    @apply text-white px-4 py-3 rounded-[6px] text-[14px] max-w-[400px];
+    background: #37352F;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+}
+
+/* Notion Transitions */
+.notion-transition-fast {
+  transition: all 0.15s ease;
+}
+
+.notion-transition-normal {
+  transition: all 0.2s ease;
+}
+
+/* Notion Scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(55, 53, 47, 0.16);
+  border-radius: 10px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(55, 53, 47, 0.28);
+  background-clip: content-box;
 }
