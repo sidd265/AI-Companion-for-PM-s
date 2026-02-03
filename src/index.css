@@ -1,3 +1,6 @@
+@import url("https://fonts.googleapis.com/css2?family=Space+Grotesk&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Lora&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Space+Mono&display=swap");
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -9,40 +12,40 @@
     /* Notion Light Mode Colors - EXACT VALUES */
     --background: 0 0% 100%;
     --foreground: 37 29% 20%;
-    
+
     --card: 0 0% 100%;
     --card-foreground: 37 29% 20%;
-    
+
     --popover: 0 0% 100%;
     --popover-foreground: 37 29% 20%;
-    
+
     /* Notion Primary Blue */
     --primary: 210 79% 51%;
     --primary-foreground: 0 0% 100%;
-    
+
     /* Notion Secondary - Warm Gray */
     --secondary: 40 14% 96%;
     --secondary-foreground: 37 29% 20%;
-    
+
     /* Notion Muted */
     --muted: 40 14% 96%;
     --muted-foreground: 37 6% 46%;
-    
+
     /* Notion Accent */
     --accent: 40 14% 96%;
     --accent-foreground: 37 29% 20%;
-    
+
     /* Notion Colors */
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
-    
+
     /* Notion Borders */
     --border: 40 17% 91%;
     --input: 40 17% 91%;
     --ring: 210 79% 51%;
-    
+
     --radius: 6px;
-    
+
     /* Notion Specific Variables */
     --notion-bg: 0 0% 100%;
     --notion-sidebar: 40 23% 96%;
@@ -59,11 +62,11 @@
     --notion-purple: 276 45% 56%;
     --notion-pink: 331 79% 61%;
     --notion-brown: 17 36% 49%;
-    
+
     /* Notion Hover/Active States */
     --notion-hover: 37 29% 20% / 0.04;
     --notion-active: 0 0% 0% / 0.05;
-    
+
     /* Sidebar Variables */
     --sidebar-background: 40 23% 96%;
     --sidebar-foreground: 37 29% 20%;
@@ -73,6 +76,14 @@
     --sidebar-accent-foreground: 37 29% 20%;
     --sidebar-border: 40 17% 91%;
     --sidebar-ring: 210 79% 51%;
+    --font-sans: "Space Grotesk", ui-sans-serif, system-ui, sans-serif, Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol, Noto Color Emoji;
+    --font-serif: Lora, ui-serif, Georgia, Cambria, Times New Roman, Times, serif;
+    --font-mono: "Space Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, Courier New, monospace;
+  }
+  .dark {
+    --font-sans: "Space Grotesk", ui-sans-serif, system-ui, sans-serif, Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol, Noto Color Emoji;
+    --font-serif: Lora, ui-serif, Georgia, Cambria, Times New Roman, Times, serif;
+    --font-mono: "Space Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, Courier New, monospace;
   }
 }
 
@@ -80,7 +91,7 @@
   * {
     @apply border-border;
   }
-  
+
   body {
     @apply bg-background text-foreground;
     font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol";
@@ -95,37 +106,37 @@
     @apply text-[40px] font-bold leading-[1.2] tracking-tight;
     color: hsl(var(--notion-text));
   }
-  
+
   .notion-h1 {
     @apply text-[30px] font-bold;
     color: hsl(var(--notion-text));
   }
-  
+
   .notion-h2 {
     @apply text-[24px] font-semibold;
     color: hsl(var(--notion-text));
   }
-  
+
   .notion-h3 {
     @apply text-[18px] font-semibold;
     color: hsl(var(--notion-text));
   }
-  
+
   .notion-body {
     @apply text-[16px] font-normal leading-[1.5];
     color: hsl(var(--notion-text));
   }
-  
+
   .notion-small {
     @apply text-[14px] font-normal;
     color: hsl(var(--notion-text));
   }
-  
+
   .notion-caption {
     @apply text-[12px] font-normal;
     color: hsl(var(--notion-text-secondary));
   }
-  
+
   .notion-section-header {
     @apply text-[14px] font-semibold uppercase tracking-[0.06em];
     color: hsl(var(--notion-text-secondary));
@@ -137,74 +148,74 @@
   .notion-card {
     @apply bg-white border border-notion-border rounded-[6px] transition-colors duration-150;
   }
-  
+
   .notion-card:hover {
     background: #FAFAF9;
   }
-  
+
   .notion-sidebar-item {
     @apply flex items-center gap-2 px-[14px] py-[4px] mx-[6px] my-[1px] rounded-[4px] text-[14px] transition-colors duration-150 cursor-pointer;
     color: hsl(var(--notion-text));
   }
-  
+
   .notion-sidebar-item:hover {
     background: rgba(0, 0, 0, 0.03);
   }
-  
+
   .notion-sidebar-item.active {
     background: rgba(0, 0, 0, 0.05);
   }
-  
+
   .notion-btn-primary {
     @apply bg-notion-blue text-white border-none rounded-[6px] px-3 py-[6px] text-[14px] font-medium cursor-pointer transition-colors duration-150;
   }
-  
+
   .notion-btn-primary:hover {
     background: #1a6fcc;
   }
-  
+
   .notion-btn-secondary {
     @apply bg-transparent border border-notion-border rounded-[6px] px-3 py-[6px] text-[14px] font-medium cursor-pointer transition-colors duration-150;
     color: hsl(var(--notion-text));
   }
-  
+
   .notion-btn-secondary:hover {
     background: #F7F6F3;
   }
-  
+
   .notion-input {
     @apply border border-notion-border rounded-[6px] px-3 py-2 text-[14px] bg-white transition-all duration-150;
     color: hsl(var(--notion-text));
   }
-  
+
   .notion-input:hover {
     border-color: #D3D1CB;
   }
-  
+
   .notion-input:focus {
     @apply border-notion-blue outline-none;
     box-shadow: 0 0 0 1px hsl(var(--notion-blue));
   }
-  
+
   .notion-badge {
     @apply inline-flex items-center px-[6px] py-[2px] rounded-[3px] text-[12px] font-medium border;
     background: #F7F6F3;
     color: hsl(var(--notion-text-secondary));
     border-color: hsl(var(--notion-border));
   }
-  
+
   .notion-tag {
     @apply inline-block px-2 py-[2px] rounded-[3px] text-[12px] mr-1 mb-1 border;
     background: #F7F6F3;
     color: hsl(var(--notion-text));
     border-color: hsl(var(--notion-border));
   }
-  
+
   .notion-avatar {
     @apply rounded-[4px] font-semibold flex items-center justify-center;
     background: #E9E7E3;
   }
-  
+
   .notion-toast {
     @apply text-white px-4 py-3 rounded-[6px] text-[14px] max-w-[400px];
     background: #37352F;
