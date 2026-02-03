@@ -103,7 +103,10 @@ const Dashboard = () => {
       {/* Row 1: Stats Cards + Alerts */}
       <div className="grid grid-cols-6 gap-[12px] mb-[16px]">
         {/* Active Tickets */}
-        <div className="notion-card p-[12px]">
+        <div 
+          className="notion-card p-[12px] cursor-pointer transition-all hover:shadow-md hover:border-notion-blue/30"
+          onClick={() => navigate('/integrations')}
+        >
           <div className="flex items-center justify-between mb-[4px]">
             <FileText className="w-[16px] h-[16px] text-notion-text opacity-50" />
             <div className={`flex items-center gap-1 text-[11px] ${
@@ -122,7 +125,10 @@ const Dashboard = () => {
         </div>
 
         {/* Open PRs */}
-        <div className="notion-card p-[12px]">
+        <div 
+          className="notion-card p-[12px] cursor-pointer transition-all hover:shadow-md hover:border-notion-blue/30"
+          onClick={() => navigate('/integrations')}
+        >
           <div className="flex items-center justify-between mb-[4px]">
             <GitPullRequest className="w-[16px] h-[16px] text-notion-text opacity-50" />
             <div className={`flex items-center gap-1 text-[11px] ${dashboardStats.openPRs.trend < 0 ? 'text-notion-green' : 'text-notion-red'}`}>
@@ -141,7 +147,10 @@ const Dashboard = () => {
         </div>
 
         {/* Team Capacity */}
-        <div className="notion-card p-[12px]">
+        <div 
+          className="notion-card p-[12px] cursor-pointer transition-all hover:shadow-md hover:border-notion-blue/30"
+          onClick={() => navigate('/team')}
+        >
           <div className="flex items-center justify-between mb-[4px]">
             <UsersIcon className="w-[16px] h-[16px] text-notion-text opacity-50" />
             <div className="flex items-center gap-1 text-[11px] text-notion-green">
@@ -155,7 +164,10 @@ const Dashboard = () => {
         </div>
 
         {/* Commits Today */}
-        <div className="notion-card p-[12px]">
+        <div 
+          className="notion-card p-[12px] cursor-pointer transition-all hover:shadow-md hover:border-notion-blue/30"
+          onClick={() => navigate('/integrations')}
+        >
           <div className="flex items-center justify-between mb-[4px]">
             <GitCommit className="w-[16px] h-[16px] text-notion-text opacity-50" />
             <div className="flex items-center gap-1 text-[11px] text-notion-green">
@@ -171,7 +183,10 @@ const Dashboard = () => {
         <div className="notion-card p-[12px] col-span-2">
           <div className="text-[11px] text-notion-text-secondary uppercase tracking-wide mb-[8px]">Needs Attention</div>
           <div className="grid grid-cols-2 gap-[8px]">
-            <div className="flex items-center gap-[8px]">
+            <div 
+              className="flex items-center gap-[8px] p-[4px] rounded-[4px] cursor-pointer hover:bg-notion-orange/5 transition-colors"
+              onClick={() => navigate('/integrations')}
+            >
               <div className="w-[24px] h-[24px] rounded-[4px] bg-notion-orange/10 flex items-center justify-center">
                 <Eye className="w-[12px] h-[12px] text-notion-orange" />
               </div>
@@ -180,7 +195,10 @@ const Dashboard = () => {
                 <div className="text-[10px] text-notion-text-tertiary">Reviews</div>
               </div>
             </div>
-            <div className="flex items-center gap-[8px]">
+            <div 
+              className="flex items-center gap-[8px] p-[4px] rounded-[4px] cursor-pointer hover:bg-notion-yellow/5 transition-colors"
+              onClick={() => navigate('/integrations')}
+            >
               <div className="w-[24px] h-[24px] rounded-[4px] bg-notion-yellow/10 flex items-center justify-center">
                 <Target className="w-[12px] h-[12px] text-notion-yellow" />
               </div>
@@ -189,7 +207,10 @@ const Dashboard = () => {
                 <div className="text-[10px] text-notion-text-tertiary">Unassigned</div>
               </div>
             </div>
-            <div className="flex items-center gap-[8px]">
+            <div 
+              className="flex items-center gap-[8px] p-[4px] rounded-[4px] cursor-pointer hover:bg-notion-red/5 transition-colors"
+              onClick={() => navigate('/integrations')}
+            >
               <div className="w-[24px] h-[24px] rounded-[4px] bg-notion-red/10 flex items-center justify-center">
                 <AlertCircle className="w-[12px] h-[12px] text-notion-red" />
               </div>
@@ -198,7 +219,10 @@ const Dashboard = () => {
                 <div className="text-[10px] text-notion-text-tertiary">Blocked</div>
               </div>
             </div>
-            <div className="flex items-center gap-[8px]">
+            <div 
+              className="flex items-center gap-[8px] p-[4px] rounded-[4px] cursor-pointer hover:bg-notion-purple/5 transition-colors"
+              onClick={() => navigate('/integrations')}
+            >
               <div className="w-[24px] h-[24px] rounded-[4px] bg-notion-purple/10 flex items-center justify-center">
                 <Calendar className="w-[12px] h-[12px] text-notion-purple" />
               </div>
