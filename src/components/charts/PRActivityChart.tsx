@@ -1,3 +1,4 @@
+import { useState, useMemo } from 'react';
 import { 
   BarChart, 
   Bar, 
@@ -8,17 +9,72 @@ import {
   ResponsiveContainer,
   Legend 
 } from 'recharts';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { repositories } from '@/data/mockData';
 
-// Mock data for weekly PR activity
-const prActivityData = [
-  { day: 'Mon', opened: 4, merged: 2 },
-  { day: 'Tue', opened: 6, merged: 5 },
-  { day: 'Wed', opened: 3, merged: 4 },
-  { day: 'Thu', opened: 7, merged: 3 },
-  { day: 'Fri', opened: 5, merged: 6 },
-  { day: 'Sat', opened: 1, merged: 2 },
-  { day: 'Sun', opened: 2, merged: 1 },
-];
+// Mock data for weekly PR activity by repository
+const prActivityByRepo: Record<string, Array<{ day: string; opened: number; merged: number }>> = {
+  'all': [
+    { day: 'Mon', opened: 4, merged: 2 },
+    { day: 'Tue', opened: 6, merged: 5 },
+    { day: 'Wed', opened: 3, merged: 4 },
+    { day: 'Thu', opened: 7, merged: 3 },
+    { day: 'Fri', opened: 5, merged: 6 },
+    { day: 'Sat', opened: 1, merged: 2 },
+    { day: 'Sun', opened: 2, merged: 1 },
+  ],
+  'payment-service': [
+    { day: 'Mon', opened: 2, merged: 1 },
+    { day: 'Tue', opened: 1, merged: 2 },
+    { day: 'Wed', opened: 1, merged: 1 },
+    { day: 'Thu', opened: 3, merged: 1 },
+    { day: 'Fri', opened: 2, merged: 2 },
+    { day: 'Sat', opened: 0, merged: 1 },
+    { day: 'Sun', opened: 1, merged: 0 },
+  ],
+  'user-auth': [
+    { day: 'Mon', opened: 1, merged: 0 },
+    { day: 'Tue', opened: 2, merged: 1 },
+    { day: 'Wed', opened: 1, merged: 2 },
+    { day: 'Thu', opened: 1, merged: 1 },
+    { day: 'Fri', opened: 1, merged: 2 },
+    { day: 'Sat', opened: 0, merged: 0 },
+    { day: 'Sun', opened: 0, merged: 1 },
+  ],
+  'web-frontend': [
+    { day: 'Mon', opened: 1, merged: 1 },
+    { day: 'Tue', opened: 2, merged: 1 },
+    { day: 'Wed', opened: 1, merged: 1 },
+    { day: 'Thu', opened: 2, merged: 1 },
+    { day: 'Fri', opened: 1, merged: 1 },
+    { day: 'Sat', opened: 1, merged: 1 },
+    { day: 'Sun', opened: 1, merged: 0 },
+  ],
+  'api-gateway': [
+    { day: 'Mon', opened: 0, merged: 0 },
+    { day: 'Tue', opened: 1, merged: 1 },
+    { day: 'Wed', opened: 0, merged: 0 },
+    { day: 'Thu', opened: 1, merged: 0 },
+    { day: 'Fri', opened: 1, merged: 1 },
+    { day: 'Sat', opened: 0, merged: 0 },
+    { day: 'Sun', opened: 0, merged: 0 },
+  ],
+  'notification-service': [
+    { day: 'Mon', opened: 0, merged: 0 },
+    { day: 'Tue', opened: 0, merged: 0 },
+    { day: 'Wed', opened: 0, merged: 0 },
+    { day: 'Thu', opened: 0, merged: 0 },
+    { day: 'Fri', opened: 0, merged: 0 },
+    { day: 'Sat', opened: 0, merged: 0 },
+    { day: 'Sun', opened: 0, merged: 0 },
+  ],
+};
 
 interface CustomTooltipProps {
   active?: boolean;
@@ -29,7 +85,7 @@ interface CustomTooltipProps {
 const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
   if (active && payload && payload.length) {
     return (
-      <div className="notion-card p-[12px] shadow-lg">
+      <div className="notion-card p-[12px] shadow-lg z-50">
         <p className="text-[13px] font-medium text-notion-text mb-[8px]">{label}</p>
         {payload.map((entry, index) => (
           <div key={index} className="flex items-center gap-[8px] text-[12px]">
@@ -48,10 +104,16 @@ const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
 };
 
 const PRActivityChart = () => {
+  const [selectedRepo, setSelectedRepo] = useState('all');
+
+  const chartData = useMemo(() => {
+    return prActivityByRepo[selectedRepo] || prActivityByRepo['all'];
+  }, [selectedRepo]);
+
   // Calculate weekly totals
-  const totalOpened = prActivityData.reduce((sum, day) => sum + day.opened, 0);
-  const totalMerged = prActivityData.reduce((sum, day) => sum + day.merged, 0);
-  const mergeRate = Math.round((totalMerged / totalOpened) * 100);
+  const totalOpened = chartData.reduce((sum, day) => sum + day.opened, 0);
+  const totalMerged = chartData.reduce((sum, day) => sum + day.merged, 0);
+  const mergeRate = totalOpened > 0 ? Math.round((totalMerged / totalOpened) * 100) : 0;
 
   return (
     <div>
@@ -73,8 +135,28 @@ const PRActivityChart = () => {
             <div className="text-[20px] font-bold text-notion-text">{mergeRate}%</div>
           </div>
         </div>
-        <div className="text-[12px] text-notion-text-secondary">
-          Last 7 days
+        
+        <div className="flex items-center gap-[12px]">
+          {/* Repository Filter Dropdown */}
+          <Select value={selectedRepo} onValueChange={setSelectedRepo}>
+            <SelectTrigger className="w-[180px] h-[32px] text-[13px] bg-white border-notion-border">
+              <SelectValue placeholder="Select repository" />
+            </SelectTrigger>
+            <SelectContent className="bg-white border-notion-border shadow-lg z-50">
+              <SelectItem value="all" className="text-[13px]">
+                All Repositories
+              </SelectItem>
+              {repositories.map((repo) => (
+                <SelectItem key={repo.id} value={repo.name} className="text-[13px]">
+                  {repo.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          
+          <span className="text-[12px] text-notion-text-secondary">
+            Last 7 days
+          </span>
         </div>
       </div>
 
@@ -82,7 +164,7 @@ const PRActivityChart = () => {
       <div className="h-[220px] w-full">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart
-            data={prActivityData}
+            data={chartData}
             margin={{ top: 5, right: 10, left: -20, bottom: 0 }}
             barGap={4}
           >
