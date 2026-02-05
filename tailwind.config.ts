@@ -57,59 +57,49 @@ export default {
   				border: 'hsl(var(--sidebar-border))',
   				ring: 'hsl(var(--sidebar-ring))'
   			},
-  			notion: {
-  				bg: '#FFFFFF',
-  				sidebar: '#F7F6F3',
-  				text: '#37352F',
-  				'text-secondary': '#787774',
-  				'text-tertiary': '#9B9A97',
-  				border: '#E9E7E3',
-  				blue: '#2383E2',
-  				'blue-light': '#EBF3FC',
-  				red: '#E03E3E',
-  				orange: '#D9730D',
-  				yellow: '#DFAB01',
-  				green: '#0F7B6C',
-  				purple: '#9065B0',
-  				pink: '#E255A1',
-  				gray: '#787774',
-  				brown: '#937264',
-  				hover: 'rgba(55, 53, 47, 0.04)',
-  				active: 'rgba(0, 0, 0, 0.05)'
-  			}
+			notion: {
+				bg: '#FAFBFC',
+				sidebar: '#172B4D',
+				text: '#172B4D',
+				'text-secondary': '#5E6C84',
+				'text-tertiary': '#7A869A',
+				border: '#DFE1E6',
+				blue: '#0052CC',
+				'blue-light': '#DEEBFF',
+				red: '#FF5630',
+				orange: '#FF991F',
+				yellow: '#FFAB00',
+				green: '#36B37E',
+				purple: '#6554C0',
+				pink: '#E34BA9',
+				gray: '#5E6C84',
+				brown: '#937264',
+				hover: 'rgba(0, 82, 204, 0.04)',
+				active: 'rgba(0, 82, 204, 0.08)'
+			}
   		},
-  		fontFamily: {
-  			sans: [
-  				'Space Grotesk',
-  				'ui-sans-serif',
-  				'system-ui',
-  				'sans-serif',
-  				'Apple Color Emoji',
-  				'Segoe UI Emoji',
-  				'Segoe UI Symbol',
-  				'Noto Color Emoji'
-  			],
-  			serif: [
-  				'Lora',
-  				'ui-serif',
-  				'Georgia',
-  				'Cambria',
-  				'Times New Roman',
-  				'Times',
-  				'serif'
-  			],
-  			mono: [
-  				'Space Mono',
-  				'ui-monospace',
-  				'SFMono-Regular',
-  				'Menlo',
-  				'Monaco',
-  				'Consolas',
-  				'Liberation Mono',
-  				'Courier New',
-  				'monospace'
-  			]
-  		},
+		fontFamily: {
+			sans: [
+				'Inter',
+				'-apple-system',
+				'BlinkMacSystemFont',
+				'Segoe UI',
+				'Roboto',
+				'Oxygen',
+				'Ubuntu',
+				'sans-serif'
+			],
+			mono: [
+				'SFMono-Medium',
+				'SF Mono',
+				'Segoe UI Mono',
+				'Roboto Mono',
+				'Ubuntu Mono',
+				'Menlo',
+				'Consolas',
+				'monospace'
+			]
+		},
   		fontSize: {
   			'notion-title': [
   				'40px',
