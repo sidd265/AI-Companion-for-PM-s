@@ -4,15 +4,10 @@ import {
   Users as UsersIcon,
   MessageSquare,
   Plus,
-  ArrowUpRight,
   TrendingUp,
   TrendingDown,
   AlertCircle,
-  GitCommit,
-  Eye,
-  Calendar,
-  Target,
-  Zap
+  GitCommit
 } from 'lucide-react';
 import { 
   dashboardStats, 
@@ -100,138 +95,83 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* Row 1: Stats Cards + Alerts */}
-      <div className="grid grid-cols-6 gap-[12px] mb-[16px]">
+      {/* Row 1: Key Metrics (simplified - alerts moved to sidebar) */}
+      <div className="grid grid-cols-4 gap-[12px] mb-[16px]">
         {/* Active Tickets */}
         <div 
-          className="notion-card p-[12px] cursor-pointer transition-all hover:shadow-md hover:border-notion-blue/30"
+          className="notion-card p-[14px] cursor-pointer transition-all hover:shadow-md hover:border-notion-blue/30"
           onClick={() => navigate('/integrations')}
         >
-          <div className="flex items-center justify-between mb-[4px]">
-            <FileText className="w-[16px] h-[16px] text-notion-text opacity-50" />
-            <div className={`flex items-center gap-1 text-[11px] ${
+          <div className="flex items-center justify-between mb-[6px]">
+            <FileText className="w-[18px] h-[18px] text-notion-text opacity-50" />
+            <div className={`flex items-center gap-1 text-[12px] ${
               dashboardStats.activeTickets.trend > 0 ? 'text-notion-green' : 'text-notion-red'
             }`}>
-              {dashboardStats.activeTickets.trend > 0 ? <TrendingUp className="w-[10px] h-[10px]" /> : <TrendingDown className="w-[10px] h-[10px]" />}
+              {dashboardStats.activeTickets.trend > 0 ? <TrendingUp className="w-[12px] h-[12px]" /> : <TrendingDown className="w-[12px] h-[12px]" />}
               {Math.abs(dashboardStats.activeTickets.trend)}%
             </div>
           </div>
-          <div className="text-[11px] text-notion-text-secondary">Active Tickets</div>
-          <div className="text-[22px] font-bold text-notion-text">{dashboardStats.activeTickets.count}</div>
-          <div className="h-[3px] bg-notion-border rounded-full overflow-hidden mt-[4px]">
+          <div className="text-[12px] text-notion-text-secondary">Active Tickets</div>
+          <div className="text-[28px] font-bold text-notion-text">{dashboardStats.activeTickets.count}</div>
+          <div className="h-[4px] bg-notion-border rounded-full overflow-hidden mt-[6px]">
             <div className="h-full bg-notion-blue rounded-full" style={{ width: `${(dashboardStats.activeTickets.completedThisSprint / dashboardStats.activeTickets.totalThisSprint) * 100}%` }} />
           </div>
-          <div className="text-[10px] text-notion-text-tertiary mt-[2px]">{dashboardStats.activeTickets.completedThisSprint}/{dashboardStats.activeTickets.totalThisSprint} sprint</div>
+          <div className="text-[11px] text-notion-text-tertiary mt-[4px]">{dashboardStats.activeTickets.completedThisSprint}/{dashboardStats.activeTickets.totalThisSprint} sprint progress</div>
         </div>
 
         {/* Open PRs */}
         <div 
-          className="notion-card p-[12px] cursor-pointer transition-all hover:shadow-md hover:border-notion-blue/30"
+          className="notion-card p-[14px] cursor-pointer transition-all hover:shadow-md hover:border-notion-blue/30"
           onClick={() => navigate('/integrations')}
         >
-          <div className="flex items-center justify-between mb-[4px]">
-            <GitPullRequest className="w-[16px] h-[16px] text-notion-text opacity-50" />
-            <div className={`flex items-center gap-1 text-[11px] ${dashboardStats.openPRs.trend < 0 ? 'text-notion-green' : 'text-notion-red'}`}>
-              {dashboardStats.openPRs.trend < 0 ? <TrendingDown className="w-[10px] h-[10px]" /> : <TrendingUp className="w-[10px] h-[10px]" />}
+          <div className="flex items-center justify-between mb-[6px]">
+            <GitPullRequest className="w-[18px] h-[18px] text-notion-text opacity-50" />
+            <div className={`flex items-center gap-1 text-[12px] ${dashboardStats.openPRs.trend < 0 ? 'text-notion-green' : 'text-notion-red'}`}>
+              {dashboardStats.openPRs.trend < 0 ? <TrendingDown className="w-[12px] h-[12px]" /> : <TrendingUp className="w-[12px] h-[12px]" />}
               {Math.abs(dashboardStats.openPRs.trend)}%
             </div>
           </div>
-          <div className="text-[11px] text-notion-text-secondary">Open PRs</div>
-          <div className="text-[22px] font-bold text-notion-text">{dashboardStats.openPRs.count}</div>
-          <div className="flex -space-x-1 mt-[4px]">
-            {dashboardStats.openPRs.reviewers.slice(0, 3).map((r) => (
-              <div key={r.id} className="notion-avatar w-[16px] h-[16px] text-[7px] text-white border border-white" style={{ backgroundColor: r.avatarColor }}>{r.initials}</div>
+          <div className="text-[12px] text-notion-text-secondary">Open PRs</div>
+          <div className="text-[28px] font-bold text-notion-text">{dashboardStats.openPRs.count}</div>
+          <div className="flex -space-x-1 mt-[6px]">
+            {dashboardStats.openPRs.reviewers.slice(0, 4).map((r) => (
+              <div key={r.id} className="notion-avatar w-[20px] h-[20px] text-[8px] text-white border-2 border-white" style={{ backgroundColor: r.avatarColor }}>{r.initials}</div>
             ))}
-            <span className="text-[10px] text-notion-text-tertiary ml-[4px]">reviewers</span>
+            <span className="text-[11px] text-notion-text-tertiary ml-[6px] self-center">reviewers</span>
           </div>
         </div>
 
         {/* Team Capacity */}
         <div 
-          className="notion-card p-[12px] cursor-pointer transition-all hover:shadow-md hover:border-notion-blue/30"
+          className="notion-card p-[14px] cursor-pointer transition-all hover:shadow-md hover:border-notion-blue/30"
           onClick={() => navigate('/team')}
         >
-          <div className="flex items-center justify-between mb-[4px]">
-            <UsersIcon className="w-[16px] h-[16px] text-notion-text opacity-50" />
-            <div className="flex items-center gap-1 text-[11px] text-notion-green">
-              <TrendingUp className="w-[10px] h-[10px]" />
+          <div className="flex items-center justify-between mb-[6px]">
+            <UsersIcon className="w-[18px] h-[18px] text-notion-text opacity-50" />
+            <div className="flex items-center gap-1 text-[12px] text-notion-green">
+              <TrendingUp className="w-[12px] h-[12px]" />
               {dashboardStats.teamCapacity.trend}%
             </div>
           </div>
-          <div className="text-[11px] text-notion-text-secondary">Team Capacity</div>
-          <div className="text-[22px] font-bold text-notion-text">{dashboardStats.teamCapacity.average}%</div>
-          <div className="text-[10px] text-notion-text-tertiary mt-[4px]">{dashboardStats.teamCapacity.available} available</div>
+          <div className="text-[12px] text-notion-text-secondary">Team Capacity</div>
+          <div className="text-[28px] font-bold text-notion-text">{dashboardStats.teamCapacity.average}%</div>
+          <div className="text-[11px] text-notion-text-tertiary mt-[6px]">{dashboardStats.teamCapacity.available} members available</div>
         </div>
 
         {/* Commits Today */}
         <div 
-          className="notion-card p-[12px] cursor-pointer transition-all hover:shadow-md hover:border-notion-blue/30"
+          className="notion-card p-[14px] cursor-pointer transition-all hover:shadow-md hover:border-notion-blue/30"
           onClick={() => navigate('/integrations')}
         >
-          <div className="flex items-center justify-between mb-[4px]">
-            <GitCommit className="w-[16px] h-[16px] text-notion-text opacity-50" />
-            <div className="flex items-center gap-1 text-[11px] text-notion-green">
-              <TrendingUp className="w-[10px] h-[10px]" />18%
+          <div className="flex items-center justify-between mb-[6px]">
+            <GitCommit className="w-[18px] h-[18px] text-notion-text opacity-50" />
+            <div className="flex items-center gap-1 text-[12px] text-notion-green">
+              <TrendingUp className="w-[12px] h-[12px]" />18%
             </div>
           </div>
-          <div className="text-[11px] text-notion-text-secondary">Commits Today</div>
-          <div className="text-[22px] font-bold text-notion-text">47</div>
-          <div className="text-[10px] text-notion-text-tertiary mt-[4px]">{repositories.length} repos</div>
-        </div>
-
-        {/* Needs Attention - Compact */}
-        <div className="notion-card p-[12px] col-span-2">
-          <div className="text-[11px] text-notion-text-secondary uppercase tracking-wide mb-[8px]">Needs Attention</div>
-          <div className="grid grid-cols-2 gap-[8px]">
-            <div 
-              className="flex items-center gap-[8px] p-[4px] rounded-[4px] cursor-pointer hover:bg-notion-orange/5 transition-colors"
-              onClick={() => navigate('/integrations')}
-            >
-              <div className="w-[24px] h-[24px] rounded-[4px] bg-notion-orange/10 flex items-center justify-center">
-                <Eye className="w-[12px] h-[12px] text-notion-orange" />
-              </div>
-              <div>
-                <div className="text-[12px] font-medium text-notion-text">{dashboardStats.needsAttention.pendingReviews}</div>
-                <div className="text-[10px] text-notion-text-tertiary">Reviews</div>
-              </div>
-            </div>
-            <div 
-              className="flex items-center gap-[8px] p-[4px] rounded-[4px] cursor-pointer hover:bg-notion-yellow/5 transition-colors"
-              onClick={() => navigate('/integrations')}
-            >
-              <div className="w-[24px] h-[24px] rounded-[4px] bg-notion-yellow/10 flex items-center justify-center">
-                <Target className="w-[12px] h-[12px] text-notion-yellow" />
-              </div>
-              <div>
-                <div className="text-[12px] font-medium text-notion-text">{dashboardStats.needsAttention.unassignedTickets}</div>
-                <div className="text-[10px] text-notion-text-tertiary">Unassigned</div>
-              </div>
-            </div>
-            <div 
-              className="flex items-center gap-[8px] p-[4px] rounded-[4px] cursor-pointer hover:bg-notion-red/5 transition-colors"
-              onClick={() => navigate('/integrations')}
-            >
-              <div className="w-[24px] h-[24px] rounded-[4px] bg-notion-red/10 flex items-center justify-center">
-                <AlertCircle className="w-[12px] h-[12px] text-notion-red" />
-              </div>
-              <div>
-                <div className="text-[12px] font-medium text-notion-text">{dashboardStats.needsAttention.blockedTasks}</div>
-                <div className="text-[10px] text-notion-text-tertiary">Blocked</div>
-              </div>
-            </div>
-            <div 
-              className="flex items-center gap-[8px] p-[4px] rounded-[4px] cursor-pointer hover:bg-notion-purple/5 transition-colors"
-              onClick={() => navigate('/integrations')}
-            >
-              <div className="w-[24px] h-[24px] rounded-[4px] bg-notion-purple/10 flex items-center justify-center">
-                <Calendar className="w-[12px] h-[12px] text-notion-purple" />
-              </div>
-              <div>
-                <div className="text-[12px] font-medium text-notion-text">8</div>
-                <div className="text-[10px] text-notion-text-tertiary">Due Soon</div>
-              </div>
-            </div>
-          </div>
+          <div className="text-[12px] text-notion-text-secondary">Commits Today</div>
+          <div className="text-[28px] font-bold text-notion-text">47</div>
+          <div className="text-[11px] text-notion-text-tertiary mt-[6px]">Across {repositories.length} repositories</div>
         </div>
       </div>
 
