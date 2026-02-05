@@ -68,18 +68,18 @@ export const Sidebar = () => {
 
   return (
     <aside 
-      className={`h-screen flex flex-col bg-notion-sidebar border-r border-notion-border transition-all duration-200 ${
-        isCollapsed ? 'w-[60px]' : 'w-notion-sidebar'
+      className={`h-screen flex flex-col bg-[#172B4D] transition-all duration-200 ${
+        isCollapsed ? 'w-[60px]' : 'w-[260px]'
       }`}
     >
       {/* Logo Area */}
-      <div className="px-[14px] py-[12px] flex items-center justify-between">
-        <div className={`flex items-center gap-2 ${isCollapsed ? 'justify-center w-full' : ''}`}>
-          <div className="w-[22px] h-[22px] bg-notion-text rounded-[4px] flex items-center justify-center flex-shrink-0">
-            <span className="text-white text-[12px] font-bold">A</span>
+      <div className="px-[16px] py-[16px] flex items-center justify-between border-b border-white/10">
+        <div className={`flex items-center gap-3 ${isCollapsed ? 'justify-center w-full' : ''}`}>
+          <div className="w-[28px] h-[28px] bg-[#0052CC] rounded-[3px] flex items-center justify-center flex-shrink-0">
+            <span className="text-white text-[14px] font-bold">A</span>
           </div>
           {!isCollapsed && (
-            <span className="text-[14px] font-semibold text-notion-text">AM PM</span>
+            <span className="text-[15px] font-semibold text-white">AM PM</span>
           )}
         </div>
       </div>
@@ -87,12 +87,12 @@ export const Sidebar = () => {
       {/* Collapse Toggle */}
       <button
         onClick={() => setIsCollapsed(!isCollapsed)}
-        className="mx-[6px] mb-[4px] p-[6px] rounded-[4px] hover:bg-notion-hover transition-colors duration-150 flex items-center justify-center"
+        className="mx-[8px] mt-[8px] mb-[4px] p-[8px] rounded-[3px] hover:bg-white/10 transition-colors duration-150 flex items-center justify-center"
       >
         {isCollapsed ? (
-          <ChevronRight className="w-[16px] h-[16px] text-notion-text-secondary" />
+          <ChevronRight className="w-[16px] h-[16px] text-white/60" />
         ) : (
-          <ChevronLeft className="w-[16px] h-[16px] text-notion-text-secondary" />
+          <ChevronLeft className="w-[16px] h-[16px] text-white/60" />
         )}
       </button>
 
@@ -106,14 +106,18 @@ export const Sidebar = () => {
             <NavLink
               key={item.to}
               to={item.to}
-              className={`notion-sidebar-item ${isActive ? 'active' : ''} ${isCollapsed ? 'justify-center px-[6px]' : ''}`}
+              className={`flex items-center gap-3 px-[16px] py-[10px] mx-[8px] my-[2px] rounded-[3px] text-[14px] transition-colors duration-150 cursor-pointer ${
+                isActive 
+                  ? 'bg-[#0052CC] text-white' 
+                  : 'text-white/80 hover:bg-white/10 hover:text-white'
+              } ${isCollapsed ? 'justify-center px-[8px]' : ''}`}
               title={isCollapsed ? item.label : undefined}
             >
               <item.icon 
-                className="w-[18px] h-[18px] opacity-60 flex-shrink-0" 
+                className={`w-[18px] h-[18px] flex-shrink-0 ${isActive ? 'opacity-100' : 'opacity-70'}`}
                 strokeWidth={2}
               />
-              {!isCollapsed && <span>{item.label}</span>}
+              {!isCollapsed && <span className="font-medium">{item.label}</span>}
             </NavLink>
           );
         })}
@@ -121,52 +125,52 @@ export const Sidebar = () => {
 
       {/* Quick Stats Section */}
       {!isCollapsed && (
-        <div className="px-[10px] mt-[8px]">
+        <div className="px-[12px] mt-[16px]">
           <button
             onClick={() => setIsStatsExpanded(!isStatsExpanded)}
-            className="flex items-center justify-between w-full px-[4px] py-[6px] text-[11px] uppercase tracking-wide text-notion-text-secondary hover:text-notion-text transition-colors"
+            className="flex items-center justify-between w-full px-[8px] py-[6px] text-[11px] uppercase tracking-wider text-white/50 hover:text-white/70 transition-colors"
           >
             <span>Quick Stats</span>
             <ChevronDown className={`w-[14px] h-[14px] transition-transform ${isStatsExpanded ? '' : '-rotate-90'}`} />
           </button>
           
           {isStatsExpanded && (
-            <div className="space-y-[2px] mb-[8px]">
+            <div className="space-y-[4px] mb-[8px]">
               {/* Summary Row */}
-              <div className="flex items-center gap-[8px] px-[8px] py-[6px] rounded-[4px] bg-notion-hover/50">
-                <FileText className="w-[14px] h-[14px] text-notion-blue" />
-                <span className="text-[12px] text-notion-text flex-1">Tickets</span>
-                <span className="text-[12px] font-semibold text-notion-text">{dashboardStats.activeTickets.count}</span>
+              <div className="flex items-center gap-[10px] px-[10px] py-[8px] rounded-[3px] bg-white/5">
+                <FileText className="w-[14px] h-[14px] text-[#4C9AFF]" />
+                <span className="text-[12px] text-white/80 flex-1">Tickets</span>
+                <span className="text-[12px] font-semibold text-white">{dashboardStats.activeTickets.count}</span>
               </div>
-              <div className="flex items-center gap-[8px] px-[8px] py-[6px] rounded-[4px] bg-notion-hover/50">
-                <GitPullRequest className="w-[14px] h-[14px] text-notion-green" />
-                <span className="text-[12px] text-notion-text flex-1">Open PRs</span>
-                <span className="text-[12px] font-semibold text-notion-text">{dashboardStats.openPRs.count}</span>
+              <div className="flex items-center gap-[10px] px-[10px] py-[8px] rounded-[3px] bg-white/5">
+                <GitPullRequest className="w-[14px] h-[14px] text-[#36B37E]" />
+                <span className="text-[12px] text-white/80 flex-1">Open PRs</span>
+                <span className="text-[12px] font-semibold text-white">{dashboardStats.openPRs.count}</span>
               </div>
 
               {/* Needs Attention */}
-              <div className="mt-[6px] pt-[6px] border-t border-notion-border">
-                <div className="text-[10px] uppercase tracking-wide text-notion-text-tertiary px-[8px] mb-[4px]">Needs Attention</div>
+              <div className="mt-[8px] pt-[8px] border-t border-white/10">
+                <div className="text-[10px] uppercase tracking-wider text-white/40 px-[10px] mb-[6px]">Needs Attention</div>
                 {quickStats.map((stat) => (
-                  <div key={stat.label} className="flex items-center gap-[8px] px-[8px] py-[4px] rounded-[4px] hover:bg-notion-hover transition-colors cursor-pointer">
-                    <div className={`w-[18px] h-[18px] rounded-[4px] ${stat.bgColor} flex items-center justify-center`}>
-                      <stat.icon className={`w-[10px] h-[10px] ${stat.color}`} />
+                  <div key={stat.label} className="flex items-center gap-[10px] px-[10px] py-[6px] rounded-[3px] hover:bg-white/5 transition-colors cursor-pointer">
+                    <div className={`w-[20px] h-[20px] rounded-[3px] ${stat.bgColor} flex items-center justify-center`}>
+                      <stat.icon className={`w-[11px] h-[11px] ${stat.color}`} />
                     </div>
-                    <span className="text-[11px] text-notion-text flex-1">{stat.label}</span>
-                    <span className="text-[11px] font-medium text-notion-text">{stat.value}</span>
+                    <span className="text-[12px] text-white/70 flex-1">{stat.label}</span>
+                    <span className="text-[12px] font-medium text-white/90">{stat.value}</span>
                   </div>
                 ))}
               </div>
 
               {/* Team Capacity Mini */}
-              <div className="mt-[6px] pt-[6px] border-t border-notion-border">
-                <div className="text-[10px] uppercase tracking-wide text-notion-text-tertiary px-[8px] mb-[4px]">Team</div>
-                <div className="flex items-center justify-between px-[8px]">
+              <div className="mt-[8px] pt-[8px] border-t border-white/10">
+                <div className="text-[10px] uppercase tracking-wider text-white/40 px-[10px] mb-[6px]">Team</div>
+                <div className="flex items-center justify-between px-[10px]">
                   <div className="flex -space-x-1">
                     {topMembers.map((member) => (
                       <div 
                         key={member.id}
-                        className="notion-avatar w-[20px] h-[20px] text-[8px] text-white border-2 border-notion-sidebar"
+                        className="w-[22px] h-[22px] rounded-full text-[8px] text-white border-2 border-[#172B4D] flex items-center justify-center font-semibold"
                         style={{ backgroundColor: member.avatarColor }}
                         title={`${member.name}: ${Math.round(member.capacity * 100)}%`}
                       >
@@ -174,7 +178,7 @@ export const Sidebar = () => {
                       </div>
                     ))}
                   </div>
-                  <span className="text-[11px] text-notion-text-secondary">{dashboardStats.teamCapacity.average}% avg</span>
+                  <span className="text-[11px] text-white/50">{dashboardStats.teamCapacity.average}% avg</span>
                 </div>
               </div>
             </div>
@@ -186,10 +190,10 @@ export const Sidebar = () => {
       <div className="flex-1" />
 
       {/* User Profile */}
-      <div className="px-[14px] py-[8px] border-t border-notion-border">
-        <div className={`flex items-center gap-[12px] px-[4px] py-[4px] ${isCollapsed ? 'justify-center' : ''}`}>
+      <div className="px-[16px] py-[12px] border-t border-white/10">
+        <div className={`flex items-center gap-[12px] ${isCollapsed ? 'justify-center' : ''}`}>
           <div 
-            className="notion-avatar w-[32px] h-[32px] text-[12px] text-white flex-shrink-0"
+            className="w-[36px] h-[36px] rounded-full text-[13px] text-white flex-shrink-0 flex items-center justify-center font-semibold"
             style={{ backgroundColor: currentUser.avatarColor }}
             title={isCollapsed ? currentUser.name : undefined}
           >
@@ -197,10 +201,10 @@ export const Sidebar = () => {
           </div>
           {!isCollapsed && (
             <div className="flex-1 min-w-0">
-              <div className="text-[14px] font-medium text-notion-text truncate">
+              <div className="text-[14px] font-medium text-white truncate">
                 {currentUser.name}
               </div>
-              <div className="text-[12px] text-notion-text-secondary truncate">
+              <div className="text-[12px] text-white/50 truncate">
                 {currentUser.role}
               </div>
             </div>
