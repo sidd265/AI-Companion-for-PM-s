@@ -89,6 +89,12 @@ export interface Message {
     type: 'repo_summary' | 'assignment_suggestion' | 'ticket_list';
     data: any;
   };
+  attachments?: {
+    name: string;
+    type: string;
+    size: number;
+    url: string;
+  }[];
 }
 
 // Team Members
