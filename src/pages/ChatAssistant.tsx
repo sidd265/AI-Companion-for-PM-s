@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Plus, Send, ChevronLeft, ChevronDown, Paperclip, Settings2, Trash2, Sparkles, X, FileText, Image as ImageIcon } from 'lucide-react';
+import { Plus, Send, ChevronDown, Paperclip, Settings2, Trash2, Sparkles, X, FileText, Image as ImageIcon } from 'lucide-react';
 import { conversations as initialConversations, Conversation, Message } from '@/data/mockData';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -144,7 +144,7 @@ const ChatAssistant = () => {
     const lowerQuery = query.toLowerCase();
 
     if (lowerQuery.includes('payment') || lowerQuery.includes('refund')) {
-      return `Can you explain how the payment refund flow works in three main steps:
+      return `The payment refund flow works in three main steps:
 
 1. **Request Validation:** When a refund is requested, the system first validates the original transaction and checks if it's eligible for refund.
 
@@ -152,7 +152,7 @@ const ChatAssistant = () => {
 
 3. **Database Update:** After successful processing, the transaction status is updated in our database.
 
-Would you like me to show you [who has worked on this feature recently?](#)`;
+Would you like me to show you who has worked on this feature recently?`;
     }
 
     if (lowerQuery.includes('assign') || lowerQuery.includes('who should')) {
@@ -167,7 +167,7 @@ Would you like me to show you [who has worked on this feature recently?](#)`;
    - 75% expertise match
    - 70% capacity (moderately busy)
 
-Would you like me to [create a Jira ticket and assign it automatically?](#)`;
+Would you like me to create a Jira ticket and assign it automatically?`;
     }
 
     if (lowerQuery.includes('sprint') || lowerQuery.includes('status') || lowerQuery.includes('progress')) {
@@ -175,16 +175,16 @@ Would you like me to [create a Jira ticket and assign it automatically?](#)`;
 
 Overall: 56% complete (18/32 tickets)
 
-1. **Done:** 18 tickets
-2. **In Progress:** 6 tickets
-3. **To Do:** 6 tickets
-4. **Blocked:** 2 tickets
+- **Done:** 18 tickets
+- **In Progress:** 6 tickets
+- **To Do:** 6 tickets
+- **Blocked:** 2 tickets
 
 **Risks:**
 - 2 tickets are blocked and need attention
 - 7 tickets are unassigned
 
-Would you like me to [show the blocked tickets?](#)`;
+Would you like me to show the blocked tickets?`;
     }
 
     return `I understand you're asking about "${query}".
@@ -197,12 +197,6 @@ I can help you with:
 4. **Team insights** - Analyze capacity and expertise
 
 Could you provide more specific details about what you'd like to know?`;
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
-      handleSendMessage();
-    }
   };
 
   const formatDate = (timestamp: string) => {
@@ -218,23 +212,10 @@ Could you provide more specific details about what you'd like to know?`;
         const match = line.match(/^(\d+\.)\s+\*\*(.*?)\*\*(.*)$/);
         if (match) {
           return (
-            <p key={i} className="my-[6px]">
-              <span className="text-white">{match[1]} </span>
-              <span className="font-semibold text-white">{match[2]}</span>
-              <span className="text-gray-300">{match[3]}</span>
-            </p>
-          );
-        }
-      }
-      // Links
-      if (line.includes('[') && line.includes('](#)')) {
-        const match = line.match(/^(.*?)\[(.*?)\]\(#\)(.*)$/);
-        if (match) {
-          return (
-            <p key={i} className="my-[6px]">
-              <span className="text-gray-300">{match[1]}</span>
-              <span className="text-blue-400 underline cursor-pointer hover:text-blue-300">{match[2]}</span>
-              <span className="text-gray-300">{match[3]}</span>
+            <p key={i} className="my-1.5">
+              <span className="text-foreground">{match[1]} </span>
+              <span className="font-semibold text-foreground">{match[2]}</span>
+              <span className="text-muted-foreground">{match[3]}</span>
             </p>
           );
         }
@@ -242,7 +223,7 @@ Could you provide more specific details about what you'd like to know?`;
       // Regular bold text
       if (line.startsWith('**') && line.endsWith('**')) {
         return (
-          <p key={i} className="font-semibold text-white my-[8px]">
+          <p key={i} className="font-semibold text-foreground my-2">
             {line.replace(/\*\*/g, '')}
           </p>
         );
@@ -250,7 +231,7 @@ Could you provide more specific details about what you'd like to know?`;
       // Bullet points
       if (line.startsWith('- ')) {
         return (
-          <p key={i} className="text-gray-300 pl-[16px] my-[4px]">
+          <p key={i} className="text-muted-foreground pl-4 my-1">
             • {line.slice(2).replace(/\*\*(.*?)\*\*/g, '$1')}
           </p>
         );
@@ -262,7 +243,7 @@ Could you provide more specific details about what you'd like to know?`;
       // Regular text with inline bold
       const processedLine = line.replace(/\*\*(.*?)\*\*/g, '$1');
       return (
-        <p key={i} className="text-gray-300 my-[4px]">
+        <p key={i} className="text-muted-foreground my-1">
           {processedLine}
         </p>
       );
@@ -272,48 +253,47 @@ Could you provide more specific details about what you'd like to know?`;
   return (
     <div className="flex h-full">
       {/* Chat Sidebar */}
-      <div className="w-[240px] border-r border-notion-border bg-[#1a1a2e] flex flex-col">
+      <div className="w-[280px] border-r border-border bg-secondary/30 flex flex-col">
         {/* Header */}
-        <div className="p-[16px] border-b border-white/10">
-          <div className="flex items-center gap-[8px] text-white mb-[16px]">
-            <ChevronLeft className="w-[18px] h-[18px] text-gray-400" />
-            <span className="text-[15px] font-medium">Chat Assistant</span>
-            <ChevronDown className="w-[14px] h-[14px] text-gray-400 ml-auto" />
+        <div className="p-4 border-b border-border">
+          <div className="flex items-center gap-2 text-foreground mb-4">
+            <Sparkles className="w-5 h-5 text-primary" />
+            <span className="text-base font-semibold">Chat Assistant</span>
           </div>
           <button
             onClick={handleNewChat}
-            className="w-full flex items-center gap-[8px] px-[12px] py-[10px] bg-[#2a2a4a] hover:bg-[#3a3a5a] rounded-[6px] text-white transition-colors"
+            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-primary hover:bg-primary/90 rounded-full text-primary-foreground transition-colors"
           >
-            <Plus className="w-[16px] h-[16px]" />
-            <span className="text-[14px]">New Chat</span>
+            <Plus className="w-4 h-4" />
+            <span className="text-sm font-medium">New Chat</span>
           </button>
         </div>
 
         {/* Conversation List */}
-        <div className="flex-1 overflow-y-auto p-[8px]">
+        <div className="flex-1 overflow-y-auto p-2">
           {conversations.map(conv => (
             <div
               key={conv.id}
               onClick={() => setActiveConversationId(conv.id)}
-              className={`group flex items-center justify-between px-[12px] py-[10px] rounded-[6px] cursor-pointer transition-colors mb-[4px] ${
+              className={`group flex items-center justify-between px-4 py-3 rounded-xl cursor-pointer transition-all mb-1 ${
                 activeConversationId === conv.id
-                  ? 'bg-[#2a2a4a]'
-                  : 'hover:bg-[#2a2a4a]/50'
+                  ? 'bg-card border-l-2 border-l-primary shadow-sm'
+                  : 'hover:bg-card/50'
               }`}
             >
               <div className="flex-1 min-w-0">
-                <div className="text-[14px] text-white truncate">
+                <div className="text-sm text-foreground truncate font-medium">
                   {conv.title}
                 </div>
-                <div className="text-[12px] text-gray-400 truncate">
+                <div className="text-xs text-muted-foreground truncate">
                   {conv.preview || 'No messages yet'}
                 </div>
               </div>
               <button
                 onClick={e => handleDeleteConversation(conv.id, e)}
-                className="opacity-0 group-hover:opacity-100 p-[4px] hover:bg-white/10 rounded-[4px] transition-opacity"
+                className="opacity-0 group-hover:opacity-100 p-1.5 hover:bg-secondary rounded-lg transition-opacity"
               >
-                <Trash2 className="w-[14px] h-[14px] text-gray-400" />
+                <Trash2 className="w-3.5 h-3.5 text-muted-foreground" />
               </button>
             </div>
           ))}
@@ -321,22 +301,22 @@ Could you provide more specific details about what you'd like to know?`;
       </div>
 
       {/* Chat Area */}
-      <div className="flex-1 flex flex-col bg-[#0f0f1a]">
+      <div className="flex-1 flex flex-col bg-background">
         {activeConversation ? (
           <>
             {/* Chat Header */}
-            <div className="px-[32px] py-[20px] border-b border-white/10">
-              <div className="flex items-center gap-[12px]">
-                <div className="w-[40px] h-[40px] bg-gradient-to-br from-blue-500 to-purple-600 rounded-[8px] flex items-center justify-center">
-                  <Sparkles className="w-[20px] h-[20px] text-white" />
+            <div className="px-8 py-5 border-b border-border">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-gradient-to-br from-primary to-primary/70 rounded-xl flex items-center justify-center">
+                  <Sparkles className="w-5 h-5 text-primary-foreground" />
                 </div>
                 <div>
-                  <h1 className="text-[18px] font-semibold text-white">
+                  <h1 className="text-lg font-semibold text-foreground">
                     {activeConversation.title}
                   </h1>
-                  <button className="flex items-center gap-[4px] text-[13px] text-gray-400 hover:text-gray-300">
+                  <button className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors">
                     {formatDate(activeConversation.updatedAt)}
-                    <ChevronDown className="w-[12px] h-[12px]" />
+                    <ChevronDown className="w-3 h-3" />
                   </button>
                 </div>
               </div>
@@ -344,21 +324,21 @@ Could you provide more specific details about what you'd like to know?`;
 
             {/* Messages */}
             <div className="flex-1 overflow-y-auto">
-              <div className="max-w-[800px] mx-auto px-[32px] py-[24px]">
+              <div className="max-w-[800px] mx-auto px-8 py-6">
                 {activeConversation.messages.length === 0 ? (
                   <div className="flex flex-col items-center justify-center h-[400px] text-center">
-                    <div className="w-[56px] h-[56px] bg-gradient-to-br from-blue-500 to-purple-600 rounded-[12px] flex items-center justify-center mb-[20px]">
-                      <Sparkles className="w-[28px] h-[28px] text-white" />
+                    <div className="w-16 h-16 bg-gradient-to-br from-primary to-primary/70 rounded-2xl flex items-center justify-center mb-5">
+                      <Sparkles className="w-8 h-8 text-primary-foreground" />
                     </div>
-                    <h2 className="text-[24px] font-semibold text-white mb-[8px]">
+                    <h2 className="text-2xl font-bold text-foreground mb-2">
                       How can I help you today?
                     </h2>
-                    <p className="text-[15px] text-gray-400 max-w-[400px]">
+                    <p className="text-base text-muted-foreground max-w-[400px]">
                       Ask me about your repositories, Jira tickets, team assignments, or any project-related questions.
                     </p>
                   </div>
                 ) : (
-                  <div className="space-y-[20px]">
+                  <div className="space-y-5">
                     <AnimatePresence>
                       {activeConversation.messages.map(message => (
                         <motion.div
@@ -368,18 +348,17 @@ Could you provide more specific details about what you'd like to know?`;
                           transition={{ duration: 0.15 }}
                         >
                           {message.role === 'user' ? (
-                            <div className="text-[15px] text-gray-300 py-[8px]">
-                              {message.content}
+                            <div className="flex justify-end">
+                              <div className="bg-primary text-primary-foreground rounded-2xl rounded-br-md px-5 py-3 max-w-[70%]">
+                                <p className="text-sm">{message.content}</p>
+                              </div>
                             </div>
                           ) : (
-                            <div className="bg-[#1a1a2e] rounded-[12px] p-[20px] border border-white/5">
-                              {/* Card Header */}
-                              <div className="text-[16px] font-semibold text-white mb-[12px] pb-[12px] border-b border-white/10">
-                                {activeConversation.title}
-                              </div>
-                              {/* Card Content */}
-                              <div className="text-[14px] leading-[1.7]">
-                                {renderMessageContent(message.content)}
+                            <div className="flex justify-start">
+                              <div className="bg-card border border-border rounded-2xl rounded-bl-md px-5 py-4 max-w-[85%] shadow-sm">
+                                <div className="text-sm leading-relaxed">
+                                  {renderMessageContent(message.content)}
+                                </div>
                               </div>
                             </div>
                           )}
@@ -391,14 +370,14 @@ Could you provide more specific details about what you'd like to know?`;
                       <motion.div
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
-                        className="flex items-center gap-[8px] py-[12px]"
+                        className="flex items-center gap-2 py-3"
                       >
-                        <div className="flex gap-[4px]">
-                          <span className="w-[6px] h-[6px] bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                          <span className="w-[6px] h-[6px] bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                          <span className="w-[6px] h-[6px] bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                        <div className="flex gap-1">
+                          <span className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                          <span className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                          <span className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
                         </div>
-                        <span className="text-[14px] text-gray-400">AI is thinking...</span>
+                        <span className="text-sm text-muted-foreground">AI is thinking...</span>
                       </motion.div>
                     )}
                     <div ref={messagesEndRef} />
@@ -408,30 +387,30 @@ Could you provide more specific details about what you'd like to know?`;
             </div>
 
             {/* Input Area */}
-            <div className="px-[32px] py-[20px] border-t border-white/10">
+            <div className="px-8 py-5 border-t border-border">
               <div className="max-w-[800px] mx-auto">
                 {/* Attached Files Preview */}
                 {attachedFiles.length > 0 && (
-                  <div className="flex flex-wrap gap-[8px] mb-[12px]">
+                  <div className="flex flex-wrap gap-2 mb-3">
                     {attachedFiles.map(file => (
                       <div
                         key={file.id}
-                        className="flex items-center gap-[8px] bg-[#2a2a4a] rounded-[8px] px-[12px] py-[8px] border border-white/10"
+                        className="flex items-center gap-2 bg-secondary rounded-xl px-3 py-2 border border-border"
                       >
                         {file.type.startsWith('image/') ? (
-                          <ImageIcon className="w-[16px] h-[16px] text-blue-400" />
+                          <ImageIcon className="w-4 h-4 text-primary" />
                         ) : (
-                          <FileText className="w-[16px] h-[16px] text-gray-400" />
+                          <FileText className="w-4 h-4 text-muted-foreground" />
                         )}
                         <div className="flex flex-col">
-                          <span className="text-[13px] text-white truncate max-w-[150px]">{file.name}</span>
-                          <span className="text-[11px] text-gray-500">{formatFileSize(file.size)}</span>
+                          <span className="text-xs text-foreground truncate max-w-[150px]">{file.name}</span>
+                          <span className="text-[10px] text-muted-foreground">{formatFileSize(file.size)}</span>
                         </div>
                         <button
                           onClick={() => removeAttachedFile(file.id)}
-                          className="p-[4px] hover:bg-white/10 rounded-[4px] transition-colors"
+                          className="p-1 hover:bg-card rounded-lg transition-colors"
                         >
-                          <X className="w-[14px] h-[14px] text-gray-400" />
+                          <X className="w-3.5 h-3.5 text-muted-foreground" />
                         </button>
                       </div>
                     ))}
@@ -447,12 +426,12 @@ Could you provide more specific details about what you'd like to know?`;
                   accept="image/*,.pdf,.doc,.docx,.txt,.md,.json,.csv"
                 />
                 
-                <div className="flex items-center gap-[12px] bg-[#1a1a2e] rounded-[12px] px-[16px] py-[12px] border border-white/10">
+                <div className="flex items-center gap-3 bg-card rounded-2xl px-4 py-3 border border-border shadow-sm">
                   <button 
                     onClick={() => fileInputRef.current?.click()}
-                    className="p-[6px] hover:bg-white/10 rounded-[6px] transition-colors"
+                    className="p-2 hover:bg-secondary rounded-xl transition-colors"
                   >
-                    <Paperclip className="w-[18px] h-[18px] text-gray-400" />
+                    <Paperclip className="w-5 h-5 text-muted-foreground" />
                   </button>
                   <input
                     ref={textareaRef as any}
@@ -466,23 +445,23 @@ Could you provide more specific details about what you'd like to know?`;
                       }
                     }}
                     placeholder="Ask about repositories, tickets, or team assignments..."
-                    className="flex-1 bg-transparent text-[14px] text-white placeholder:text-gray-500 outline-none"
+                    className="flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground outline-none"
                   />
                   <button
                     onClick={handleSendMessage}
                     disabled={(!inputValue.trim() && attachedFiles.length === 0) || isTyping}
-                    className={`p-[10px] rounded-[8px] transition-colors ${
+                    className={`p-2.5 rounded-xl transition-all ${
                       (inputValue.trim() || attachedFiles.length > 0) && !isTyping
-                        ? 'bg-blue-600 hover:bg-blue-500'
-                        : 'bg-gray-700 cursor-not-allowed'
+                        ? 'bg-primary hover:bg-primary/90'
+                        : 'bg-secondary cursor-not-allowed'
                     }`}
                   >
-                    <Send className="w-[16px] h-[16px] text-white" />
+                    <Send className={`w-4 h-4 ${(inputValue.trim() || attachedFiles.length > 0) && !isTyping ? 'text-primary-foreground' : 'text-muted-foreground'}`} />
                   </button>
                 </div>
-                <div className="flex justify-end mt-[8px]">
-                  <button className="p-[4px] hover:bg-white/10 rounded-[4px] transition-colors">
-                    <Settings2 className="w-[16px] h-[16px] text-gray-500" />
+                <div className="flex justify-end mt-2">
+                  <button className="p-1.5 hover:bg-secondary rounded-lg transition-colors">
+                    <Settings2 className="w-4 h-4 text-muted-foreground" />
                   </button>
                 </div>
               </div>
@@ -491,7 +470,7 @@ Could you provide more specific details about what you'd like to know?`;
         ) : (
           <div className="flex-1 flex items-center justify-center">
             <div className="text-center">
-              <p className="text-[16px] text-gray-400">
+              <p className="text-base text-muted-foreground">
                 Select a conversation or start a new chat
               </p>
             </div>

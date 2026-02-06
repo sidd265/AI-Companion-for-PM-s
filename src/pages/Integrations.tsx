@@ -19,7 +19,7 @@ const IntegrationDrawer = ({ type, onClose }: IntegrationDrawerProps) => {
       className="fixed inset-0 z-50"
     >
       <div 
-        className="absolute inset-0 bg-black/60 backdrop-blur-[5px]"
+        className="absolute inset-0 bg-black/40 backdrop-blur-sm"
         onClick={onClose}
       />
       <motion.div
@@ -27,85 +27,85 @@ const IntegrationDrawer = ({ type, onClose }: IntegrationDrawerProps) => {
         animate={{ x: 0 }}
         exit={{ x: '100%' }}
         transition={{ duration: 0.3, ease: 'easeOut' }}
-        className="absolute right-0 top-0 h-full w-notion-drawer bg-white border-l border-notion-border shadow-notion-drawer"
+        className="absolute right-0 top-0 h-full w-[480px] bg-card border-l border-border shadow-2xl rounded-l-3xl"
       >
-        <div className="p-[32px]">
-          <div className="flex items-center justify-between mb-[24px]">
-            <h2 className="text-[24px] font-semibold text-notion-text capitalize">
+        <div className="p-8">
+          <div className="flex items-center justify-between mb-8">
+            <h2 className="text-2xl font-bold text-foreground capitalize">
               {type} Settings
             </h2>
             <button 
               onClick={onClose}
-              className="p-[8px] hover:bg-notion-hover rounded-[4px] transition-colors duration-150"
+              className="p-2 hover:bg-secondary rounded-xl transition-colors"
             >
-              <X className="w-[20px] h-[20px] text-notion-text-secondary" />
+              <X className="w-5 h-5 text-muted-foreground" />
             </button>
           </div>
 
           {type === 'github' && integration.connected && (
             <>
-              <div className="mb-[24px]">
-                <h3 className="text-[14px] font-medium text-notion-text mb-[12px]">
+              <div className="mb-6">
+                <h3 className="text-sm font-medium text-foreground mb-3">
                   Connected Account
                 </h3>
-                <div className="flex items-center justify-between p-[12px] bg-notion-sidebar rounded-[6px] border border-notion-border">
-                  <div className="flex items-center gap-[12px]">
-                    <div className="w-[40px] h-[40px] bg-notion-text rounded-full flex items-center justify-center">
-                      <Github className="w-[20px] h-[20px] text-white" />
+                <div className="flex items-center justify-between p-4 bg-secondary rounded-2xl">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 bg-foreground rounded-xl flex items-center justify-center">
+                      <Github className="w-6 h-6 text-background" />
                     </div>
                     <div>
-                      <div className="text-[14px] font-medium text-notion-text">
+                      <div className="text-sm font-medium text-foreground">
                         @{integrations.github.username}
                       </div>
-                      <div className="text-[12px] text-notion-text-secondary">
+                      <div className="text-xs text-muted-foreground">
                         Connected
                       </div>
                     </div>
                   </div>
-                  <button className="text-[14px] text-notion-red hover:underline">
+                  <button className="text-sm text-destructive hover:underline font-medium">
                     Disconnect
                   </button>
                 </div>
               </div>
 
-              <div className="mb-[24px]">
-                <h3 className="text-[14px] font-medium text-notion-text mb-[12px]">
+              <div className="mb-6">
+                <h3 className="text-sm font-medium text-foreground mb-3">
                   Repositories ({repositories.length})
                 </h3>
-                <div className="space-y-[8px]">
+                <div className="space-y-2">
                   {repositories.map(repo => (
                     <label 
                       key={repo.id}
-                      className="flex items-center gap-[12px] p-[12px] border border-notion-border rounded-[6px] cursor-pointer hover:bg-notion-hover transition-colors duration-150"
+                      className="flex items-center gap-3 p-4 border border-border rounded-xl cursor-pointer hover:bg-secondary transition-colors"
                     >
                       <input 
                         type="checkbox" 
                         defaultChecked 
-                        className="w-[16px] h-[16px] rounded-[4px] border-notion-border text-notion-blue focus:ring-notion-blue"
+                        className="w-4 h-4 rounded border-border text-primary focus:ring-primary"
                       />
                       <div className="flex-1">
-                        <div className="text-[14px] text-notion-text">{repo.name}</div>
-                        <div className="text-[12px] text-notion-text-secondary">{repo.description}</div>
+                        <div className="text-sm text-foreground">{repo.name}</div>
+                        <div className="text-xs text-muted-foreground">{repo.description}</div>
                       </div>
-                      <span className="notion-tag">{repo.language}</span>
+                      <span className="airbnb-tag">{repo.language}</span>
                     </label>
                   ))}
                 </div>
               </div>
 
-              <div className="mb-[24px]">
-                <h3 className="text-[14px] font-medium text-notion-text mb-[12px]">
+              <div className="mb-6">
+                <h3 className="text-sm font-medium text-foreground mb-3">
                   Sync Settings
                 </h3>
-                <div className="flex items-center justify-between p-[12px] border border-notion-border rounded-[6px]">
+                <div className="flex items-center justify-between p-4 border border-border rounded-xl">
                   <div>
-                    <div className="text-[14px] text-notion-text">Last Synced</div>
-                    <div className="text-[12px] text-notion-text-secondary">
+                    <div className="text-sm text-foreground">Last Synced</div>
+                    <div className="text-xs text-muted-foreground">
                       {integrations.github.lastSync}
                     </div>
                   </div>
-                  <button className="notion-btn-secondary flex items-center gap-2">
-                    <RefreshCw className="w-[14px] h-[14px]" />
+                  <button className="airbnb-btn-secondary flex items-center gap-2 py-2 px-4 rounded-full">
+                    <RefreshCw className="w-4 h-4" />
                     Sync Now
                   </button>
                 </div>
@@ -115,25 +115,25 @@ const IntegrationDrawer = ({ type, onClose }: IntegrationDrawerProps) => {
 
           {type === 'jira' && integration.connected && (
             <>
-              <div className="mb-[24px]">
-                <h3 className="text-[14px] font-medium text-notion-text mb-[12px]">
+              <div className="mb-6">
+                <h3 className="text-sm font-medium text-foreground mb-3">
                   Connected Site
                 </h3>
-                <div className="flex items-center justify-between p-[12px] bg-notion-sidebar rounded-[6px] border border-notion-border">
-                  <div className="flex items-center gap-[12px]">
-                    <div className="w-[40px] h-[40px] bg-notion-blue rounded-[6px] flex items-center justify-center">
-                      <Trello className="w-[20px] h-[20px] text-white" />
+                <div className="flex items-center justify-between p-4 bg-secondary rounded-2xl">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center">
+                      <Trello className="w-6 h-6 text-white" />
                     </div>
                     <div>
-                      <div className="text-[14px] font-medium text-notion-text">
+                      <div className="text-sm font-medium text-foreground">
                         {integrations.jira.site}
                       </div>
-                      <div className="text-[12px] text-notion-text-secondary">
+                      <div className="text-xs text-muted-foreground">
                         {integrations.jira.projects} projects synced
                       </div>
                     </div>
                   </div>
-                  <button className="text-[14px] text-notion-red hover:underline">
+                  <button className="text-sm text-destructive hover:underline font-medium">
                     Disconnect
                   </button>
                 </div>
@@ -142,17 +142,17 @@ const IntegrationDrawer = ({ type, onClose }: IntegrationDrawerProps) => {
           )}
 
           {type === 'slack' && !integration.connected && (
-            <div className="text-center py-[48px]">
-              <div className="w-[64px] h-[64px] bg-notion-sidebar rounded-[12px] flex items-center justify-center mx-auto mb-[16px]">
-                <MessageCircle className="w-[32px] h-[32px] text-notion-text-secondary" />
+            <div className="text-center py-12">
+              <div className="w-16 h-16 bg-secondary rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <MessageCircle className="w-8 h-8 text-muted-foreground" />
               </div>
-              <h3 className="text-[18px] font-medium text-notion-text mb-[8px]">
+              <h3 className="text-lg font-semibold text-foreground mb-2">
                 Connect Slack
               </h3>
-              <p className="text-[14px] text-notion-text-secondary mb-[24px]">
+              <p className="text-sm text-muted-foreground mb-6">
                 Get notifications and updates directly in your Slack workspace
               </p>
-              <button className="notion-btn-primary">
+              <button className="airbnb-btn-pill">
                 Connect Slack
               </button>
             </div>
@@ -172,7 +172,8 @@ const Integrations = () => {
       name: 'GitHub',
       description: 'Connect repositories to analyze code and pull requests',
       icon: Github,
-      iconBg: '#24292e',
+      iconBg: 'bg-gray-900 dark:bg-gray-100',
+      iconColor: 'text-white dark:text-gray-900',
       connected: integrations.github.connected,
       info: integrations.github.connected 
         ? `Connected as @${integrations.github.username} · Syncing ${integrations.github.repos} repositories`
@@ -183,7 +184,8 @@ const Integrations = () => {
       name: 'Jira',
       description: 'Connect projects to track tickets and assignments',
       icon: Trello,
-      iconBg: '#0052CC',
+      iconBg: 'bg-blue-600',
+      iconColor: 'text-white',
       connected: integrations.jira.connected,
       info: integrations.jira.connected
         ? `Connected to ${integrations.jira.site} · ${integrations.jira.projects} projects`
@@ -194,68 +196,68 @@ const Integrations = () => {
       name: 'Slack',
       description: 'Get notifications and updates in Slack channels',
       icon: MessageCircle,
-      iconBg: '#E01E5A',
+      iconBg: 'bg-purple-600',
+      iconColor: 'text-white',
       connected: integrations.slack.connected,
       info: null,
     },
   ];
 
   return (
-    <div className="px-notion-massive py-notion-xxl">
+    <div className="px-12 py-10">
       {/* Page Header */}
-      <div className="mb-[32px]">
-        <h1 className="notion-title mb-[4px]">Integrations</h1>
-        <p className="text-[16px] text-notion-text-secondary">
+      <div className="mb-10">
+        <h1 className="text-3xl font-bold text-foreground mb-2">Integrations</h1>
+        <p className="text-base text-muted-foreground">
           Connect your tools to unlock the full power of AM PM
         </p>
       </div>
 
       {/* Integration Cards Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[16px]">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
         {integrationCards.map((integration) => (
-          <div key={integration.id} className="notion-card p-[20px]">
+          <div key={integration.id} className="airbnb-card p-6">
             <div 
-              className="w-[48px] h-[48px] rounded-[8px] flex items-center justify-center mb-[16px]"
-              style={{ backgroundColor: integration.iconBg }}
+              className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-5 ${integration.iconBg}`}
             >
-              <integration.icon className="w-[24px] h-[24px] text-white" />
+              <integration.icon className={`w-7 h-7 ${integration.iconColor}`} />
             </div>
             
-            <h3 className="text-[18px] font-semibold text-notion-text mb-[8px]">
+            <h3 className="text-lg font-semibold text-foreground mb-2">
               {integration.name}
             </h3>
             
-            <p className="text-[14px] text-notion-text-secondary leading-[1.5] mb-[16px]">
+            <p className="text-sm text-muted-foreground leading-relaxed mb-5">
               {integration.description}
             </p>
 
             {integration.connected ? (
               <>
-                <div className="flex items-center gap-[6px] mb-[12px]">
-                  <span className="inline-flex items-center gap-[4px] px-[8px] py-[4px] rounded-[3px] text-[12px] font-medium bg-notion-green/10 text-notion-green">
-                    <Check className="w-[12px] h-[12px]" />
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-green-50 dark:bg-green-950 text-airbnb-success">
+                    <Check className="w-3 h-3" />
                     Connected
                   </span>
                 </div>
                 {integration.info && (
-                  <p className="text-[13px] text-notion-text-secondary mb-[16px]">
+                  <p className="text-xs text-muted-foreground mb-5">
                     {integration.info}
                   </p>
                 )}
                 <button 
                   onClick={() => setActiveDrawer(integration.id)}
-                  className="notion-btn-secondary flex items-center gap-2"
+                  className="airbnb-btn-secondary flex items-center gap-2 py-2 px-4 rounded-full text-sm"
                 >
-                  <Settings className="w-[14px] h-[14px]" />
+                  <Settings className="w-4 h-4" />
                   Manage
                 </button>
               </>
             ) : (
               <button 
                 onClick={() => setActiveDrawer(integration.id)}
-                className="notion-btn-primary flex items-center gap-2"
+                className="airbnb-btn-pill flex items-center gap-2 py-2.5 px-5 text-sm"
               >
-                <ExternalLink className="w-[14px] h-[14px]" />
+                <ExternalLink className="w-4 h-4" />
                 Connect
               </button>
             )}
@@ -264,25 +266,25 @@ const Integrations = () => {
       </div>
 
       {/* Coming Soon Section */}
-      <div className="mt-notion-xxl">
-        <h2 className="notion-section-header mb-[12px]">Coming Soon</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[16px]">
+      <div className="mt-12">
+        <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-4">Coming Soon</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
           {[
             { name: 'Linear', description: 'Track issues and projects' },
             { name: 'Notion', description: 'Sync with your Notion workspace' },
             { name: 'Figma', description: 'View designs and prototypes' },
           ].map((item) => (
-            <div key={item.name} className="notion-card p-[20px] opacity-60">
-              <div className="w-[48px] h-[48px] rounded-[8px] bg-notion-border flex items-center justify-center mb-[16px]">
-                <span className="text-[16px] text-notion-text-secondary">?</span>
+            <div key={item.name} className="airbnb-card-static p-6 opacity-60">
+              <div className="w-14 h-14 rounded-2xl bg-secondary flex items-center justify-center mb-5">
+                <span className="text-lg text-muted-foreground">?</span>
               </div>
-              <h3 className="text-[18px] font-semibold text-notion-text mb-[8px]">
+              <h3 className="text-lg font-semibold text-foreground mb-2">
                 {item.name}
               </h3>
-              <p className="text-[14px] text-notion-text-secondary">
+              <p className="text-sm text-muted-foreground">
                 {item.description}
               </p>
-              <span className="notion-badge mt-[16px]">Coming Soon</span>
+              <span className="airbnb-badge mt-5">Coming Soon</span>
             </div>
           ))}
         </div>
