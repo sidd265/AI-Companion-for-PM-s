@@ -90,6 +90,7 @@ const SprintBurndownChart = ({ compact = false }: SprintBurndownChartProps) => {
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(40 17% 91%)" vertical={false} />
               <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{ fontSize: 9, fill: 'hsl(37 4% 46%)' }} />
               <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 9, fill: 'hsl(37 4% 46%)' }} domain={[0, 35]} />
+              <Tooltip content={<CustomTooltip />} />
               <Line type="monotone" dataKey="ideal" stroke="hsl(37 4% 46%)" strokeWidth={1} strokeDasharray="3 3" dot={false} connectNulls />
               <Line type="monotone" dataKey="remaining" stroke="hsl(210 79% 51%)" strokeWidth={2} dot={{ fill: 'hsl(210 79% 51%)', strokeWidth: 0, r: 2 }} connectNulls />
             </LineChart>

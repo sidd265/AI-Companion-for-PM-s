@@ -135,6 +135,7 @@ const PRActivityChart = ({ compact = false }: PRActivityChartProps) => {
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(40 17% 91%)" vertical={false} />
               <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{ fontSize: 9, fill: 'hsl(37 4% 46%)' }} />
               <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 9, fill: 'hsl(37 4% 46%)' }} />
+              <Tooltip content={<CustomTooltip />} />
               <Bar dataKey="opened" fill="hsl(210 79% 51%)" radius={[2, 2, 0, 0]} maxBarSize={16} />
               <Bar dataKey="merged" fill="hsl(169 78% 27%)" radius={[2, 2, 0, 0]} maxBarSize={16} />
             </BarChart>
