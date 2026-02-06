@@ -230,7 +230,7 @@ const Team = () => {
                 className={`px-[8px] py-[4px] rounded-[3px] text-[12px] border transition-colors duration-150 ${
                   selectedExpertise.includes(skill)
                     ? 'bg-notion-blue text-white border-notion-blue'
-                    : 'bg-notion-sidebar text-notion-text border-notion-border hover:bg-notion-hover'
+                    : 'bg-white text-notion-text border-notion-border hover:bg-notion-hover'
                 }`}
               >
                 {skill}
