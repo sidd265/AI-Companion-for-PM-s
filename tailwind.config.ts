@@ -83,11 +83,14 @@ export default {
   				'Inter',
   				'ui-sans-serif',
   				'system-ui',
-  				'sans-serif',
-  				'Apple Color Emoji',
-  				'Segoe UI Emoji',
-  				'Segoe UI Symbol',
-  				'Noto Color Emoji'
+  				'-apple-system',
+  				'BlinkMacSystemFont',
+  				'Segoe UI',
+  				'Roboto',
+  				'Helvetica Neue',
+  				'Arial',
+  				'Noto Sans',
+  				'sans-serif'
   			],
   			mono: [
   				'Space Mono',
@@ -185,7 +188,14 @@ export default {
   			'notion-card': '0 1px 2px rgba(0, 0, 0, 0.06)',
   			'notion-modal': '0 16px 70px rgba(0, 0, 0, 0.2)',
   			'notion-dropdown': '0 5px 16px rgba(0, 0, 0, 0.08)',
-  			'notion-drawer': '-2px 0 8px rgba(0, 0, 0, 0.08)'
+  			'notion-drawer': '-2px 0 8px rgba(0, 0, 0, 0.08)',
+  			'2xs': 'var(--shadow-2xs)',
+  			xs: 'var(--shadow-xs)',
+  			sm: 'var(--shadow-sm)',
+  			md: 'var(--shadow-md)',
+  			lg: 'var(--shadow-lg)',
+  			xl: 'var(--shadow-xl)',
+  			'2xl': 'var(--shadow-2xl)'
   		},
   		keyframes: {
   			'accordion-down': {
