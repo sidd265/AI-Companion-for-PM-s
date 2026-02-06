@@ -1,15 +1,25 @@
 import { useState, useRef, useEffect } from 'react';
-import { Plus, Send, ChevronLeft, ChevronDown, Paperclip, Settings2, Trash2, Sparkles } from 'lucide-react';
+import { Plus, Send, ChevronLeft, ChevronDown, Paperclip, Settings2, Trash2, Sparkles, X, FileText, Image as ImageIcon } from 'lucide-react';
 import { conversations as initialConversations, Conversation, Message } from '@/data/mockData';
 import { motion, AnimatePresence } from 'framer-motion';
+
+interface AttachedFile {
+  id: string;
+  name: string;
+  type: string;
+  size: number;
+  url: string;
+}
 
 const ChatAssistant = () => {
   const [conversations, setConversations] = useState<Conversation[]>(initialConversations);
   const [activeConversationId, setActiveConversationId] = useState<string | null>(initialConversations[0]?.id || null);
   const [inputValue, setInputValue] = useState('');
   const [isTyping, setIsTyping] = useState(false);
+  const [attachedFiles, setAttachedFiles] = useState<AttachedFile[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const activeConversation = conversations.find(c => c.id === activeConversationId);
 
@@ -43,23 +53,60 @@ const ChatAssistant = () => {
     }
   };
 
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files) return;
+
+    const newFiles: AttachedFile[] = Array.from(files).map(file => ({
+      id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+      name: file.name,
+      type: file.type,
+      size: file.size,
+      url: URL.createObjectURL(file)
+    }));
+
+    setAttachedFiles(prev => [...prev, ...newFiles]);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+  const removeAttachedFile = (id: string) => {
+    setAttachedFiles(prev => {
+      const file = prev.find(f => f.id === id);
+      if (file) URL.revokeObjectURL(file.url);
+      return prev.filter(f => f.id !== id);
+    });
+  };
+
+  const formatFileSize = (bytes: number) => {
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+    return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+  };
+
   const handleSendMessage = async () => {
-    if (!inputValue.trim() || !activeConversationId) return;
+    if ((!inputValue.trim() && attachedFiles.length === 0) || !activeConversationId) return;
+
+    const fileNames = attachedFiles.map(f => f.name);
+    const messageContent = inputValue.trim() + (fileNames.length > 0 ? `\n\n📎 Attached: ${fileNames.join(', ')}` : '');
 
     const userMessage: Message = {
       id: Date.now().toString(),
       role: 'user',
-      content: inputValue.trim(),
-      timestamp: new Date().toISOString()
+      content: messageContent,
+      timestamp: new Date().toISOString(),
+      attachments: attachedFiles.map(f => ({ name: f.name, type: f.type, size: f.size, url: f.url }))
     };
 
     setConversations(prev => prev.map(conv => {
       if (conv.id === activeConversationId) {
         const isFirstMessage = conv.messages.length === 0;
+        const title = inputValue.trim() || (fileNames.length > 0 ? `Files: ${fileNames[0]}` : 'New conversation');
         return {
           ...conv,
-          title: isFirstMessage ? inputValue.slice(0, 40) : conv.title,
-          preview: inputValue.slice(0, 60),
+          title: isFirstMessage ? title.slice(0, 40) : conv.title,
+          preview: (inputValue || fileNames.join(', ')).slice(0, 60),
           updatedAt: new Date().toISOString(),
           messages: [...conv.messages, userMessage]
         };
@@ -68,6 +115,7 @@ const ChatAssistant = () => {
     }));
 
     setInputValue('');
+    setAttachedFiles([]);
     setIsTyping(true);
 
     setTimeout(() => {
@@ -362,8 +410,48 @@ Could you provide more specific details about what you'd like to know?`;
             {/* Input Area */}
             <div className="px-[32px] py-[20px] border-t border-white/10">
               <div className="max-w-[800px] mx-auto">
+                {/* Attached Files Preview */}
+                {attachedFiles.length > 0 && (
+                  <div className="flex flex-wrap gap-[8px] mb-[12px]">
+                    {attachedFiles.map(file => (
+                      <div
+                        key={file.id}
+                        className="flex items-center gap-[8px] bg-[#2a2a4a] rounded-[8px] px-[12px] py-[8px] border border-white/10"
+                      >
+                        {file.type.startsWith('image/') ? (
+                          <ImageIcon className="w-[16px] h-[16px] text-blue-400" />
+                        ) : (
+                          <FileText className="w-[16px] h-[16px] text-gray-400" />
+                        )}
+                        <div className="flex flex-col">
+                          <span className="text-[13px] text-white truncate max-w-[150px]">{file.name}</span>
+                          <span className="text-[11px] text-gray-500">{formatFileSize(file.size)}</span>
+                        </div>
+                        <button
+                          onClick={() => removeAttachedFile(file.id)}
+                          className="p-[4px] hover:bg-white/10 rounded-[4px] transition-colors"
+                        >
+                          <X className="w-[14px] h-[14px] text-gray-400" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  multiple
+                  onChange={handleFileSelect}
+                  className="hidden"
+                  accept="image/*,.pdf,.doc,.docx,.txt,.md,.json,.csv"
+                />
+                
                 <div className="flex items-center gap-[12px] bg-[#1a1a2e] rounded-[12px] px-[16px] py-[12px] border border-white/10">
-                  <button className="p-[6px] hover:bg-white/10 rounded-[6px] transition-colors">
+                  <button 
+                    onClick={() => fileInputRef.current?.click()}
+                    className="p-[6px] hover:bg-white/10 rounded-[6px] transition-colors"
+                  >
                     <Paperclip className="w-[18px] h-[18px] text-gray-400" />
                   </button>
                   <input
@@ -380,14 +468,11 @@ Could you provide more specific details about what you'd like to know?`;
                     placeholder="Ask about repositories, tickets, or team assignments..."
                     className="flex-1 bg-transparent text-[14px] text-white placeholder:text-gray-500 outline-none"
                   />
-                  <button className="p-[6px] hover:bg-white/10 rounded-[6px] transition-colors">
-                    <Send className="w-[18px] h-[18px] text-gray-400" />
-                  </button>
                   <button
                     onClick={handleSendMessage}
-                    disabled={!inputValue.trim() || isTyping}
+                    disabled={(!inputValue.trim() && attachedFiles.length === 0) || isTyping}
                     className={`p-[10px] rounded-[8px] transition-colors ${
-                      inputValue.trim() && !isTyping
+                      (inputValue.trim() || attachedFiles.length > 0) && !isTyping
                         ? 'bg-blue-600 hover:bg-blue-500'
                         : 'bg-gray-700 cursor-not-allowed'
                     }`}
