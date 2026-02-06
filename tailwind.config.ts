@@ -57,49 +57,59 @@ export default {
   				border: 'hsl(var(--sidebar-border))',
   				ring: 'hsl(var(--sidebar-ring))'
   			},
-			notion: {
-				bg: '#FAFBFC',
-				sidebar: '#172B4D',
-				text: '#172B4D',
-				'text-secondary': '#5E6C84',
-				'text-tertiary': '#7A869A',
-				border: '#DFE1E6',
-				blue: '#0052CC',
-				'blue-light': '#DEEBFF',
-				red: '#FF5630',
-				orange: '#FF991F',
-				yellow: '#FFAB00',
-				green: '#36B37E',
-				purple: '#6554C0',
-				pink: '#E34BA9',
-				gray: '#5E6C84',
-				brown: '#937264',
-				hover: 'rgba(0, 82, 204, 0.04)',
-				active: 'rgba(0, 82, 204, 0.08)'
-			}
+  			notion: {
+  				bg: '#FAFBFC',
+  				sidebar: '#172B4D',
+  				text: '#172B4D',
+  				'text-secondary': '#5E6C84',
+  				'text-tertiary': '#7A869A',
+  				border: '#DFE1E6',
+  				blue: '#0052CC',
+  				'blue-light': '#DEEBFF',
+  				red: '#FF5630',
+  				orange: '#FF991F',
+  				yellow: '#FFAB00',
+  				green: '#36B37E',
+  				purple: '#6554C0',
+  				pink: '#E34BA9',
+  				gray: '#5E6C84',
+  				brown: '#937264',
+  				hover: 'rgba(0, 82, 204, 0.04)',
+  				active: 'rgba(0, 82, 204, 0.08)'
+  			}
   		},
-		fontFamily: {
-			sans: [
-				'Inter',
-				'-apple-system',
-				'BlinkMacSystemFont',
-				'Segoe UI',
-				'Roboto',
-				'Oxygen',
-				'Ubuntu',
-				'sans-serif'
-			],
-			mono: [
-				'SFMono-Medium',
-				'SF Mono',
-				'Segoe UI Mono',
-				'Roboto Mono',
-				'Ubuntu Mono',
-				'Menlo',
-				'Consolas',
-				'monospace'
-			]
-		},
+  		fontFamily: {
+  			sans: [
+  				'Inter',
+  				'ui-sans-serif',
+  				'system-ui',
+  				'sans-serif',
+  				'Apple Color Emoji',
+  				'Segoe UI Emoji',
+  				'Segoe UI Symbol',
+  				'Noto Color Emoji'
+  			],
+  			mono: [
+  				'Space Mono',
+  				'ui-monospace',
+  				'SFMono-Regular',
+  				'Menlo',
+  				'Monaco',
+  				'Consolas',
+  				'Liberation Mono',
+  				'Courier New',
+  				'monospace'
+  			],
+  			serif: [
+  				'Lora',
+  				'ui-serif',
+  				'Georgia',
+  				'Cambria',
+  				'Times New Roman',
+  				'Times',
+  				'serif'
+  			]
+  		},
   		fontSize: {
   			'notion-title': [
   				'40px',
