@@ -94,7 +94,7 @@ const TicketTrendChart = ({ compact = false }: TicketTrendChartProps) => {
             tick={{ fontSize: compact ? 9 : 11, fill: 'hsl(37 4% 46%)' }}
             dx={-5}
           />
-          {!compact && <Tooltip content={<CustomTooltip />} />}
+          <Tooltip content={<CustomTooltip />} />
           {!compact && (
             <Legend 
               verticalAlign="top" 
