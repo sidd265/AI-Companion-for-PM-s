@@ -55,7 +55,7 @@ export const Sidebar = () => {
   const topMembers = teamMembers.sort((a, b) => b.capacity - a.capacity).slice(0, 4);
   return <aside className={`h-screen flex flex-col bg-[#172B4D] transition-all duration-200 relative ${isCollapsed ? 'w-[60px]' : 'w-[260px]'}`}>
       {/* Edge Toggle Button */}
-      <button onClick={() => setIsCollapsed(!isCollapsed)} className="absolute top-1/2 -translate-y-1/2 -right-[12px] z-10 w-[24px] h-[48px] border border-white/20 rounded-r-[6px] flex items-center justify-center transition-colors duration-150 shadow-md bg-[#172c4f]/[0.66]">
+      <button onClick={() => setIsCollapsed(!isCollapsed)} className="absolute top-1/2 -translate-y-1/2 -right-[12px] z-10 w-[24px] h-[48px] border border-white/20 rounded-r-[6px] flex items-center justify-center transition-colors duration-150 shadow-md bg-[#1b3869]">
         {isCollapsed ? <ChevronRight className="w-[14px] h-[14px] text-white/80" /> : <ChevronLeft className="w-[14px] h-[14px] text-white/80" />}
       </button>
 
