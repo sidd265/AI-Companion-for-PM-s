@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTheme } from 'next-themes';
 import { 
   User, 
   Bell, 
@@ -9,7 +10,8 @@ import {
   Check,
   Github,
   Trello,
-  MessageCircle
+  MessageCircle,
+  Monitor
 } from 'lucide-react';
 import { currentUser, integrations } from '@/data/mockData';
 
@@ -20,6 +22,7 @@ const SettingsPage = () => {
   const [emailNotifications, setEmailNotifications] = useState(true);
   const [slackNotifications, setSlackNotifications] = useState(true);
   const [desktopNotifications, setDesktopNotifications] = useState(false);
+  const { theme, setTheme } = useTheme();
 
   const tabs = [
     { id: 'profile' as const, label: 'Profile', icon: User },
@@ -219,30 +222,48 @@ const SettingsPage = () => {
           {/* Appearance Tab */}
           {activeTab === 'appearance' && (
             <div>
-              <h2 className="text-[18px] font-semibold text-notion-text mb-[24px]">Appearance</h2>
+              <h2 className="text-[18px] font-semibold text-foreground mb-[24px]">Appearance</h2>
               
               <div className="mb-[32px]">
-                <h3 className="text-[14px] font-medium text-notion-text mb-[12px]">Theme</h3>
+                <h3 className="text-[14px] font-medium text-foreground mb-[12px]">Theme</h3>
                 <div className="grid grid-cols-3 gap-[12px]">
-                  <button className="p-[16px] border-2 border-notion-blue rounded-[8px] text-center bg-white">
-                    <div className="w-full h-[48px] bg-white border border-notion-border rounded-[4px] mb-[8px]" />
-                    <span className="text-[14px] font-medium text-notion-text flex items-center justify-center gap-2">
+                  <button 
+                    onClick={() => setTheme('light')}
+                    className={`p-[16px] border-2 rounded-[8px] text-center bg-card transition-colors ${
+                      theme === 'light' ? 'border-primary' : 'border-border'
+                    }`}
+                  >
+                    <div className="w-full h-[48px] bg-white border border-border rounded-[4px] mb-[8px]" />
+                    <span className="text-[14px] font-medium text-foreground flex items-center justify-center gap-2">
                       Light
-                      <Check className="w-[14px] h-[14px] text-notion-blue" />
+                      {theme === 'light' && <Check className="w-[14px] h-[14px] text-primary" />}
                     </span>
                   </button>
-                  <button className="p-[16px] border border-notion-border rounded-[8px] text-center opacity-50">
+                  <button 
+                    onClick={() => setTheme('dark')}
+                    className={`p-[16px] border-2 rounded-[8px] text-center bg-card transition-colors ${
+                      theme === 'dark' ? 'border-primary' : 'border-border'
+                    }`}
+                  >
                     <div className="w-full h-[48px] bg-[#191919] border border-[#373737] rounded-[4px] mb-[8px]" />
-                    <span className="text-[14px] font-medium text-notion-text">Dark</span>
+                    <span className="text-[14px] font-medium text-foreground flex items-center justify-center gap-2">
+                      Dark
+                      {theme === 'dark' && <Check className="w-[14px] h-[14px] text-primary" />}
+                    </span>
                   </button>
-                  <button className="p-[16px] border border-notion-border rounded-[8px] text-center opacity-50">
+                  <button 
+                    onClick={() => setTheme('system')}
+                    className={`p-[16px] border-2 rounded-[8px] text-center bg-card transition-colors ${
+                      theme === 'system' ? 'border-primary' : 'border-border'
+                    }`}
+                  >
                     <div className="w-full h-[48px] bg-gradient-to-b from-white to-[#191919] rounded-[4px] mb-[8px]" />
-                    <span className="text-[14px] font-medium text-notion-text">System</span>
+                    <span className="text-[14px] font-medium text-foreground flex items-center justify-center gap-2">
+                      System
+                      {theme === 'system' && <Check className="w-[14px] h-[14px] text-primary" />}
+                    </span>
                   </button>
                 </div>
-                <p className="text-[12px] text-notion-text-secondary mt-[8px]">
-                  Dark mode coming soon
-                </p>
               </div>
 
               <div>
