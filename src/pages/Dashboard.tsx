@@ -185,19 +185,28 @@ const Dashboard = () => {
 
       {/* Charts Row */}
       <div className="grid grid-cols-3 gap-4 mb-6">
-        <div className="airbnb-card-static p-5">
+        <div 
+          className="airbnb-card p-5 cursor-pointer"
+          onClick={() => navigate('/integrations')}
+        >
           <div className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-4">Ticket Trends</div>
           <div className="h-[180px]">
             <TicketTrendChart compact />
           </div>
         </div>
-        <div className="airbnb-card-static p-5">
+        <div 
+          className="airbnb-card p-5 cursor-pointer"
+          onClick={() => navigate('/integrations')}
+        >
           <div className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-4">Sprint Burndown</div>
           <div className="h-[180px]">
             <SprintBurndownChart compact />
           </div>
         </div>
-        <div className="airbnb-card-static p-5">
+        <div 
+          className="airbnb-card p-5 cursor-pointer"
+          onClick={() => navigate('/integrations')}
+        >
           <div className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-4">PR Activity</div>
           <div className="h-[180px]">
             <PRActivityChart compact />
