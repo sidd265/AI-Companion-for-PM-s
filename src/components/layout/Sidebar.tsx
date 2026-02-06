@@ -68,10 +68,22 @@ export const Sidebar = () => {
 
   return (
     <aside 
-      className={`h-screen flex flex-col bg-[#172B4D] transition-all duration-200 ${
+      className={`h-screen flex flex-col bg-[#172B4D] transition-all duration-200 relative ${
         isCollapsed ? 'w-[60px]' : 'w-[260px]'
       }`}
     >
+      {/* Edge Toggle Button */}
+      <button
+        onClick={() => setIsCollapsed(!isCollapsed)}
+        className="absolute top-1/2 -translate-y-1/2 -right-[12px] z-10 w-[24px] h-[48px] bg-[#172B4D] border border-white/20 rounded-r-[6px] flex items-center justify-center hover:bg-[#1e3a5f] transition-colors duration-150 shadow-md"
+      >
+        {isCollapsed ? (
+          <ChevronRight className="w-[14px] h-[14px] text-white/80" />
+        ) : (
+          <ChevronLeft className="w-[14px] h-[14px] text-white/80" />
+        )}
+      </button>
+
       {/* Logo Area */}
       <div className="px-[16px] py-[16px] flex items-center justify-between border-b border-white/10">
         <div className={`flex items-center gap-3 ${isCollapsed ? 'justify-center w-full' : ''}`}>
@@ -83,18 +95,6 @@ export const Sidebar = () => {
           )}
         </div>
       </div>
-
-      {/* Collapse Toggle */}
-      <button
-        onClick={() => setIsCollapsed(!isCollapsed)}
-        className="mx-[8px] mt-[8px] mb-[4px] p-[8px] rounded-[3px] hover:bg-white/10 transition-colors duration-150 flex items-center justify-center"
-      >
-        {isCollapsed ? (
-          <ChevronRight className="w-[16px] h-[16px] text-white/60" />
-        ) : (
-          <ChevronLeft className="w-[16px] h-[16px] text-white/60" />
-        )}
-      </button>
 
       {/* Navigation */}
       <nav className="py-[4px]">
