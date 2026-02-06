@@ -221,7 +221,7 @@ Could you provide more specific details about what you'd like to know?`;
             <p key={i} className="my-[6px]">
               <span className="text-white">{match[1]} </span>
               <span className="font-semibold text-white">{match[2]}</span>
-              <span className="text-white/70">{match[3]}</span>
+              <span className="text-gray-300">{match[3]}</span>
             </p>
           );
         }
@@ -232,9 +232,9 @@ Could you provide more specific details about what you'd like to know?`;
         if (match) {
           return (
             <p key={i} className="my-[6px]">
-              <span className="text-white/70">{match[1]}</span>
-              <span className="text-[#4C9AFF] underline cursor-pointer hover:text-[#79B8FF]">{match[2]}</span>
-              <span className="text-white/70">{match[3]}</span>
+              <span className="text-gray-300">{match[1]}</span>
+              <span className="text-blue-400 underline cursor-pointer hover:text-blue-300">{match[2]}</span>
+              <span className="text-gray-300">{match[3]}</span>
             </p>
           );
         }
@@ -250,7 +250,7 @@ Could you provide more specific details about what you'd like to know?`;
       // Bullet points
       if (line.startsWith('- ')) {
         return (
-          <p key={i} className="text-white/70 pl-[16px] my-[4px]">
+          <p key={i} className="text-gray-300 pl-[16px] my-[4px]">
             • {line.slice(2).replace(/\*\*(.*?)\*\*/g, '$1')}
           </p>
         );
@@ -262,7 +262,7 @@ Could you provide more specific details about what you'd like to know?`;
       // Regular text with inline bold
       const processedLine = line.replace(/\*\*(.*?)\*\*/g, '$1');
       return (
-        <p key={i} className="text-white/70 my-[4px]">
+        <p key={i} className="text-gray-300 my-[4px]">
           {processedLine}
         </p>
       );
@@ -272,17 +272,17 @@ Could you provide more specific details about what you'd like to know?`;
   return (
     <div className="flex h-full">
       {/* Chat Sidebar */}
-      <div className="w-[240px] border-r border-white/10 bg-[#172B4D] flex flex-col">
+      <div className="w-[240px] border-r border-notion-border bg-[#1a1a2e] flex flex-col">
         {/* Header */}
         <div className="p-[16px] border-b border-white/10">
           <div className="flex items-center gap-[8px] text-white mb-[16px]">
-            <ChevronLeft className="w-[18px] h-[18px] text-white/60" />
+            <ChevronLeft className="w-[18px] h-[18px] text-gray-400" />
             <span className="text-[15px] font-medium">Chat Assistant</span>
-            <ChevronDown className="w-[14px] h-[14px] text-white/60 ml-auto" />
+            <ChevronDown className="w-[14px] h-[14px] text-gray-400 ml-auto" />
           </div>
           <button
             onClick={handleNewChat}
-            className="w-full flex items-center gap-[8px] px-[12px] py-[10px] bg-[#0052CC] hover:bg-[#0747A6] rounded-[3px] text-white transition-colors"
+            className="w-full flex items-center gap-[8px] px-[12px] py-[10px] bg-[#2a2a4a] hover:bg-[#3a3a5a] rounded-[6px] text-white transition-colors"
           >
             <Plus className="w-[16px] h-[16px]" />
             <span className="text-[14px]">New Chat</span>
@@ -295,25 +295,25 @@ Could you provide more specific details about what you'd like to know?`;
             <div
               key={conv.id}
               onClick={() => setActiveConversationId(conv.id)}
-              className={`group flex items-center justify-between px-[12px] py-[10px] rounded-[3px] cursor-pointer transition-colors mb-[4px] ${
+              className={`group flex items-center justify-between px-[12px] py-[10px] rounded-[6px] cursor-pointer transition-colors mb-[4px] ${
                 activeConversationId === conv.id
-                  ? 'bg-white/12'
-                  : 'hover:bg-white/8'
+                  ? 'bg-[#2a2a4a]'
+                  : 'hover:bg-[#2a2a4a]/50'
               }`}
             >
               <div className="flex-1 min-w-0">
                 <div className="text-[14px] text-white truncate">
                   {conv.title}
                 </div>
-                <div className="text-[12px] text-white/50 truncate">
+                <div className="text-[12px] text-gray-400 truncate">
                   {conv.preview || 'No messages yet'}
                 </div>
               </div>
               <button
                 onClick={e => handleDeleteConversation(conv.id, e)}
-                className="opacity-0 group-hover:opacity-100 p-[4px] hover:bg-white/10 rounded-[3px] transition-opacity"
+                className="opacity-0 group-hover:opacity-100 p-[4px] hover:bg-white/10 rounded-[4px] transition-opacity"
               >
-                <Trash2 className="w-[14px] h-[14px] text-white/60" />
+                <Trash2 className="w-[14px] h-[14px] text-gray-400" />
               </button>
             </div>
           ))}
@@ -321,20 +321,20 @@ Could you provide more specific details about what you'd like to know?`;
       </div>
 
       {/* Chat Area */}
-      <div className="flex-1 flex flex-col bg-[#0d1f3c]">
+      <div className="flex-1 flex flex-col bg-[#0f0f1a]">
         {activeConversation ? (
           <>
             {/* Chat Header */}
             <div className="px-[32px] py-[20px] border-b border-white/10">
               <div className="flex items-center gap-[12px]">
-                <div className="w-[40px] h-[40px] bg-[#0052CC] rounded-[3px] flex items-center justify-center">
+                <div className="w-[40px] h-[40px] bg-gradient-to-br from-blue-500 to-purple-600 rounded-[8px] flex items-center justify-center">
                   <Sparkles className="w-[20px] h-[20px] text-white" />
                 </div>
                 <div>
                   <h1 className="text-[18px] font-semibold text-white">
                     {activeConversation.title}
                   </h1>
-                  <button className="flex items-center gap-[4px] text-[13px] text-white/50 hover:text-white/70">
+                  <button className="flex items-center gap-[4px] text-[13px] text-gray-400 hover:text-gray-300">
                     {formatDate(activeConversation.updatedAt)}
                     <ChevronDown className="w-[12px] h-[12px]" />
                   </button>
@@ -347,13 +347,13 @@ Could you provide more specific details about what you'd like to know?`;
               <div className="max-w-[800px] mx-auto px-[32px] py-[24px]">
                 {activeConversation.messages.length === 0 ? (
                   <div className="flex flex-col items-center justify-center h-[400px] text-center">
-                    <div className="w-[56px] h-[56px] bg-[#0052CC] rounded-[3px] flex items-center justify-center mb-[20px]">
+                    <div className="w-[56px] h-[56px] bg-gradient-to-br from-blue-500 to-purple-600 rounded-[12px] flex items-center justify-center mb-[20px]">
                       <Sparkles className="w-[28px] h-[28px] text-white" />
                     </div>
                     <h2 className="text-[24px] font-semibold text-white mb-[8px]">
                       How can I help you today?
                     </h2>
-                    <p className="text-[15px] text-white/60 max-w-[400px]">
+                    <p className="text-[15px] text-gray-400 max-w-[400px]">
                       Ask me about your repositories, Jira tickets, team assignments, or any project-related questions.
                     </p>
                   </div>
@@ -368,11 +368,11 @@ Could you provide more specific details about what you'd like to know?`;
                           transition={{ duration: 0.15 }}
                         >
                           {message.role === 'user' ? (
-                            <div className="text-[15px] text-white/80 py-[8px]">
+                            <div className="text-[15px] text-gray-300 py-[8px]">
                               {message.content}
                             </div>
                           ) : (
-                            <div className="bg-[#172B4D] rounded-[3px] p-[20px] border border-white/10">
+                            <div className="bg-[#1a1a2e] rounded-[12px] p-[20px] border border-white/5">
                               {/* Card Header */}
                               <div className="text-[16px] font-semibold text-white mb-[12px] pb-[12px] border-b border-white/10">
                                 {activeConversation.title}
@@ -394,11 +394,11 @@ Could you provide more specific details about what you'd like to know?`;
                         className="flex items-center gap-[8px] py-[12px]"
                       >
                         <div className="flex gap-[4px]">
-                          <span className="w-[6px] h-[6px] bg-white/40 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                          <span className="w-[6px] h-[6px] bg-white/40 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                          <span className="w-[6px] h-[6px] bg-white/40 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                          <span className="w-[6px] h-[6px] bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                          <span className="w-[6px] h-[6px] bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                          <span className="w-[6px] h-[6px] bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
                         </div>
-                        <span className="text-[14px] text-white/50">AI is thinking...</span>
+                        <span className="text-[14px] text-gray-400">AI is thinking...</span>
                       </motion.div>
                     )}
                     <div ref={messagesEndRef} />
@@ -416,22 +416,22 @@ Could you provide more specific details about what you'd like to know?`;
                     {attachedFiles.map(file => (
                       <div
                         key={file.id}
-                        className="flex items-center gap-[8px] bg-[#172B4D] rounded-[3px] px-[12px] py-[8px] border border-white/10"
+                        className="flex items-center gap-[8px] bg-[#2a2a4a] rounded-[8px] px-[12px] py-[8px] border border-white/10"
                       >
                         {file.type.startsWith('image/') ? (
-                          <ImageIcon className="w-[16px] h-[16px] text-[#4C9AFF]" />
+                          <ImageIcon className="w-[16px] h-[16px] text-blue-400" />
                         ) : (
-                          <FileText className="w-[16px] h-[16px] text-white/60" />
+                          <FileText className="w-[16px] h-[16px] text-gray-400" />
                         )}
                         <div className="flex flex-col">
                           <span className="text-[13px] text-white truncate max-w-[150px]">{file.name}</span>
-                          <span className="text-[11px] text-white/40">{formatFileSize(file.size)}</span>
+                          <span className="text-[11px] text-gray-500">{formatFileSize(file.size)}</span>
                         </div>
                         <button
                           onClick={() => removeAttachedFile(file.id)}
-                          className="p-[4px] hover:bg-white/10 rounded-[3px] transition-colors"
+                          className="p-[4px] hover:bg-white/10 rounded-[4px] transition-colors"
                         >
-                          <X className="w-[14px] h-[14px] text-white/60" />
+                          <X className="w-[14px] h-[14px] text-gray-400" />
                         </button>
                       </div>
                     ))}
@@ -447,12 +447,12 @@ Could you provide more specific details about what you'd like to know?`;
                   accept="image/*,.pdf,.doc,.docx,.txt,.md,.json,.csv"
                 />
                 
-                <div className="flex items-center gap-[12px] bg-[#172B4D] rounded-[3px] px-[16px] py-[12px] border border-white/10">
+                <div className="flex items-center gap-[12px] bg-[#1a1a2e] rounded-[12px] px-[16px] py-[12px] border border-white/10">
                   <button 
                     onClick={() => fileInputRef.current?.click()}
-                    className="p-[6px] hover:bg-white/10 rounded-[3px] transition-colors"
+                    className="p-[6px] hover:bg-white/10 rounded-[6px] transition-colors"
                   >
-                    <Paperclip className="w-[18px] h-[18px] text-white/60" />
+                    <Paperclip className="w-[18px] h-[18px] text-gray-400" />
                   </button>
                   <input
                     ref={textareaRef as any}
@@ -466,23 +466,23 @@ Could you provide more specific details about what you'd like to know?`;
                       }
                     }}
                     placeholder="Ask about repositories, tickets, or team assignments..."
-                    className="flex-1 bg-transparent text-[14px] text-white placeholder:text-white/40 outline-none"
+                    className="flex-1 bg-transparent text-[14px] text-white placeholder:text-gray-500 outline-none"
                   />
                   <button
                     onClick={handleSendMessage}
                     disabled={(!inputValue.trim() && attachedFiles.length === 0) || isTyping}
-                    className={`p-[10px] rounded-[3px] transition-colors ${
+                    className={`p-[10px] rounded-[8px] transition-colors ${
                       (inputValue.trim() || attachedFiles.length > 0) && !isTyping
-                        ? 'bg-[#0052CC] hover:bg-[#0747A6]'
-                        : 'bg-white/10 cursor-not-allowed'
+                        ? 'bg-blue-600 hover:bg-blue-500'
+                        : 'bg-gray-700 cursor-not-allowed'
                     }`}
                   >
                     <Send className="w-[16px] h-[16px] text-white" />
                   </button>
                 </div>
                 <div className="flex justify-end mt-[8px]">
-                  <button className="p-[4px] hover:bg-white/10 rounded-[3px] transition-colors">
-                    <Settings2 className="w-[16px] h-[16px] text-white/40" />
+                  <button className="p-[4px] hover:bg-white/10 rounded-[4px] transition-colors">
+                    <Settings2 className="w-[16px] h-[16px] text-gray-500" />
                   </button>
                 </div>
               </div>
@@ -491,7 +491,7 @@ Could you provide more specific details about what you'd like to know?`;
         ) : (
           <div className="flex-1 flex items-center justify-center">
             <div className="text-center">
-              <p className="text-[16px] text-white/50">
+              <p className="text-[16px] text-gray-400">
                 Select a conversation or start a new chat
               </p>
             </div>
