@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { Search, Filter, X, Mail, Github, MessageCircle } from 'lucide-react';
+import { Search, Filter, X, Mail, Github, MessageCircle, Plus } from 'lucide-react';
 import { teamMembers, TeamMember } from '@/data/mockData';
 import { motion, AnimatePresence } from 'framer-motion';
+import AddMemberModal from '@/components/AddMemberModal';
 
 const TeamMemberModal = ({ member, onClose }: { member: TeamMember; onClose: () => void }) => {
   return (
@@ -144,6 +145,7 @@ const Team = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedExpertise, setSelectedExpertise] = useState<string[]>([]);
   const [selectedMember, setSelectedMember] = useState<TeamMember | null>(null);
+  const [showAddMember, setShowAddMember] = useState(false);
 
   // Get all unique expertise tags
   const allExpertise = Array.from(
@@ -180,11 +182,20 @@ const Team = () => {
   return (
     <div className="px-12 py-10">
       {/* Page Header */}
-      <div className="mb-10">
-        <h1 className="text-3xl font-bold text-foreground mb-2">Team</h1>
-        <p className="text-base text-muted-foreground">
-          View team members, expertise, and current capacity
-        </p>
+      <div className="flex items-center justify-between mb-10">
+        <div>
+          <h1 className="text-3xl font-bold text-foreground mb-2">Team</h1>
+          <p className="text-base text-muted-foreground">
+            View team members, expertise, and current capacity
+          </p>
+        </div>
+        <button
+          onClick={() => setShowAddMember(true)}
+          className="airbnb-btn-pill flex items-center gap-2 text-sm py-2.5 px-5"
+        >
+          <Plus className="w-4 h-4" />
+          Add Member
+        </button>
       </div>
 
       {/* Team Stats */}
@@ -325,6 +336,10 @@ const Team = () => {
             onClose={() => setSelectedMember(null)}
           />
         )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        <AddMemberModal open={showAddMember} onClose={() => setShowAddMember(false)} />
       </AnimatePresence>
     </div>
   );
