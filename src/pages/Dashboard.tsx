@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { 
   FileText, 
   GitPullRequest, 
@@ -22,9 +23,12 @@ import { useNavigate } from 'react-router-dom';
 import TicketTrendChart from '@/components/charts/TicketTrendChart';
 import SprintBurndownChart from '@/components/charts/SprintBurndownChart';
 import PRActivityChart from '@/components/charts/PRActivityChart';
+import CreateTicketModal from '@/components/CreateTicketModal';
+import { AnimatePresence } from 'framer-motion';
 
 const Dashboard = () => {
   const navigate = useNavigate();
+  const [showCreateTicket, setShowCreateTicket] = useState(false);
   
   const getGreeting = () => {
     const hour = new Date().getHours();
@@ -88,7 +92,10 @@ const Dashboard = () => {
             <MessageSquare className="w-4 h-4" />
             AI Assistant
           </button>
-          <button className="airbnb-btn-secondary flex items-center gap-2 text-sm py-2.5 px-5 rounded-full">
+          <button 
+            onClick={() => setShowCreateTicket(true)}
+            className="airbnb-btn-secondary flex items-center gap-2 text-sm py-2.5 px-5 rounded-full"
+          >
             <Plus className="w-4 h-4" />
             Create Ticket
           </button>
@@ -337,6 +344,9 @@ const Dashboard = () => {
           </div>
         </div>
       </div>
+      <AnimatePresence>
+        <CreateTicketModal open={showCreateTicket} onClose={() => setShowCreateTicket(false)} />
+      </AnimatePresence>
     </div>
   );
 };
