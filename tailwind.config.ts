@@ -176,6 +176,10 @@ export default {
         marquee: {
           '0%': { transform: 'translateX(0)' },
           '100%': { transform: 'translateX(-50%)' }
+        },
+        pulseGlow: {
+          '0%, 100%': { boxShadow: '0 0 0px 0px hsl(350 100% 61% / 0)' },
+          '50%': { boxShadow: '0 0 20px 4px hsl(350 100% 61% / 0.15)' }
         }
       },
       animation: {
