@@ -104,7 +104,7 @@ export const Hero = () => {
         initial={{ opacity: 0, y: 40 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 1.3, duration: 0.8, ease: 'easeOut' as const }}
-        className="relative z-10 w-full max-w-4xl mx-auto mt-8 md:mt-10"
+        className="relative z-10 w-full max-w-4xl mx-auto mt-4 md:mt-6"
         style={{ transform: 'perspective(1200px) rotateX(4deg)', transformOrigin: 'center bottom' }}
       >
         <HeroDashboardGraphic />
