@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { Mail, Lock, Eye, EyeOff, ArrowRight, User } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Mail, Lock, Eye, EyeOff, ArrowRight, User, Check, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -9,6 +9,27 @@ import { Separator } from '@/components/ui/separator';
 import { Checkbox } from '@/components/ui/checkbox';
 import { toast } from 'sonner';
 import { AuthBrandingPanel } from '@/components/auth/AuthBrandingPanel';
+
+const getPasswordStrength = (pw: string) => {
+  const checks = [
+    { label: '8+ characters', passed: pw.length >= 8 },
+    { label: 'Uppercase letter', passed: /[A-Z]/.test(pw) },
+    { label: 'Lowercase letter', passed: /[a-z]/.test(pw) },
+    { label: 'Number', passed: /\d/.test(pw) },
+    { label: 'Special character', passed: /[^A-Za-z0-9]/.test(pw) },
+  ];
+  const score = checks.filter((c) => c.passed).length;
+  const level = score <= 1 ? 'Weak' : score <= 3 ? 'Fair' : score === 4 ? 'Good' : 'Strong';
+  const color =
+    score <= 1
+      ? 'bg-destructive'
+      : score <= 3
+        ? 'bg-yellow-500'
+        : score === 4
+          ? 'bg-blue-500'
+          : 'bg-green-500';
+  return { checks, score, level, color };
+};
 
 const Signup = () => {
   const [name, setName] = useState('');
@@ -137,6 +158,59 @@ const Signup = () => {
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
+              {/* Password strength indicator */}
+              <AnimatePresence>
+                {password.length > 0 && (() => {
+                  const strength = getPasswordStrength(password);
+                  return (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      exit={{ opacity: 0, height: 0 }}
+                      transition={{ duration: 0.2 }}
+                      className="space-y-2 pt-1"
+                    >
+                      {/* Bar */}
+                      <div className="flex items-center gap-2">
+                        <div className="flex-1 flex gap-1">
+                          {[1, 2, 3, 4, 5].map((i) => (
+                            <motion.div
+                              key={i}
+                              className={`h-1.5 flex-1 rounded-full transition-colors duration-300 ${
+                                i <= strength.score ? strength.color : 'bg-muted'
+                              }`}
+                              initial={{ scaleX: 0 }}
+                              animate={{ scaleX: 1 }}
+                              transition={{ duration: 0.2, delay: i * 0.05 }}
+                              style={{ transformOrigin: 'left' }}
+                            />
+                          ))}
+                        </div>
+                        <span className={`text-xs font-medium min-w-[40px] text-right ${
+                          strength.score <= 1 ? 'text-destructive' : strength.score <= 3 ? 'text-yellow-600 dark:text-yellow-400' : strength.score === 4 ? 'text-blue-600 dark:text-blue-400' : 'text-green-600 dark:text-green-400'
+                        }`}>
+                          {strength.level}
+                        </span>
+                      </div>
+                      {/* Checklist */}
+                      <div className="grid grid-cols-2 gap-x-2 gap-y-0.5">
+                        {strength.checks.map((check) => (
+                          <div key={check.label} className="flex items-center gap-1.5">
+                            {check.passed ? (
+                              <Check className="w-3 h-3 text-green-500" />
+                            ) : (
+                              <X className="w-3 h-3 text-muted-foreground/50" />
+                            )}
+                            <span className={`text-[11px] ${check.passed ? 'text-muted-foreground' : 'text-muted-foreground/50'}`}>
+                              {check.label}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </motion.div>
+                  );
+                })()}
+              </AnimatePresence>
             </div>
 
             <div className="flex items-start gap-2 pt-1">
