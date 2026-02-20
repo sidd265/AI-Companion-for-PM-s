@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { NavLink, useLocation } from 'react-router-dom';
+import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { LayoutDashboard, MessageSquare, Puzzle, Users, Settings, ChevronLeft, ChevronRight, ChevronDown, Eye, Target, AlertCircle, Calendar, GitPullRequest, FileText } from 'lucide-react';
 import { currentUser, dashboardStats, teamMembers } from '@/data/mockData';
 
@@ -12,14 +12,15 @@ const navItems = [
 ];
 
 const quickStats = [
-  { label: 'Reviews', value: dashboardStats.needsAttention.pendingReviews, icon: Eye, color: 'text-orange-500', bgColor: 'bg-orange-50' },
-  { label: 'Unassigned', value: dashboardStats.needsAttention.unassignedTickets, icon: Target, color: 'text-amber-500', bgColor: 'bg-amber-50' },
-  { label: 'Blocked', value: dashboardStats.needsAttention.blockedTasks, icon: AlertCircle, color: 'text-red-500', bgColor: 'bg-red-50' },
-  { label: 'Due Soon', value: 8, icon: Calendar, color: 'text-purple-500', bgColor: 'bg-purple-50' }
+  { label: 'Reviews', value: dashboardStats.needsAttention.pendingReviews, icon: Eye, color: 'text-orange-500', bgColor: 'bg-orange-50', route: '/integrations' },
+  { label: 'Unassigned', value: dashboardStats.needsAttention.unassignedTickets, icon: Target, color: 'text-amber-500', bgColor: 'bg-amber-50', route: '/integrations' },
+  { label: 'Blocked', value: dashboardStats.needsAttention.blockedTasks, icon: AlertCircle, color: 'text-red-500', bgColor: 'bg-red-50', route: '/integrations' },
+  { label: 'Due Soon', value: 8, icon: Calendar, color: 'text-purple-500', bgColor: 'bg-purple-50', route: '/integrations' }
 ];
 
 export const Sidebar = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isStatsExpanded, setIsStatsExpanded] = useState(true);
   const topMembers = teamMembers.sort((a, b) => b.capacity - a.capacity).slice(0, 4);
@@ -86,12 +87,12 @@ export const Sidebar = () => {
           {isStatsExpanded && (
             <div className="space-y-1 mt-1">
               {/* Summary Row */}
-              <div className="flex items-center gap-3 px-3 py-2 rounded-xl bg-secondary/50">
+              <div onClick={() => navigate('/integrations')} className="flex items-center gap-3 px-3 py-2 rounded-xl bg-secondary/50 hover:bg-secondary cursor-pointer transition-colors">
                 <FileText className="w-4 h-4 text-primary" />
                 <span className="text-xs text-muted-foreground flex-1">Tickets</span>
                 <span className="text-xs font-semibold text-foreground">{dashboardStats.activeTickets.count}</span>
               </div>
-              <div className="flex items-center gap-3 px-3 py-2 rounded-xl bg-secondary/50">
+              <div onClick={() => navigate('/integrations')} className="flex items-center gap-3 px-3 py-2 rounded-xl bg-secondary/50 hover:bg-secondary cursor-pointer transition-colors">
                 <GitPullRequest className="w-4 h-4 text-airbnb-success" />
                 <span className="text-xs text-muted-foreground flex-1">Open PRs</span>
                 <span className="text-xs font-semibold text-foreground">{dashboardStats.openPRs.count}</span>
@@ -103,6 +104,7 @@ export const Sidebar = () => {
                 {quickStats.map(stat => (
                   <div
                     key={stat.label}
+                    onClick={() => navigate(stat.route)}
                     className="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-secondary/50 transition-colors cursor-pointer"
                   >
                     <div className={`w-6 h-6 rounded-lg ${stat.bgColor} flex items-center justify-center`}>
