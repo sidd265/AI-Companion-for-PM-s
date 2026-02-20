@@ -172,6 +172,10 @@ export default {
         'scale-in': {
           from: { transform: 'scale(0.95)', opacity: '0' },
           to: { transform: 'scale(1)', opacity: '1' }
+        },
+        marquee: {
+          '0%': { transform: 'translateX(0)' },
+          '100%': { transform: 'translateX(-50%)' }
         }
       },
       animation: {
@@ -179,7 +183,8 @@ export default {
         'accordion-up': 'accordion-up 0.2s ease-out',
         'fade-in': 'fade-in 0.2s ease',
         'slide-in-right': 'slide-in-right 0.3s ease',
-        'scale-in': 'scale-in 0.2s ease'
+        'scale-in': 'scale-in 0.2s ease',
+        marquee: 'marquee 30s linear infinite'
       },
       width: {
         'sidebar': '260px',

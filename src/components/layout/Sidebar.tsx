@@ -4,7 +4,7 @@ import { LayoutDashboard, MessageSquare, Puzzle, Users, Settings, ChevronLeft, C
 import { currentUser, dashboardStats, teamMembers } from '@/data/mockData';
 
 const navItems = [
-  { to: '/', icon: LayoutDashboard, label: 'Dashboard' },
+  { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
   { to: '/chat', icon: MessageSquare, label: 'Chat Assistant' },
   { to: '/integrations', icon: Puzzle, label: 'Integrations' },
   { to: '/team', icon: Users, label: 'Team' },
