@@ -46,24 +46,24 @@ const SettingsPage = () => {
   );
 
   return (
-    <div className="px-12 py-10">
+    <div className="px-4 py-6 md:px-12 md:py-10">
       {/* Page Header */}
-      <div className="mb-10">
-        <h1 className="text-3xl font-bold text-foreground mb-2">Settings</h1>
+      <div className="mb-6 md:mb-10">
+        <h1 className="text-2xl md:text-3xl font-bold text-foreground mb-2">Settings</h1>
         <p className="text-base text-muted-foreground">
           Manage your account preferences and integrations
         </p>
       </div>
 
-      <div className="flex gap-12">
+      <div className="flex flex-col md:flex-row gap-6 md:gap-12">
         {/* Sidebar Navigation */}
-        <div className="w-[220px] flex-shrink-0">
-          <nav className="space-y-1">
+        <div className="md:w-[220px] flex-shrink-0">
+          <nav className="flex md:flex-col gap-1 overflow-x-auto md:overflow-x-visible pb-2 md:pb-0">
             {tabs.map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm transition-all ${
+                className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm transition-all whitespace-nowrap ${
                   activeTab === tab.id
                     ? 'bg-accent text-primary font-medium'
                     : 'text-muted-foreground hover:bg-secondary hover:text-foreground'

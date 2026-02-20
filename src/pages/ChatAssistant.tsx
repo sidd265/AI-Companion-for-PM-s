@@ -251,9 +251,9 @@ Could you provide more specific details about what you'd like to know?`;
   };
 
   return (
-    <div className="flex h-full">
+    <div className="flex flex-col md:flex-row h-full">
       {/* Chat Sidebar */}
-      <div className="w-[280px] border-r border-border bg-secondary/30 flex flex-col">
+      <div className="w-full md:w-[280px] border-b md:border-b-0 md:border-r border-border bg-secondary/30 flex flex-col max-h-[40vh] md:max-h-none">
         {/* Header */}
         <div className="p-4 border-b border-border">
           <div className="flex items-center gap-2 text-foreground mb-4">

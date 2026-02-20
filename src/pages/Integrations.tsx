@@ -27,7 +27,7 @@ const IntegrationDrawer = ({ type, onClose }: IntegrationDrawerProps) => {
         animate={{ x: 0 }}
         exit={{ x: '100%' }}
         transition={{ duration: 0.3, ease: 'easeOut' }}
-        className="absolute right-0 top-0 h-full w-[480px] bg-card border-l border-border shadow-2xl rounded-l-3xl"
+        className="absolute right-0 top-0 h-full w-full sm:w-[480px] bg-card border-l border-border shadow-2xl sm:rounded-l-3xl"
       >
         <div className="p-8">
           <div className="flex items-center justify-between mb-8">
@@ -204,10 +204,10 @@ const Integrations = () => {
   ];
 
   return (
-    <div className="px-12 py-10">
+    <div className="px-4 py-6 md:px-12 md:py-10">
       {/* Page Header */}
-      <div className="mb-10">
-        <h1 className="text-3xl font-bold text-foreground mb-2">Integrations</h1>
+      <div className="mb-6 md:mb-10">
+        <h1 className="text-2xl md:text-3xl font-bold text-foreground mb-2">Integrations</h1>
         <p className="text-base text-muted-foreground">
           Connect your tools to unlock the full power of AM PM
         </p>
