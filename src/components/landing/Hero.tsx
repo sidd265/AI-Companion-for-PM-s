@@ -54,7 +54,7 @@ export const Hero = () => {
           variants={container}
           initial="hidden"
           animate="visible"
-          className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold tracking-tight text-foreground leading-[1.05] mb-6"
+          className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight text-foreground leading-[1.08] mb-6"
         >
           {headlineWords.map((word, i) => (
             <motion.span
@@ -104,7 +104,8 @@ export const Hero = () => {
         initial={{ opacity: 0, y: 40 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 1.3, duration: 0.8, ease: 'easeOut' as const }}
-        className="relative z-10 w-full max-w-4xl mx-auto mt-16 md:mt-20"
+        className="relative z-10 w-full max-w-4xl mx-auto mt-12 md:mt-16"
+        style={{ transform: 'perspective(1200px) rotateX(4deg)', transformOrigin: 'center bottom' }}
       >
         <HeroDashboardGraphic />
       </motion.div>
