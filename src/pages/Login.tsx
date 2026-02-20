@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { toast } from 'sonner';
+import { AuthBrandingPanel } from '@/components/auth/AuthBrandingPanel';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -29,36 +30,10 @@ const Login = () => {
 
   return (
     <div className="min-h-screen bg-background text-foreground flex">
-      {/* Left panel – branding */}
-      <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden items-center justify-center bg-primary/[0.03] dark:bg-primary/[0.06]">
-        {/* Grid background */}
-        <div
-          className="absolute inset-0 opacity-[0.04] dark:opacity-[0.06]"
-          style={{
-            backgroundImage: 'radial-gradient(circle, hsl(var(--foreground)) 1px, transparent 1px)',
-            backgroundSize: '24px 24px',
-          }}
-        />
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="relative z-10 max-w-md px-12 text-center"
-        >
-          <Link to="/" className="inline-flex items-center gap-2.5 mb-10">
-            <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
-              <span className="text-primary-foreground text-lg font-bold tracking-tight">A</span>
-            </div>
-            <span className="text-2xl font-bold text-foreground tracking-tight">AM PM</span>
-          </Link>
-          <h2 className="text-3xl font-bold tracking-tight text-foreground mb-4">
-            Ship faster, together.
-          </h2>
-          <p className="text-muted-foreground leading-relaxed">
-            Join thousands of teams using AM PM to streamline their development workflow — from sprint planning to deployment.
-          </p>
-        </motion.div>
-      </div>
+      <AuthBrandingPanel
+        headline="Ship faster, together."
+        description="Join thousands of teams using AM PM to streamline their development workflow — from sprint planning to deployment."
+      />
 
       {/* Right panel – form */}
       <div className="flex-1 flex items-center justify-center px-6 py-12">
