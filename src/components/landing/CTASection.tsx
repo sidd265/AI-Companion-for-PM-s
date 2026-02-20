@@ -4,7 +4,7 @@ import { ArrowRight } from 'lucide-react';
 
 export const CTASection = () => {
   return (
-    <section className="py-24 md:py-32 px-6 relative overflow-hidden">
+    <section className="py-16 md:py-20 px-6 relative overflow-hidden">
       {/* Dot grid background */}
       <div
         className="absolute inset-0 opacity-[0.04] dark:opacity-[0.06]"

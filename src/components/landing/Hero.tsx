@@ -24,7 +24,7 @@ const wordVariant = {
 
 export const Hero = () => {
   return (
-    <section className="relative min-h-screen flex flex-col items-center justify-center px-6 pt-24 pb-16 overflow-hidden">
+    <section className="relative min-h-[90vh] flex flex-col items-center justify-center px-6 pt-24 pb-8 overflow-hidden">
       {/* Subtle grid background */}
       <div
         className="absolute inset-0 opacity-[0.03] dark:opacity-[0.05]"
