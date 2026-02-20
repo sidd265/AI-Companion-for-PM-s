@@ -1,251 +1,100 @@
 
-# Airbnb Style Redesign Plan
+
+# High-End SaaS Landing Page for AM PM
 
 ## Overview
-This plan transforms the current Jira/Atlassian-styled application into an Airbnb-inspired design with clean aesthetics, warm coral accents, rounded elements, and generous whitespace.
+Build a premium, modern landing page with an About section for AM PM -- a developer productivity and project management platform. The design will follow high-end SaaS standards (think Linear, Vercel, Raycast) with purposeful motion, clean typography, and a powerful hero section with graphic animation. No unnecessary gradients. No basic design.
 
-## Airbnb Design Principles to Apply
-- **Colors**: White backgrounds, coral/pink accent (#FF385C), soft grays
-- **Typography**: Clean, modern Inter font with generous line-height
-- **Corners**: Rounded elements (12-16px border radius)
-- **Spacing**: Generous whitespace and breathing room
-- **Shadows**: Subtle, soft shadows for depth
-- **Cards**: Clean cards with hover animations and rounded corners
-- **Buttons**: Pill-shaped buttons, gradient accents
+## Route Architecture
 
----
+- `/landing` -- Main landing page (will become the new `/` route)
+- `/about` -- About page
+- `/` -- Dashboard (moved to `/dashboard`)
 
-## Phase 1: Design System Foundation
+The landing page and about page will NOT use the `AppLayout` (no sidebar). They get their own minimal navbar and footer.
 
-### 1.1 Update Global Styles (src/index.css)
-- Replace Jira color variables with Airbnb palette:
-  - Primary: `#FF385C` (Airbnb coral/pink)
-  - Background: `#FFFFFF` (pure white)
-  - Secondary backgrounds: `#F7F7F7`
-  - Text primary: `#222222`
-  - Text secondary: `#717171`
-  - Border: `#DDDDDD`
-  - Success: `#008A05`
-  - Warning: `#C13515`
-- Update global component classes for Airbnb styling
-- Add new shadow definitions for soft, diffused shadows
-- Update scrollbar styling to be minimal
+## Page Structure
 
-### 1.2 Update Tailwind Config (tailwind.config.ts)
-- Add Airbnb color palette as custom colors
-- Update border-radius defaults to larger values (12px, 16px)
-- Add new spacing tokens for generous padding
-- Define Airbnb-style shadows
-- Add custom font-size scale
+### Landing Page Sections
 
----
+1. **Navbar** -- Minimal sticky nav with logo, links (Features, About, Pricing), and a "Get Started" CTA button. Transparent on scroll, with blur backdrop on scroll down.
 
-## Phase 2: Sidebar Redesign
+2. **Hero Section** -- The centerpiece.
+   - Bold headline with word-by-word staggered reveal animation (Framer Motion)
+   - Subheadline fades in after
+   - Two CTA buttons: "Get Started" (primary pill) and "See how it works" (ghost/outline)
+   - **Graphic animation**: An animated dashboard mockup built with floating cards, ticket badges, and avatar stacks that assemble themselves on load using Framer Motion spring physics -- no static image, pure code-driven animation. Elements float, connect, and settle into a dashboard-like composition.
 
-### 2.1 Transform Sidebar (src/components/layout/Sidebar.tsx)
-**Current**: Dark navy (#172B4D) with white text
-**New**: Light sidebar with clean white/gray background
+3. **Trusted By / Logos** -- A subtle horizontal marquee of company logos (placeholder styled blocks) with fade edges.
 
-Changes:
-- Background: White with subtle gray border
-- Navigation items: Dark text with coral hover/active states
-- Logo area: Clean with coral accent
-- Quick Stats section: Cards with soft backgrounds
-- User profile: Clean avatar with simple layout
-- Toggle button: Subtle gray with coral hover
-- Remove uppercase labels, use natural case
+4. **Features Grid** -- 3-column bento-style grid with:
+   - Each card has an icon, title, and description
+   - Cards animate in on scroll (staggered `whileInView`)
+   - Features: AI Chat Assistant, Smart Ticket Management, GitHub/Jira Integration, Team Workload Analytics, Sprint Burndowns, Real-time Activity Feed
 
----
+5. **Product Showcase** -- A large centered card showing a stylized screenshot/mockup of the dashboard with a subtle floating shadow. Parallax-like scroll effect using Framer Motion `useScroll` + `useTransform`.
 
-## Phase 3: Dashboard Redesign
+6. **Stats Section** -- Animated counters: "10x faster workflows", "500+ teams", "1M+ tickets managed" -- numbers count up on scroll into view.
 
-### 3.1 Dashboard Page (src/pages/Dashboard.tsx)
-**Current**: Dense grid with dark cards and Jira-style stats
-**New**: Open layout with card-based sections
+7. **Testimonials** -- 3 testimonial cards in a row with avatar, quote, name, and role. Clean card design with subtle hover lift.
 
-Changes:
-- **Header**: Simple greeting with rounded buttons
-  - Primary button: Coral gradient with pill shape
-  - Secondary button: Gray outline with rounded corners
-- **Stat Cards**: 
-  - White background with subtle shadow
-  - Large rounded corners (16px)
-  - Coral accents for trends
-  - Clean typography hierarchy
-- **Charts Section**: 
-  - Clean white cards with rounded corners
-  - Minimal chart headers
-  - Soft grid lines
-- **Activity/PR Lists**: 
-  - Card-based layout with hover animations
-  - Avatar circles with subtle borders
-  - Clean time stamps
-- **Team Workload**: 
-  - Horizontal card layout
-  - Progress bars with coral gradient
-  - Clean avatar presentation
-- **Repositories**: 
-  - Grid of cards with subtle hover
-  - Language indicators as colored dots
-  - Clean metadata display
+8. **CTA Section** -- Full-width section with bold headline, subtext, and a large "Get Started Free" button. Subtle animated background pattern (CSS grid dots or lines).
 
----
+9. **Footer** -- Multi-column footer with links, social icons, copyright.
 
-## Phase 4: Chat Assistant Redesign
+### About Page Sections
 
-### 4.1 Chat Page (src/pages/ChatAssistant.tsx)
-**Current**: Dark theme (#1a1a2e, #0f0f1a) with purple gradients
-**New**: Clean white interface with coral accents
+1. Same Navbar
+2. **Hero** -- "About AM PM" with mission statement
+3. **Story** -- Two-column layout with text and a values grid
+4. **Team Showcase** -- Grid of team member cards pulling from mockData
+5. **CTA** -- Same as landing page
+6. Same Footer
 
-Changes:
-- **Chat Sidebar**:
-  - White/light gray background
-  - Clean conversation list with subtle dividers
-  - Coral "New Chat" button with rounded shape
-  - Active conversation: Coral left border accent
-- **Chat Header**:
-  - White background with clean bottom border
-  - Coral gradient icon
-  - Clean typography
-- **Messages Area**:
-  - User messages: Right-aligned, coral background bubbles
-  - AI messages: Left-aligned, white/gray background cards
-  - Clean rounded corners on message bubbles
-  - Soft shadows
-- **Input Area**:
-  - White background with rounded input field
-  - Coral send button (circular)
-  - Clean attachment previews
-  - Subtle border styling
+## New Files
 
----
+| File | Purpose |
+|------|---------|
+| `src/pages/Landing.tsx` | Main landing page with all sections |
+| `src/pages/About.tsx` | About page |
+| `src/components/landing/Navbar.tsx` | Landing page sticky navbar |
+| `src/components/landing/Hero.tsx` | Hero section with animated graphic |
+| `src/components/landing/Features.tsx` | Bento feature grid |
+| `src/components/landing/Stats.tsx` | Animated counter stats |
+| `src/components/landing/Testimonials.tsx` | Testimonial cards |
+| `src/components/landing/Footer.tsx` | Multi-column footer |
+| `src/components/landing/LogoMarquee.tsx` | Trusted-by logo scroll |
+| `src/components/landing/ProductShowcase.tsx` | Dashboard mockup with scroll effect |
+| `src/components/landing/CTASection.tsx` | Final call-to-action block |
+| `src/components/landing/HeroDashboardGraphic.tsx` | The animated floating dashboard graphic |
 
-## Phase 5: Integrations Page Redesign
+## Modified Files
 
-### 5.1 Integrations Page (src/pages/Integrations.tsx)
-**Current**: Notion-style cards with Jira coloring
-**New**: Airbnb-style clean cards
+| File | Change |
+|------|--------|
+| `src/App.tsx` | Add `/landing` as new `/`, move dashboard to `/dashboard`, add `/about` route outside `AppLayout` |
 
-Changes:
-- **Page Header**: Clean typography with generous spacing
-- **Integration Cards**:
-  - White background with 16px border radius
-  - Soft hover shadow animation
-  - Clean icon containers
-  - Coral "Connect" buttons (pill-shaped)
-  - Green "Connected" badges
-- **Coming Soon Section**:
-  - Gray/disabled appearance
-  - Clean "Coming Soon" badges
-- **Drawer/Modal**:
-  - Rounded corners (24px top)
-  - Clean close button
-  - Coral accent buttons
+## Animation Strategy (Framer Motion)
 
----
+- **Hero text**: `variants` with staggered children, each word slides up + fades in
+- **Dashboard graphic**: Spring-animated cards that translate from offscreen, rotate slightly, and settle. Continuous subtle floating with `animate` + `transition: { repeat: Infinity, repeatType: "reverse" }`
+- **Scroll reveals**: `whileInView` with `once: true` on feature cards, stats, testimonials
+- **Stats counters**: Custom hook that animates numbers from 0 to target using `useMotionValue` + `useTransform`
+- **Logo marquee**: CSS `@keyframes` infinite horizontal scroll
+- **Product showcase**: `useScroll` + `useTransform` for subtle Y-parallax and scale
 
-## Phase 6: Team Page Redesign
+## Design Principles
 
-### 6.1 Team Page (src/pages/Team.tsx)
-**Current**: Grid cards with notion styling
-**New**: Clean profile cards with Airbnb aesthetics
+- **Color**: Primarily monochrome (black/white/gray) with coral (`--primary`) as the single accent color
+- **Typography**: Inter for body, large bold headlines (48-72px on desktop)
+- **Spacing**: Generous whitespace, 80-120px section padding
+- **No unnecessary gradients**: Solid colors, subtle shadows, clean borders
+- **Dark mode compatible**: All sections respect the existing theme system
 
-Changes:
-- **Stats Bar**:
-  - Horizontal cards with soft backgrounds
-  - Large typography for numbers
-  - Clean labels
-- **Search/Filters**:
-  - Rounded search input with icon
-  - Pill-shaped filter buttons
-  - Coral active state
-- **Team Cards**:
-  - White cards with generous padding
-  - Circular avatars (not rounded squares)
-  - Coral capacity progress bars
-  - Hover scale/shadow animation
-  - Clean "View Profile" button
-- **Profile Modal**:
-  - Large rounded corners
-  - Clean header layout
-  - Coral accent buttons
-  - Skill tags with rounded pills
+## Technical Notes
 
----
+- All animations use `framer-motion` (already installed)
+- Responsive: mobile-first with breakpoints for tablet and desktop
+- Landing navbar includes a "Login" link that routes to `/dashboard`
+- The About page reuses Navbar and Footer components from landing
 
-## Phase 7: Settings Page Redesign
-
-### 7.1 Settings Page (src/pages/Settings.tsx)
-**Current**: Jira-style with notion inputs
-**New**: Clean Airbnb-style settings
-
-Changes:
-- **Navigation Tabs**:
-  - Vertical list with coral active indicator
-  - Clean hover states
-  - Rounded selection background
-- **Profile Section**:
-  - Circular avatar upload
-  - Clean form inputs with rounded corners
-  - Coral primary button
-- **Notifications**:
-  - Clean toggle switches (coral when active)
-  - Rounded section cards
-  - Checkbox list with clean styling
-- **Appearance**:
-  - Theme cards with clean borders
-  - Coral checkmark for selected
-  - Clean font size buttons
-- **Integrations Status**:
-  - Clean status cards
-  - Green/gray status indicators
-- **Privacy**:
-  - Clean action cards
-  - Coral warning for delete
-
----
-
-## Implementation Order
-
-1. **Foundation** (Phase 1): CSS variables and Tailwind config
-2. **Sidebar** (Phase 2): Core navigation transformation
-3. **Dashboard** (Phase 3): Main page redesign
-4. **Chat** (Phase 4): Chat interface overhaul
-5. **Supporting Pages** (Phases 5-7): Integrations, Team, Settings
-
----
-
-## Technical Details
-
-### New CSS Variables
-```text
---airbnb-coral: #FF385C
---airbnb-coral-dark: #E31C5F
---airbnb-coral-light: #FFEBEF
---airbnb-black: #222222
---airbnb-gray-dark: #484848
---airbnb-gray: #717171
---airbnb-gray-light: #B0B0B0
---airbnb-gray-lighter: #DDDDDD
---airbnb-background: #FFFFFF
---airbnb-background-alt: #F7F7F7
---airbnb-success: #008A05
---airbnb-warning: #C13515
-```
-
-### Component Style Updates
-- Border radius: 12px (default), 16px (cards), 24px (modals), 50px (pills)
-- Shadows: `0 6px 16px rgba(0,0,0,0.12)` (hover), `0 2px 8px rgba(0,0,0,0.08)` (default)
-- Transitions: 200ms ease for all interactive elements
-- Font weights: 400 (body), 500 (medium), 600 (semibold), 800 (bold)
-
-### Files to Modify
-1. `src/index.css` - Global styles and CSS variables
-2. `tailwind.config.ts` - Theme configuration
-3. `src/components/layout/Sidebar.tsx` - Navigation redesign
-4. `src/components/layout/AppLayout.tsx` - Layout adjustments
-5. `src/pages/Dashboard.tsx` - Main dashboard
-6. `src/pages/ChatAssistant.tsx` - Chat interface
-7. `src/pages/Integrations.tsx` - Integrations page
-8. `src/pages/Team.tsx` - Team directory
-9. `src/pages/Settings.tsx` - Settings page
