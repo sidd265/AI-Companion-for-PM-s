@@ -180,11 +180,11 @@ const Team = () => {
   };
 
   return (
-    <div className="px-12 py-10">
+    <div className="px-4 py-6 md:px-12 md:py-10">
       {/* Page Header */}
-      <div className="flex items-center justify-between mb-10">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 md:mb-10 gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-foreground mb-2">Team</h1>
+          <h1 className="text-2xl md:text-3xl font-bold text-foreground mb-2">Team</h1>
           <p className="text-base text-muted-foreground">
             View team members, expertise, and current capacity
           </p>
@@ -199,7 +199,7 @@ const Team = () => {
       </div>
 
       {/* Team Stats */}
-      <div className="grid grid-cols-4 gap-4 mb-10">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-6 md:mb-10">
         <div className="airbnb-card-static p-5">
           <div className="text-sm text-muted-foreground mb-2">Total Members</div>
           <div className="text-3xl font-bold text-foreground">{teamStats.totalMembers}</div>
@@ -220,7 +220,7 @@ const Team = () => {
       </div>
 
       {/* Filters */}
-      <div className="flex items-center gap-4 mb-8">
+      <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 mb-6 md:mb-8">
         <div className="relative flex-1 max-w-[320px]">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <input
@@ -231,9 +231,9 @@ const Team = () => {
             className="airbnb-input w-full pl-11"
           />
         </div>
-        <div className="flex items-center gap-3">
-          <Filter className="w-4 h-4 text-muted-foreground" />
-          <div className="flex flex-wrap gap-2">
+        <div className="flex items-center gap-3 overflow-x-auto">
+          <Filter className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+          <div className="flex flex-nowrap gap-2">
             {allExpertise.slice(0, 8).map((skill) => (
               <button
                 key={skill}

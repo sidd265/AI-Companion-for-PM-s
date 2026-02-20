@@ -73,18 +73,18 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="px-8 py-6">
+    <div className="px-4 py-4 md:px-8 md:py-6">
       {/* Header */}
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 md:mb-8 gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">
+          <h1 className="text-xl md:text-2xl font-bold text-foreground">
             {getGreeting()}, {currentUser.name.split(' ')[0]}
           </h1>
           <p className="text-sm text-muted-foreground mt-1">
             Here's what's happening today
           </p>
         </div>
-        <div className="flex gap-3">
+        <div className="flex gap-2 sm:gap-3">
           <button 
             onClick={() => navigate('/chat')}
             className="airbnb-btn-pill flex items-center gap-2 text-sm py-2.5 px-5"
@@ -103,7 +103,7 @@ const Dashboard = () => {
       </div>
 
       {/* Stat Cards */}
-      <div className="grid grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-6">
         {/* Active Tickets */}
         <div 
           className="airbnb-card p-5 cursor-pointer"
@@ -191,7 +191,7 @@ const Dashboard = () => {
       </div>
 
       {/* Charts Row */}
-      <div className="grid grid-cols-3 gap-4 mb-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4 mb-6">
         <div 
           className="airbnb-card p-5 cursor-pointer"
           onClick={() => navigate('/integrations')}
@@ -222,7 +222,7 @@ const Dashboard = () => {
       </div>
 
       {/* Activity Row */}
-      <div className="grid grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-6">
         {/* Recent Activity */}
         <div className="airbnb-card-static overflow-hidden">
           <div className="px-5 py-4 border-b border-border">
@@ -305,11 +305,11 @@ const Dashboard = () => {
       </div>
 
       {/* Bottom Row */}
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
         {/* Team Workload */}
         <div className="airbnb-card-static p-5">
           <div className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-4">Team Workload</div>
-          <div className="grid grid-cols-6 gap-4">
+          <div className="grid grid-cols-3 sm:grid-cols-6 gap-4">
             {teamWorkload.map((member) => (
               <div key={member.id} className="text-center">
                 <div className="w-10 h-10 rounded-full text-xs text-white mx-auto mb-2 flex items-center justify-center font-medium" style={{ backgroundColor: member.avatarColor }}>{member.initials}</div>
@@ -326,7 +326,7 @@ const Dashboard = () => {
         {/* Repositories */}
         <div className="airbnb-card-static p-5">
           <div className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-4">Repositories</div>
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
             {repositories.slice(0, 6).map((repo) => (
               <div key={repo.id} className="flex items-center gap-2 p-3 rounded-xl hover:bg-secondary/50 cursor-pointer transition-colors">
                 <div className="w-2 h-2 rounded-full bg-primary flex-shrink-0" />
