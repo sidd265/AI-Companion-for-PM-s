@@ -12,7 +12,7 @@ export const ProductShowcase = () => {
   const scale = useTransform(scrollYProgress, [0, 0.5], [0.95, 1]);
 
   return (
-    <section ref={ref} className="py-24 md:py-32 px-6">
+    <section ref={ref} className="py-16 md:py-20 px-6">
       <div className="max-w-5xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 16 }}
