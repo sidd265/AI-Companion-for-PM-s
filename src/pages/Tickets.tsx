@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { Search, Filter, SlidersHorizontal, ExternalLink } from 'lucide-react';
+import { Search, Filter, SlidersHorizontal, ExternalLink, List, LayoutGrid } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -13,12 +13,16 @@ import { fetchTickets, getUniqueProjects, type TicketFilters } from '@/services/
 import type { JiraTicket } from '@/data/mockData';
 import { TicketSummaryCards } from '@/components/tickets/TicketSummaryCards';
 import { TicketCard } from '@/components/tickets/TicketCard';
+import { KanbanBoard } from '@/components/tickets/KanbanBoard';
+
+type ViewMode = 'list' | 'board';
 
 const Tickets = () => {
   const [tickets, setTickets] = useState<JiraTicket[]>([]);
   const [allTickets, setAllTickets] = useState<JiraTicket[]>([]);
   const [filters, setFilters] = useState<TicketFilters>({});
   const [search, setSearch] = useState('');
+  const [viewMode, setViewMode] = useState<ViewMode>('list');
   const projects = useMemo(() => getUniqueProjects(), []);
 
   useEffect(() => {
@@ -41,7 +45,7 @@ const Tickets = () => {
   };
 
   return (
-    <div className="px-4 py-4 md:px-8 md:py-6 space-y-6 max-w-[1200px]">
+    <div className={`px-4 py-4 md:px-8 md:py-6 space-y-6 ${viewMode === 'list' ? 'max-w-[1200px]' : ''}`}>
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>
@@ -55,19 +59,46 @@ const Tickets = () => {
             <span>{allTickets.length} total tickets</span>
           </p>
         </div>
-        <a
-          href="https://company.atlassian.net"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="airbnb-btn-secondary flex items-center gap-2 !px-4 !py-2 text-xs"
-        >
-          Open Jira
-          <ExternalLink className="w-3.5 h-3.5" />
-        </a>
+        <div className="flex items-center gap-2">
+          {/* View toggle */}
+          <div className="flex items-center bg-muted rounded-lg p-0.5">
+            <button
+              onClick={() => setViewMode('list')}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
+                viewMode === 'list'
+                  ? 'bg-card text-foreground shadow-sm'
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              <List className="w-3.5 h-3.5" />
+              List
+            </button>
+            <button
+              onClick={() => setViewMode('board')}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
+                viewMode === 'board'
+                  ? 'bg-card text-foreground shadow-sm'
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              <LayoutGrid className="w-3.5 h-3.5" />
+              Board
+            </button>
+          </div>
+          <a
+            href="https://company.atlassian.net"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="airbnb-btn-secondary flex items-center gap-2 !px-4 !py-2 text-xs"
+          >
+            Open Jira
+            <ExternalLink className="w-3.5 h-3.5" />
+          </a>
+        </div>
       </div>
 
-      {/* Summary cards */}
-      <TicketSummaryCards tickets={allTickets} />
+      {/* Summary cards — only in list view */}
+      {viewMode === 'list' && <TicketSummaryCards tickets={allTickets} />}
 
       {/* Filters section */}
       <div className="airbnb-card-static p-4 space-y-3">
@@ -100,23 +131,25 @@ const Tickets = () => {
               className="pl-9 h-9 text-sm"
             />
           </div>
-          <Select
-            value={filters.status || 'all'}
-            onValueChange={(v) => setFilters((f) => ({ ...f, status: v as TicketFilters['status'] }))}
-          >
-            <SelectTrigger className="w-full sm:w-[150px] h-9">
-              <Filter className="w-3.5 h-3.5 mr-1.5" />
-              <SelectValue placeholder="Status" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Status</SelectItem>
-              <SelectItem value="To Do">To Do</SelectItem>
-              <SelectItem value="In Progress">In Progress</SelectItem>
-              <SelectItem value="In Review">In Review</SelectItem>
-              <SelectItem value="Done">Done</SelectItem>
-              <SelectItem value="Blocked">Blocked</SelectItem>
-            </SelectContent>
-          </Select>
+          {viewMode === 'list' && (
+            <Select
+              value={filters.status || 'all'}
+              onValueChange={(v) => setFilters((f) => ({ ...f, status: v as TicketFilters['status'] }))}
+            >
+              <SelectTrigger className="w-full sm:w-[150px] h-9">
+                <Filter className="w-3.5 h-3.5 mr-1.5" />
+                <SelectValue placeholder="Status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Status</SelectItem>
+                <SelectItem value="To Do">To Do</SelectItem>
+                <SelectItem value="In Progress">In Progress</SelectItem>
+                <SelectItem value="In Review">In Review</SelectItem>
+                <SelectItem value="Done">Done</SelectItem>
+                <SelectItem value="Blocked">Blocked</SelectItem>
+              </SelectContent>
+            </Select>
+          )}
           <Select
             value={filters.priority || 'all'}
             onValueChange={(v) => setFilters((f) => ({ ...f, priority: v as TicketFilters['priority'] }))}
@@ -158,25 +191,29 @@ const Tickets = () => {
         </span>
       </div>
 
-      {/* Ticket list */}
-      <div className="space-y-2">
-        {tickets.length === 0 && (
-          <div className="airbnb-card-static text-center py-16">
-            <div className="text-4xl mb-3">🔍</div>
-            <p className="text-sm font-medium text-foreground">No tickets found</p>
-            <p className="text-xs text-muted-foreground mt-1">Try adjusting your filters or search terms</p>
-            <button
-              onClick={clearFilters}
-              className="mt-4 text-xs text-primary hover:text-primary/80 font-medium"
-            >
-              Clear all filters
-            </button>
-          </div>
-        )}
-        {tickets.map((ticket) => (
-          <TicketCard key={ticket.id} ticket={ticket} />
-        ))}
-      </div>
+      {/* Content */}
+      {viewMode === 'board' ? (
+        <KanbanBoard tickets={tickets} />
+      ) : (
+        <div className="space-y-2">
+          {tickets.length === 0 && (
+            <div className="airbnb-card-static text-center py-16">
+              <div className="text-4xl mb-3">🔍</div>
+              <p className="text-sm font-medium text-foreground">No tickets found</p>
+              <p className="text-xs text-muted-foreground mt-1">Try adjusting your filters or search terms</p>
+              <button
+                onClick={clearFilters}
+                className="mt-4 text-xs text-primary hover:text-primary/80 font-medium"
+              >
+                Clear all filters
+              </button>
+            </div>
+          )}
+          {tickets.map((ticket) => (
+            <TicketCard key={ticket.id} ticket={ticket} />
+          ))}
+        </div>
+      )}
     </div>
   );
 };
