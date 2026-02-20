@@ -9,6 +9,17 @@ const navLinks = [
   { label: 'Pricing', href: '/#pricing' },
 ];
 
+const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+  if (href.startsWith('/#')) {
+    const id = href.slice(2);
+    const el = document.getElementById(id);
+    if (el) {
+      e.preventDefault();
+      el.scrollIntoView({ behavior: 'smooth' });
+    }
+  }
+};
+
 export const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -50,6 +61,7 @@ export const Navbar = () => {
             <Link
               key={link.label}
               to={link.href}
+              onClick={(e) => handleNavClick(e, link.href)}
               className="text-sm text-muted-foreground hover:text-foreground transition-colors duration-200"
             >
               {link.label}
@@ -96,6 +108,7 @@ export const Navbar = () => {
                 <Link
                   key={link.label}
                   to={link.href}
+                  onClick={(e) => handleNavClick(e, link.href)}
                   className="text-sm text-muted-foreground hover:text-foreground py-2"
                 >
                   {link.label}
