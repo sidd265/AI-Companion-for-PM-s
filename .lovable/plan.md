@@ -1,100 +1,94 @@
 
+# Tickets Page Redesign -- Clean, Approachable, Non-Technical
 
-# High-End SaaS Landing Page for AM PM
+## Problem
+The current page stacks too many elements vertically: header, 5 summary cards, a filter card, a results count line, then the ticket list. For non-technical users, this feels dense and overwhelming before they even see a ticket.
 
-## Overview
-Build a premium, modern landing page with an About section for AM PM -- a developer productivity and project management platform. The design will follow high-end SaaS standards (think Linear, Vercel, Raycast) with purposeful motion, clean typography, and a powerful hero section with graphic animation. No unnecessary gradients. No basic design.
+## Design Philosophy
+- **Breathe**: Reduce visual noise, remove unnecessary borders and cards-within-cards
+- **Hierarchy**: One clear focal point (the ticket list/board), with filters and stats as supporting elements
+- **Warmth**: Lean into the Airbnb aesthetic -- soft colors, generous spacing, friendly language
+- **Glanceable**: Key stats should be scannable in under 2 seconds
 
-## Route Architecture
+---
 
-- `/landing` -- Main landing page (will become the new `/` route)
-- `/about` -- About page
-- `/` -- Dashboard (moved to `/dashboard`)
+## Layout Changes
 
-The landing page and about page will NOT use the `AppLayout` (no sidebar). They get their own minimal navbar and footer.
+### 1. Simplified Header Bar
+Combine the title, view toggle, and "Open Jira" into a single clean row. Move the sync indicator into a subtle tooltip or tiny inline badge rather than a separate subtitle line.
 
-## Page Structure
+### 2. Inline Stats Strip (replaces 5 summary cards)
+Replace the 5 separate summary cards with a compact **horizontal stats strip** -- a single row of pill-shaped stat indicators showing counts with colored dots. This saves significant vertical space while keeping the same info glanceable.
 
-### Landing Page Sections
+```text
+[ * To Do: 1 ] [ * In Progress: 2 ] [ * In Review: 1 ] [ * Done: 0 ] [ * Blocked: 1 ]
+```
 
-1. **Navbar** -- Minimal sticky nav with logo, links (Features, About, Pricing), and a "Get Started" CTA button. Transparent on scroll, with blur backdrop on scroll down.
+Each pill is clickable to filter by that status. The active filter gets a highlighted ring. This merges the summary cards and status filter into one element.
 
-2. **Hero Section** -- The centerpiece.
-   - Bold headline with word-by-word staggered reveal animation (Framer Motion)
-   - Subheadline fades in after
-   - Two CTA buttons: "Get Started" (primary pill) and "See how it works" (ghost/outline)
-   - **Graphic animation**: An animated dashboard mockup built with floating cards, ticket badges, and avatar stacks that assemble themselves on load using Framer Motion spring physics -- no static image, pure code-driven animation. Elements float, connect, and settle into a dashboard-like composition.
+### 3. Streamlined Filter Bar
+- Remove the "FILTERS" card wrapper -- filters sit directly on the page as inline controls
+- Search input + priority dropdown + project dropdown in a single clean row
+- Status filter is now handled by the stats strip above (clicking a status pill filters)
+- "Clear all" appears inline only when filters are active
+- Remove the separate "Showing X of Y tickets" line -- integrate the count into the search placeholder or a subtle label
 
-3. **Trusted By / Logos** -- A subtle horizontal marquee of company logos (placeholder styled blocks) with fade edges.
+### 4. Refined Ticket Cards
+- Slightly more padding and breathing room
+- Assignee avatar on the right side for visual balance
+- Cleaner metadata row with less visual clutter (fewer dots/separators)
+- Subtle left-border color accent based on priority (Critical=red, High=orange, Medium=amber, Low=gray)
 
-4. **Features Grid** -- 3-column bento-style grid with:
-   - Each card has an icon, title, and description
-   - Cards animate in on scroll (staggered `whileInView`)
-   - Features: AI Chat Assistant, Smart Ticket Management, GitHub/Jira Integration, Team Workload Analytics, Sprint Burndowns, Real-time Activity Feed
+### 5. Improved Empty State
+- Friendlier illustration and copy
+- Contextual: if filters are active, suggest clearing them; if no tickets at all, show a "connect Jira" prompt
 
-5. **Product Showcase** -- A large centered card showing a stylized screenshot/mockup of the dashboard with a subtle floating shadow. Parallax-like scroll effect using Framer Motion `useScroll` + `useTransform`.
+### 6. Board View Polish
+- Keep the existing Kanban board mostly as-is, it works well
+- Add the same inline stats strip at the top for consistency
 
-6. **Stats Section** -- Animated counters: "10x faster workflows", "500+ teams", "1M+ tickets managed" -- numbers count up on scroll into view.
+---
 
-7. **Testimonials** -- 3 testimonial cards in a row with avatar, quote, name, and role. Clean card design with subtle hover lift.
+## Technical Plan
 
-8. **CTA Section** -- Full-width section with bold headline, subtext, and a large "Get Started Free" button. Subtle animated background pattern (CSS grid dots or lines).
+### Files to Modify
 
-9. **Footer** -- Multi-column footer with links, social icons, copyright.
+**`src/pages/Tickets.tsx`**
+- Restructure the layout into 3 clear zones: Header row, Stats + Filters row, Content area
+- Replace `TicketSummaryCards` with new `TicketStatusFilter` inline component
+- Merge the results count into the filter area
+- Add status filtering via clickable stat pills (clicking a pill sets `filters.status`)
 
-### About Page Sections
+**`src/components/tickets/TicketStatusFilter.tsx`** (new file)
+- Horizontal row of clickable status pills
+- Each pill shows a colored dot, label, and count
+- Active pill gets a ring/highlight
+- "All" pill at the start to clear the status filter
+- Compact, single-line design
 
-1. Same Navbar
-2. **Hero** -- "About AM PM" with mission statement
-3. **Story** -- Two-column layout with text and a values grid
-4. **Team Showcase** -- Grid of team member cards pulling from mockData
-5. **CTA** -- Same as landing page
-6. Same Footer
+**`src/components/tickets/TicketCard.tsx`**
+- Add a left-border accent color based on priority
+- Move assignee avatar to the right side
+- Simplify the metadata separators
+- Slightly increase vertical padding
 
-## New Files
+**`src/components/tickets/TicketSummaryCards.tsx`**
+- Remove this file (replaced by TicketStatusFilter)
 
-| File | Purpose |
-|------|---------|
-| `src/pages/Landing.tsx` | Main landing page with all sections |
-| `src/pages/About.tsx` | About page |
-| `src/components/landing/Navbar.tsx` | Landing page sticky navbar |
-| `src/components/landing/Hero.tsx` | Hero section with animated graphic |
-| `src/components/landing/Features.tsx` | Bento feature grid |
-| `src/components/landing/Stats.tsx` | Animated counter stats |
-| `src/components/landing/Testimonials.tsx` | Testimonial cards |
-| `src/components/landing/Footer.tsx` | Multi-column footer |
-| `src/components/landing/LogoMarquee.tsx` | Trusted-by logo scroll |
-| `src/components/landing/ProductShowcase.tsx` | Dashboard mockup with scroll effect |
-| `src/components/landing/CTASection.tsx` | Final call-to-action block |
-| `src/components/landing/HeroDashboardGraphic.tsx` | The animated floating dashboard graphic |
+**`src/components/tickets/KanbanBoard.tsx`**
+- Minor refinements: slightly more card padding, consistent with list view cards
 
-## Modified Files
+### No Changes To
+- `src/services/tickets.ts` -- service layer stays the same
+- `src/data/mockData.ts` -- mock data stays the same
+- Badge/status components -- reused as-is
 
-| File | Change |
-|------|--------|
-| `src/App.tsx` | Add `/landing` as new `/`, move dashboard to `/dashboard`, add `/about` route outside `AppLayout` |
+---
 
-## Animation Strategy (Framer Motion)
+## Visual Before vs After
 
-- **Hero text**: `variants` with staggered children, each word slides up + fades in
-- **Dashboard graphic**: Spring-animated cards that translate from offscreen, rotate slightly, and settle. Continuous subtle floating with `animate` + `transition: { repeat: Infinity, repeatType: "reverse" }`
-- **Scroll reveals**: `whileInView` with `once: true` on feature cards, stats, testimonials
-- **Stats counters**: Custom hook that animates numbers from 0 to target using `useMotionValue` + `useTransform`
-- **Logo marquee**: CSS `@keyframes` infinite horizontal scroll
-- **Product showcase**: `useScroll` + `useTransform` for subtle Y-parallax and scale
+**Before**: Title -> Subtitle -> 5 cards grid -> Filter card (with header + 4 inputs) -> "Showing X of Y" -> Ticket list
 
-## Design Principles
+**After**: Title + toggle + action (1 row) -> Status pills + Search + 2 dropdowns (1 row) -> Ticket list
 
-- **Color**: Primarily monochrome (black/white/gray) with coral (`--primary`) as the single accent color
-- **Typography**: Inter for body, large bold headlines (48-72px on desktop)
-- **Spacing**: Generous whitespace, 80-120px section padding
-- **No unnecessary gradients**: Solid colors, subtle shadows, clean borders
-- **Dark mode compatible**: All sections respect the existing theme system
-
-## Technical Notes
-
-- All animations use `framer-motion` (already installed)
-- Responsive: mobile-first with breakpoints for tablet and desktop
-- Landing navbar includes a "Login" link that routes to `/dashboard`
-- The About page reuses Navbar and Footer components from landing
-
+This reduces the "chrome" above the actual ticket content from approximately 280px to approximately 120px, letting users see tickets immediately.
