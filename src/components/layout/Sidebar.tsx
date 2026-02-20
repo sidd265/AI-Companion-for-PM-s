@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, MessageSquare, Puzzle, Users, Settings, ChevronLeft, ChevronRight, ChevronDown, Eye, Target, AlertCircle, Calendar, GitPullRequest, FileText } from 'lucide-react';
+import { LayoutDashboard, MessageSquare, Puzzle, Users, Settings, ChevronLeft, ChevronRight, ChevronDown, Eye, Target, AlertCircle, Calendar, GitPullRequest, FileText, ClipboardList } from 'lucide-react';
 import { currentUser, dashboardStats, teamMembers } from '@/data/mockData';
 
 const navItems = [
   { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
   { to: '/pull-requests', icon: GitPullRequest, label: 'Pull Requests' },
+  { to: '/tickets', icon: ClipboardList, label: 'Tickets' },
   { to: '/chat', icon: MessageSquare, label: 'Chat Assistant' },
   { to: '/integrations', icon: Puzzle, label: 'Integrations' },
   { to: '/team', icon: Users, label: 'Team' },
@@ -88,7 +89,7 @@ export const Sidebar = () => {
           {isStatsExpanded && (
             <div className="space-y-1 mt-1">
               {/* Summary Row */}
-              <div onClick={() => navigate('/integrations')} className="flex items-center gap-3 px-3 py-2 rounded-xl bg-secondary/50 hover:bg-secondary cursor-pointer transition-colors">
+              <div onClick={() => navigate('/tickets')} className="flex items-center gap-3 px-3 py-2 rounded-xl bg-secondary/50 hover:bg-secondary cursor-pointer transition-colors">
                 <FileText className="w-4 h-4 text-primary" />
                 <span className="text-xs text-muted-foreground flex-1">Tickets</span>
                 <span className="text-xs font-semibold text-foreground">{dashboardStats.activeTickets.count}</span>
