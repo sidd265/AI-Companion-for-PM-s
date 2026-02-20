@@ -10,6 +10,7 @@ import ChatAssistant from "@/pages/ChatAssistant";
 import Integrations from "@/pages/Integrations";
 import Team from "@/pages/Team";
 import Settings from "@/pages/Settings";
+import PullRequests from "@/pages/PullRequests";
 import Landing from "@/pages/Landing";
 import About from "@/pages/About";
 import Login from "@/pages/Login";
@@ -34,6 +35,7 @@ const App = () => (
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/chat" element={<ChatAssistant />} />
               <Route path="/integrations" element={<Integrations />} />
+              <Route path="/pull-requests" element={<PullRequests />} />
               <Route path="/team" element={<Team />} />
               <Route path="/settings" element={<Settings />} />
             </Route>

@@ -131,7 +131,7 @@ const Dashboard = () => {
         {/* Open PRs */}
         <div 
           className="airbnb-card p-5 cursor-pointer"
-          onClick={() => navigate('/integrations')}
+          onClick={() => navigate('/pull-requests')}
         >
           <div className="flex items-center justify-between mb-3">
             <div className="w-10 h-10 rounded-xl bg-green-50 dark:bg-green-950 flex items-center justify-center">
@@ -245,9 +245,10 @@ const Dashboard = () => {
         </div>
 
         {/* Open PRs List */}
-        <div className="airbnb-card-static overflow-hidden">
-          <div className="px-5 py-4 border-b border-border">
+        <div className="airbnb-card-static overflow-hidden cursor-pointer" onClick={() => navigate('/pull-requests')}>
+          <div className="px-5 py-4 border-b border-border flex items-center justify-between">
             <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Open Pull Requests</span>
+            <span className="text-[10px] text-primary font-medium">View all →</span>
           </div>
           <div className="max-h-[220px] overflow-y-auto">
             {pullRequests.slice(0, 4).map((pr, index) => (

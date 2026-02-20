@@ -5,6 +5,7 @@ import { currentUser, dashboardStats, teamMembers } from '@/data/mockData';
 
 const navItems = [
   { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
+  { to: '/pull-requests', icon: GitPullRequest, label: 'Pull Requests' },
   { to: '/chat', icon: MessageSquare, label: 'Chat Assistant' },
   { to: '/integrations', icon: Puzzle, label: 'Integrations' },
   { to: '/team', icon: Users, label: 'Team' },
@@ -92,7 +93,7 @@ export const Sidebar = () => {
                 <span className="text-xs text-muted-foreground flex-1">Tickets</span>
                 <span className="text-xs font-semibold text-foreground">{dashboardStats.activeTickets.count}</span>
               </div>
-              <div onClick={() => navigate('/integrations')} className="flex items-center gap-3 px-3 py-2 rounded-xl bg-secondary/50 hover:bg-secondary cursor-pointer transition-colors">
+              <div onClick={() => navigate('/pull-requests')} className="flex items-center gap-3 px-3 py-2 rounded-xl bg-secondary/50 hover:bg-secondary cursor-pointer transition-colors">
                 <GitPullRequest className="w-4 h-4 text-airbnb-success" />
                 <span className="text-xs text-muted-foreground flex-1">Open PRs</span>
                 <span className="text-xs font-semibold text-foreground">{dashboardStats.openPRs.count}</span>
