@@ -10,6 +10,8 @@ import ChatAssistant from "@/pages/ChatAssistant";
 import Integrations from "@/pages/Integrations";
 import Team from "@/pages/Team";
 import Settings from "@/pages/Settings";
+import Landing from "@/pages/Landing";
+import About from "@/pages/About";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -22,8 +24,10 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <Routes>
+            <Route path="/" element={<Landing />} />
+            <Route path="/about" element={<About />} />
             <Route element={<AppLayout />}>
-              <Route path="/" element={<Dashboard />} />
+              <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/chat" element={<ChatAssistant />} />
               <Route path="/integrations" element={<Integrations />} />
               <Route path="/team" element={<Team />} />
