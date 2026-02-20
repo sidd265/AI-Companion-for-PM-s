@@ -72,7 +72,7 @@ export const Navbar = () => {
         {/* Desktop CTA */}
         <div className="hidden md:flex items-center gap-3">
           <Link
-            to="/dashboard"
+            to="/login"
             className="text-sm text-muted-foreground hover:text-foreground transition-colors duration-200"
           >
             Log in
@@ -115,7 +115,7 @@ export const Navbar = () => {
                 </Link>
               ))}
               <div className="h-px bg-border my-2" />
-              <Link to="/dashboard" className="text-sm text-muted-foreground py-2">
+              <Link to="/login" className="text-sm text-muted-foreground py-2">
                 Log in
               </Link>
               <Link
