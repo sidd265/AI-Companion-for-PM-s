@@ -1,7 +1,8 @@
-import { FileText, Bug, Zap, Layers } from 'lucide-react';
+import { FileText, Bug, Zap, Layers, ExternalLink } from 'lucide-react';
 import type { JiraTicket } from '@/data/mockData';
 import { TicketStatusBadge } from './TicketStatusBadge';
 import { TicketPriorityBadge } from './TicketPriorityBadge';
+import { getTicketUrl } from '@/services/tickets';
 
 const typeIcon: Record<JiraTicket['type'], React.ElementType> = {
   Story: FileText,
@@ -21,7 +22,12 @@ export const TicketCard = ({ ticket }: { ticket: JiraTicket }) => {
   const Icon = typeIcon[ticket.type];
 
   return (
-    <div className="airbnb-card p-4 flex items-start gap-4 hover:shadow-md transition-shadow group cursor-pointer">
+    <a
+      href={getTicketUrl(ticket)}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="airbnb-card p-4 flex items-start gap-4 hover:shadow-md transition-shadow group cursor-pointer"
+    >
       <div className={`mt-0.5 w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 ${typeColor[ticket.type]}`}>
         <Icon className="w-3.5 h-3.5" />
       </div>
@@ -49,6 +55,7 @@ export const TicketCard = ({ ticket }: { ticket: JiraTicket }) => {
           </div>
         )}
       </div>
-    </div>
+      <ExternalLink className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity mt-1 flex-shrink-0" />
+    </a>
   );
 };
