@@ -12,6 +12,7 @@ import Team from "@/pages/Team";
 import Settings from "@/pages/Settings";
 import Landing from "@/pages/Landing";
 import About from "@/pages/About";
+import Login from "@/pages/Login";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -25,6 +26,7 @@ const App = () => (
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<Landing />} />
+            <Route path="/login" element={<Login />} />
             <Route path="/about" element={<About />} />
             <Route element={<AppLayout />}>
               <Route path="/dashboard" element={<Dashboard />} />
