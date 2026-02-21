@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useConversations } from '@/hooks/useChatData';
 import { createConversation, deleteConversation as deleteConversationService, generateAIResponse } from '@/services/chat';
 import { ConversationListSkeleton } from '@/components/skeletons/PageSkeletons';
+import ErrorState from '@/components/ErrorState';
 
 interface AttachedFile {
   id: string;
@@ -15,7 +16,7 @@ interface AttachedFile {
 }
 
 const ChatAssistant = () => {
-  const { data: initialConversations, isLoading: conversationsLoading } = useConversations();
+  const { data: initialConversations, isLoading: conversationsLoading, isError: conversationsError, refetch: refetchConversations } = useConversations();
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
   const [inputValue, setInputValue] = useState('');
@@ -126,7 +127,7 @@ const ChatAssistant = () => {
           </button>
         </div>
         <div className="flex-1 overflow-y-auto p-2">
-          {conversationsLoading ? <ConversationListSkeleton /> : (
+          {conversationsError ? <ErrorState compact message="Couldn't load conversations" onRetry={() => refetchConversations()} /> : conversationsLoading ? <ConversationListSkeleton /> : (
             conversations.map(conv => (
               <div key={conv.id} onClick={() => setActiveConversationId(conv.id)} className={`group flex items-center justify-between px-4 py-3 rounded-xl cursor-pointer transition-all mb-1 ${activeConversationId === conv.id ? 'bg-card border-l-2 border-l-primary shadow-sm' : 'hover:bg-card/50'}`}>
                 <div className="flex-1 min-w-0">

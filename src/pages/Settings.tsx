@@ -5,6 +5,7 @@ import { useUserProfile } from '@/hooks/useUserProfile';
 import { useIntegrationStatuses } from '@/hooks/useIntegrations';
 import { ProfileSkeleton } from '@/components/skeletons/PageSkeletons';
 import { Skeleton } from '@/components/ui/skeleton';
+import ErrorState from '@/components/ErrorState';
 
 type SettingsTab = 'profile' | 'notifications' | 'appearance' | 'integrations' | 'privacy';
 
@@ -15,8 +16,8 @@ const SettingsPage = () => {
   const [desktopNotifications, setDesktopNotifications] = useState(false);
   const { theme, setTheme } = useTheme();
 
-  const { data: currentUser, isLoading: userLoading } = useUserProfile();
-  const { data: integrations, isLoading: integrationsLoading } = useIntegrationStatuses();
+  const { data: currentUser, isLoading: userLoading, isError: userError, refetch: refetchUser } = useUserProfile();
+  const { data: integrations, isLoading: integrationsLoading, isError: integrationsError, refetch: refetchIntegrations } = useIntegrationStatuses();
 
   const tabs = [
     { id: 'profile' as const, label: 'Profile', icon: User },
@@ -52,6 +53,7 @@ const SettingsPage = () => {
 
         <div className="flex-1 max-w-[640px]">
           {activeTab === 'profile' && (
+            userError ? <ErrorState title="Couldn't load profile" message="We couldn't load your profile data." onRetry={() => refetchUser()} /> :
             userLoading ? <ProfileSkeleton /> : (
               <div>
                 <h2 className="text-xl font-semibold text-foreground mb-6">Profile</h2>
@@ -143,7 +145,9 @@ const SettingsPage = () => {
           {activeTab === 'integrations' && (
             <div>
               <h2 className="text-xl font-semibold text-foreground mb-6">Integrations Status</h2>
-              {integrationsLoading ? (
+              {integrationsError ? (
+                <ErrorState title="Couldn't load integrations" message="There was a problem loading integration statuses." onRetry={() => refetchIntegrations()} />
+              ) : integrationsLoading ? (
                 <div className="space-y-3">
                   {Array.from({ length: 3 }).map((_, i) => (
                     <div key={i} className="flex items-center justify-between p-5 border border-border rounded-2xl">
