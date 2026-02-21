@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState } from 'react';
 import { 
   BarChart, 
   Bar, 
@@ -17,64 +17,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { repositories } from '@/data/mockData';
-
-// Mock data for weekly PR activity by repository
-const prActivityByRepo: Record<string, Array<{ day: string; opened: number; merged: number }>> = {
-  'all': [
-    { day: 'Mon', opened: 4, merged: 2 },
-    { day: 'Tue', opened: 6, merged: 5 },
-    { day: 'Wed', opened: 3, merged: 4 },
-    { day: 'Thu', opened: 7, merged: 3 },
-    { day: 'Fri', opened: 5, merged: 6 },
-    { day: 'Sat', opened: 1, merged: 2 },
-    { day: 'Sun', opened: 2, merged: 1 },
-  ],
-  'payment-service': [
-    { day: 'Mon', opened: 2, merged: 1 },
-    { day: 'Tue', opened: 1, merged: 2 },
-    { day: 'Wed', opened: 1, merged: 1 },
-    { day: 'Thu', opened: 3, merged: 1 },
-    { day: 'Fri', opened: 2, merged: 2 },
-    { day: 'Sat', opened: 0, merged: 1 },
-    { day: 'Sun', opened: 1, merged: 0 },
-  ],
-  'user-auth': [
-    { day: 'Mon', opened: 1, merged: 0 },
-    { day: 'Tue', opened: 2, merged: 1 },
-    { day: 'Wed', opened: 1, merged: 2 },
-    { day: 'Thu', opened: 1, merged: 1 },
-    { day: 'Fri', opened: 1, merged: 2 },
-    { day: 'Sat', opened: 0, merged: 0 },
-    { day: 'Sun', opened: 0, merged: 1 },
-  ],
-  'web-frontend': [
-    { day: 'Mon', opened: 1, merged: 1 },
-    { day: 'Tue', opened: 2, merged: 1 },
-    { day: 'Wed', opened: 1, merged: 1 },
-    { day: 'Thu', opened: 2, merged: 1 },
-    { day: 'Fri', opened: 1, merged: 1 },
-    { day: 'Sat', opened: 1, merged: 1 },
-    { day: 'Sun', opened: 1, merged: 0 },
-  ],
-  'api-gateway': [
-    { day: 'Mon', opened: 0, merged: 0 },
-    { day: 'Tue', opened: 1, merged: 1 },
-    { day: 'Wed', opened: 0, merged: 0 },
-    { day: 'Thu', opened: 1, merged: 0 },
-    { day: 'Fri', opened: 1, merged: 1 },
-    { day: 'Sat', opened: 0, merged: 0 },
-    { day: 'Sun', opened: 0, merged: 0 },
-  ],
-  'notification-service': [
-    { day: 'Mon', opened: 0, merged: 0 },
-    { day: 'Tue', opened: 0, merged: 0 },
-    { day: 'Wed', opened: 0, merged: 0 },
-    { day: 'Thu', opened: 0, merged: 0 },
-    { day: 'Fri', opened: 0, merged: 0 },
-    { day: 'Sat', opened: 0, merged: 0 },
-    { day: 'Sun', opened: 0, merged: 0 },
-  ],
-};
+import { usePRActivity } from '@/hooks/useChartData';
 
 interface CustomTooltipProps {
   active?: boolean;
@@ -109,15 +52,14 @@ interface PRActivityChartProps {
 
 const PRActivityChart = ({ compact = false }: PRActivityChartProps) => {
   const [selectedRepo, setSelectedRepo] = useState('all');
-
-  const chartData = useMemo(() => {
-    return prActivityByRepo[selectedRepo] || prActivityByRepo['all'];
-  }, [selectedRepo]);
+  const { data: chartData = [], isLoading } = usePRActivity(selectedRepo);
 
   // Calculate weekly totals
   const totalOpened = chartData.reduce((sum, day) => sum + day.opened, 0);
   const totalMerged = chartData.reduce((sum, day) => sum + day.merged, 0);
   const mergeRate = totalOpened > 0 ? Math.round((totalMerged / totalOpened) * 100) : 0;
+
+  if (isLoading) return <div className="h-full w-full flex items-center justify-center text-xs text-muted-foreground">Loading...</div>;
 
   if (compact) {
     return (

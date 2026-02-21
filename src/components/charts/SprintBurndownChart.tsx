@@ -9,22 +9,7 @@ import {
   ReferenceLine,
   Legend
 } from 'recharts';
-
-// Mock sprint burndown data - 2 week sprint
-const sprintData = [
-  { day: 'Day 1', remaining: 32, ideal: 32, completed: 0 },
-  { day: 'Day 2', remaining: 30, ideal: 29.1, completed: 2 },
-  { day: 'Day 3', remaining: 27, ideal: 26.2, completed: 5 },
-  { day: 'Day 4', remaining: 25, ideal: 23.3, completed: 7 },
-  { day: 'Day 5', remaining: 22, ideal: 20.4, completed: 10 },
-  { day: 'Day 6', remaining: 20, ideal: 17.5, completed: 12 },
-  { day: 'Day 7', remaining: 18, ideal: 14.5, completed: 14 },
-  { day: 'Day 8', remaining: 16, ideal: 11.6, completed: 16 },
-  { day: 'Day 9', remaining: 14, ideal: 8.7, completed: 18 },
-  { day: 'Day 10', remaining: null, ideal: 5.8, completed: null }, // Future
-  { day: 'Day 11', remaining: null, ideal: 2.9, completed: null },
-  { day: 'Day 12', remaining: null, ideal: 0, completed: null },
-];
+import { useSprintBurndown } from '@/hooks/useChartData';
 
 interface CustomTooltipProps {
   active?: boolean;
@@ -62,11 +47,12 @@ interface SprintBurndownChartProps {
 }
 
 const SprintBurndownChart = ({ compact = false }: SprintBurndownChartProps) => {
-  // Calculate sprint progress
-  const currentDay = 9;
-  const totalPoints = 32;
-  const completedPoints = 18;
-  const percentComplete = Math.round((completedPoints / totalPoints) * 100);
+  const { data: burndown, isLoading } = useSprintBurndown();
+  const sprintData = burndown?.data ?? [];
+  const { currentDay = 9, totalDays = 12, totalPoints = 32, completedPoints = 18 } = burndown?.meta ?? {};
+  const percentComplete = totalPoints > 0 ? Math.round((completedPoints / totalPoints) * 100) : 0;
+
+  if (isLoading) return <div className="h-full w-full flex items-center justify-center text-xs text-muted-foreground">Loading...</div>;
 
   if (compact) {
     return (
@@ -74,7 +60,7 @@ const SprintBurndownChart = ({ compact = false }: SprintBurndownChartProps) => {
         <div className="flex items-center justify-between mb-[8px]">
           <div className="flex items-center gap-[8px]">
             <span className="text-[16px] font-bold text-notion-text">{percentComplete}%</span>
-            <span className="text-[10px] text-notion-text-tertiary">Day {currentDay}/12</span>
+            <span className="text-[10px] text-notion-text-tertiary">Day {currentDay}/{totalDays}</span>
           </div>
           <div className={`px-[6px] py-[2px] rounded-[3px] text-[10px] font-medium ${
             percentComplete >= 75 ? 'bg-notion-green/10 text-notion-green' : 
@@ -112,7 +98,7 @@ const SprintBurndownChart = ({ compact = false }: SprintBurndownChartProps) => {
           <div className="h-[32px] w-[1px] bg-notion-border" />
           <div>
             <span className="text-[11px] text-notion-text-secondary uppercase tracking-wide">Day</span>
-            <div className="text-[20px] font-bold text-notion-text">{currentDay}/12</div>
+            <div className="text-[20px] font-bold text-notion-text">{currentDay}/{totalDays}</div>
           </div>
           <div className="h-[32px] w-[1px] bg-notion-border" />
           <div>
