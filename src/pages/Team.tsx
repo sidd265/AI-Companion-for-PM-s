@@ -4,6 +4,8 @@ import { type TeamMember } from '@/data/mockData';
 import { motion, AnimatePresence } from 'framer-motion';
 import AddMemberModal from '@/components/AddMemberModal';
 import { useTeamMembers, useTeamStats, useAllExpertise } from '@/hooks/useTeamData';
+import { StatCardSkeleton, TeamMemberCardSkeleton } from '@/components/skeletons/PageSkeletons';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const TeamMemberModal = ({ member, onClose }: { member: TeamMember; onClose: () => void }) => {
   return (
@@ -115,12 +117,12 @@ const Team = () => {
   const [selectedMember, setSelectedMember] = useState<TeamMember | null>(null);
   const [showAddMember, setShowAddMember] = useState(false);
 
-  const { data: allExpertise } = useAllExpertise();
-  const { data: filteredMembers } = useTeamMembers({
+  const { data: allExpertise, isLoading: expertiseLoading } = useAllExpertise();
+  const { data: filteredMembers, isLoading: membersLoading } = useTeamMembers({
     search: searchQuery || undefined,
     expertise: selectedExpertise.length > 0 ? selectedExpertise : undefined,
   });
-  const { data: teamStats } = useTeamStats();
+  const { data: teamStats, isLoading: statsLoading } = useTeamStats();
 
   const toggleExpertise = (skill: string) => {
     setSelectedExpertise(prev => 
@@ -143,25 +145,31 @@ const Team = () => {
         </button>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-6 md:mb-10">
-        <div className="airbnb-card-static p-5">
-          <div className="text-sm text-muted-foreground mb-2">Total Members</div>
-          <div className="text-3xl font-bold text-foreground">{teamStats?.totalMembers ?? 0}</div>
+      {statsLoading ? (
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-6 md:mb-10">
+          {Array.from({ length: 4 }).map((_, i) => <StatCardSkeleton key={i} />)}
         </div>
-        <div className="airbnb-card-static p-5">
-          <div className="text-sm text-muted-foreground mb-2">Avg Velocity</div>
-          <div className="text-3xl font-bold text-foreground">{teamStats?.averageVelocity ?? 0}</div>
-          <div className="text-xs text-muted-foreground">points/sprint</div>
+      ) : (
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-6 md:mb-10">
+          <div className="airbnb-card-static p-5">
+            <div className="text-sm text-muted-foreground mb-2">Total Members</div>
+            <div className="text-3xl font-bold text-foreground">{teamStats?.totalMembers ?? 0}</div>
+          </div>
+          <div className="airbnb-card-static p-5">
+            <div className="text-sm text-muted-foreground mb-2">Avg Velocity</div>
+            <div className="text-3xl font-bold text-foreground">{teamStats?.averageVelocity ?? 0}</div>
+            <div className="text-xs text-muted-foreground">points/sprint</div>
+          </div>
+          <div className="airbnb-card-static p-5">
+            <div className="text-sm text-muted-foreground mb-2">Active Tasks</div>
+            <div className="text-3xl font-bold text-foreground">{teamStats?.activeTasks ?? 0}</div>
+          </div>
+          <div className="airbnb-card-static p-5">
+            <div className="text-sm text-muted-foreground mb-2">Expertise Coverage</div>
+            <div className="text-3xl font-bold text-foreground">{teamStats?.expertiseCoverage ?? 0}%</div>
+          </div>
         </div>
-        <div className="airbnb-card-static p-5">
-          <div className="text-sm text-muted-foreground mb-2">Active Tasks</div>
-          <div className="text-3xl font-bold text-foreground">{teamStats?.activeTasks ?? 0}</div>
-        </div>
-        <div className="airbnb-card-static p-5">
-          <div className="text-sm text-muted-foreground mb-2">Expertise Coverage</div>
-          <div className="text-3xl font-bold text-foreground">{teamStats?.expertiseCoverage ?? 0}%</div>
-        </div>
-      </div>
+      )}
 
       <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 mb-6 md:mb-8">
         <div className="relative flex-1 max-w-[320px]">
@@ -171,40 +179,49 @@ const Team = () => {
         <div className="flex items-center gap-3 overflow-x-auto">
           <Filter className="w-4 h-4 text-muted-foreground flex-shrink-0" />
           <div className="flex flex-nowrap gap-2">
-            {(allExpertise ?? []).slice(0, 8).map((skill) => (
-              <button key={skill} onClick={() => toggleExpertise(skill)} className={`px-4 py-2 rounded-full text-xs font-medium border transition-all ${selectedExpertise.includes(skill) ? 'bg-primary text-primary-foreground border-primary' : 'bg-card text-foreground border-border hover:bg-secondary'}`}>
-                {skill}
-              </button>
-            ))}
+            {expertiseLoading
+              ? Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="w-16 h-8 rounded-full" />)
+              : (allExpertise ?? []).slice(0, 8).map((skill) => (
+                <button key={skill} onClick={() => toggleExpertise(skill)} className={`px-4 py-2 rounded-full text-xs font-medium border transition-all ${selectedExpertise.includes(skill) ? 'bg-primary text-primary-foreground border-primary' : 'bg-card text-foreground border-border hover:bg-secondary'}`}>
+                  {skill}
+                </button>
+              ))
+            }
           </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-        {(filteredMembers ?? []).map((member) => (
-          <motion.div key={member.id} layout initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="airbnb-card p-6 cursor-pointer" onClick={() => setSelectedMember(member)}>
-            <div className="w-16 h-16 rounded-full flex items-center justify-center text-xl font-semibold text-white mb-4" style={{ backgroundColor: member.avatarColor }}>{member.initials}</div>
-            <h3 className="text-base font-semibold text-foreground mb-1">{member.name}</h3>
-            <p className="text-sm text-muted-foreground mb-4">{member.role}</p>
-            <div className="flex flex-wrap gap-1.5 mb-5">
-              {member.expertise.slice(0, 5).map((skill) => (<span key={skill} className="airbnb-tag text-[11px]">{skill}</span>))}
-              {member.expertise.length > 5 && (<span className="airbnb-tag text-[11px]">+{member.expertise.length - 5} more</span>)}
-            </div>
-            <div>
-              <div className="flex justify-between text-xs text-muted-foreground mb-2">
-                <span>Current Capacity</span>
-                <span className={`font-medium ${member.capacity > 0.8 ? 'text-destructive' : member.capacity > 0.6 ? 'text-orange-500' : 'text-airbnb-success'}`}>{Math.round(member.capacity * 100)}%</span>
+      {membersLoading ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          {Array.from({ length: 6 }).map((_, i) => <TeamMemberCardSkeleton key={i} />)}
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          {(filteredMembers ?? []).map((member) => (
+            <motion.div key={member.id} layout initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="airbnb-card p-6 cursor-pointer" onClick={() => setSelectedMember(member)}>
+              <div className="w-16 h-16 rounded-full flex items-center justify-center text-xl font-semibold text-white mb-4" style={{ backgroundColor: member.avatarColor }}>{member.initials}</div>
+              <h3 className="text-base font-semibold text-foreground mb-1">{member.name}</h3>
+              <p className="text-sm text-muted-foreground mb-4">{member.role}</p>
+              <div className="flex flex-wrap gap-1.5 mb-5">
+                {member.expertise.slice(0, 5).map((skill) => (<span key={skill} className="airbnb-tag text-[11px]">{skill}</span>))}
+                {member.expertise.length > 5 && (<span className="airbnb-tag text-[11px]">+{member.expertise.length - 5} more</span>)}
               </div>
-              <div className="h-1.5 bg-secondary rounded-full overflow-hidden">
-                <div className={`h-full rounded-full transition-all duration-300 ${member.capacity > 0.8 ? 'bg-destructive' : member.capacity > 0.6 ? 'bg-orange-500' : 'bg-airbnb-success'}`} style={{ width: `${member.capacity * 100}%` }} />
+              <div>
+                <div className="flex justify-between text-xs text-muted-foreground mb-2">
+                  <span>Current Capacity</span>
+                  <span className={`font-medium ${member.capacity > 0.8 ? 'text-destructive' : member.capacity > 0.6 ? 'text-orange-500' : 'text-airbnb-success'}`}>{Math.round(member.capacity * 100)}%</span>
+                </div>
+                <div className="h-1.5 bg-secondary rounded-full overflow-hidden">
+                  <div className={`h-full rounded-full transition-all duration-300 ${member.capacity > 0.8 ? 'bg-destructive' : member.capacity > 0.6 ? 'bg-orange-500' : 'bg-airbnb-success'}`} style={{ width: `${member.capacity * 100}%` }} />
+                </div>
               </div>
-            </div>
-            <button className="w-full airbnb-btn-secondary mt-5 rounded-full py-2.5">View Profile</button>
-          </motion.div>
-        ))}
-      </div>
+              <button className="w-full airbnb-btn-secondary mt-5 rounded-full py-2.5">View Profile</button>
+            </motion.div>
+          ))}
+        </div>
+      )}
 
-      {(filteredMembers ?? []).length === 0 && (
+      {!membersLoading && (filteredMembers ?? []).length === 0 && (
         <div className="text-center py-12">
           <p className="text-base text-muted-foreground">No team members match your search criteria</p>
         </div>
