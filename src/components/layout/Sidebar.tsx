@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { LayoutDashboard, MessageSquare, Puzzle, Users, Settings, ChevronLeft, ChevronRight, ChevronDown, Eye, Target, AlertCircle, Calendar, GitPullRequest, FileText, ClipboardList } from 'lucide-react';
-import { currentUser, dashboardStats, teamMembers } from '@/data/mockData';
+import { useDashboardStats } from '@/hooks/useDashboardData';
+import { useCurrentUser } from '@/hooks/useDashboardData';
+import { useTeamMembers } from '@/hooks/useTeamData';
 
 const navItems = [
   { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
@@ -13,19 +15,24 @@ const navItems = [
   { to: '/settings', icon: Settings, label: 'Settings' }
 ];
 
-const quickStats = [
-  { label: 'Reviews', value: dashboardStats.needsAttention.pendingReviews, icon: Eye, color: 'text-orange-500', bgColor: 'bg-orange-50', route: '/tickets?status=In+Review' },
-  { label: 'Unassigned', value: dashboardStats.needsAttention.unassignedTickets, icon: Target, color: 'text-amber-500', bgColor: 'bg-amber-50', route: '/tickets?status=To+Do' },
-  { label: 'Blocked', value: dashboardStats.needsAttention.blockedTasks, icon: AlertCircle, color: 'text-red-500', bgColor: 'bg-red-50', route: '/tickets?status=Blocked' },
-  { label: 'Due Soon', value: 8, icon: Calendar, color: 'text-purple-500', bgColor: 'bg-purple-50', route: '/tickets' }
-];
-
 export const Sidebar = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isStatsExpanded, setIsStatsExpanded] = useState(true);
-  const topMembers = teamMembers.sort((a, b) => b.capacity - a.capacity).slice(0, 4);
+
+  const { data: stats } = useDashboardStats();
+  const { data: user } = useCurrentUser();
+  const { data: members } = useTeamMembers();
+
+  const topMembers = (members ?? []).sort((a, b) => b.capacity - a.capacity).slice(0, 4);
+
+  const quickStats = [
+    { label: 'Reviews', value: stats?.needsAttention.pendingReviews ?? 0, icon: Eye, color: 'text-orange-500', bgColor: 'bg-orange-50', route: '/tickets?status=In+Review' },
+    { label: 'Unassigned', value: stats?.needsAttention.unassignedTickets ?? 0, icon: Target, color: 'text-amber-500', bgColor: 'bg-amber-50', route: '/tickets?status=To+Do' },
+    { label: 'Blocked', value: stats?.needsAttention.blockedTasks ?? 0, icon: AlertCircle, color: 'text-red-500', bgColor: 'bg-red-50', route: '/tickets?status=Blocked' },
+    { label: 'Due Soon', value: 8, icon: Calendar, color: 'text-purple-500', bgColor: 'bg-purple-50', route: '/tickets' }
+  ];
 
   return (
     <aside className={`h-screen flex flex-col bg-card border-r border-border transition-all duration-200 relative ${isCollapsed ? 'w-[72px]' : 'w-[260px]'}`}>
@@ -92,12 +99,12 @@ export const Sidebar = () => {
               <div onClick={() => navigate('/tickets')} className="flex items-center gap-3 px-3 py-2 rounded-xl bg-secondary/50 hover:bg-secondary cursor-pointer transition-colors">
                 <FileText className="w-4 h-4 text-primary" />
                 <span className="text-xs text-muted-foreground flex-1">Tickets</span>
-                <span className="text-xs font-semibold text-foreground">{dashboardStats.activeTickets.count}</span>
+                <span className="text-xs font-semibold text-foreground">{stats?.activeTickets.count ?? 0}</span>
               </div>
               <div onClick={() => navigate('/pull-requests')} className="flex items-center gap-3 px-3 py-2 rounded-xl bg-secondary/50 hover:bg-secondary cursor-pointer transition-colors">
                 <GitPullRequest className="w-4 h-4 text-airbnb-success" />
                 <span className="text-xs text-muted-foreground flex-1">Open PRs</span>
-                <span className="text-xs font-semibold text-foreground">{dashboardStats.openPRs.count}</span>
+                <span className="text-xs font-semibold text-foreground">{stats?.openPRs.count ?? 0}</span>
               </div>
 
               {/* Needs Attention */}
@@ -134,7 +141,7 @@ export const Sidebar = () => {
                       </div>
                     ))}
                   </div>
-                  <span className="text-xs text-muted-foreground">{dashboardStats.teamCapacity.average}% avg</span>
+                  <span className="text-xs text-muted-foreground">{stats?.teamCapacity.average ?? 0}% avg</span>
                 </div>
               </div>
             </div>
@@ -150,18 +157,18 @@ export const Sidebar = () => {
         <div className={`flex items-center gap-3 ${isCollapsed ? 'justify-center' : ''}`}>
           <div
             className="w-10 h-10 rounded-full text-sm text-white flex-shrink-0 flex items-center justify-center font-semibold"
-            style={{ backgroundColor: currentUser.avatarColor }}
-            title={isCollapsed ? currentUser.name : undefined}
+            style={{ backgroundColor: user?.avatarColor ?? '#2383E2' }}
+            title={isCollapsed ? user?.name : undefined}
           >
-            {currentUser.initials}
+            {user?.initials ?? ''}
           </div>
           {!isCollapsed && (
             <div className="flex-1 min-w-0">
               <div className="text-sm font-medium text-foreground truncate">
-                {currentUser.name}
+                {user?.name ?? ''}
               </div>
               <div className="text-xs text-muted-foreground truncate">
-                {currentUser.role}
+                {user?.role ?? ''}
               </div>
             </div>
           )}
