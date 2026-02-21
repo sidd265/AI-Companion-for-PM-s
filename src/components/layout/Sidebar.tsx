@@ -12,8 +12,8 @@ const navItems = [
   { to: '/pull-requests', icon: GitPullRequest, label: 'Pull Requests' },
   { to: '/tickets', icon: ClipboardList, label: 'Tickets' },
   { to: '/chat', icon: MessageSquare, label: 'Chat Assistant' },
-  { to: '/integrations', icon: Puzzle, label: 'Integrations' },
   { to: '/team', icon: Users, label: 'Team' },
+  { to: '/integrations', icon: Puzzle, label: 'Integrations' },
   { to: '/settings', icon: Settings, label: 'Settings' }
 ];
 
