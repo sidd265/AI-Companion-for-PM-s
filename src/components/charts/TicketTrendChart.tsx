@@ -8,24 +8,7 @@ import {
   ResponsiveContainer,
   Legend 
 } from 'recharts';
-
-// Mock data for ticket trends over the past 14 days
-const ticketTrendData = [
-  { date: 'Jan 20', created: 5, completed: 3, inProgress: 8 },
-  { date: 'Jan 21', created: 3, completed: 4, inProgress: 7 },
-  { date: 'Jan 22', created: 7, completed: 2, inProgress: 12 },
-  { date: 'Jan 23', created: 4, completed: 6, inProgress: 10 },
-  { date: 'Jan 24', created: 2, completed: 5, inProgress: 7 },
-  { date: 'Jan 25', created: 6, completed: 3, inProgress: 10 },
-  { date: 'Jan 26', created: 3, completed: 4, inProgress: 9 },
-  { date: 'Jan 27', created: 8, completed: 5, inProgress: 12 },
-  { date: 'Jan 28', created: 4, completed: 7, inProgress: 9 },
-  { date: 'Jan 29', created: 5, completed: 4, inProgress: 10 },
-  { date: 'Jan 30', created: 6, completed: 6, inProgress: 10 },
-  { date: 'Jan 31', created: 3, completed: 5, inProgress: 8 },
-  { date: 'Feb 1', created: 7, completed: 4, inProgress: 11 },
-  { date: 'Feb 2', created: 4, completed: 3, inProgress: 12 },
-];
+import { useTicketTrends } from '@/hooks/useChartData';
 
 interface CustomTooltipProps {
   active?: boolean;
@@ -59,6 +42,10 @@ interface TicketTrendChartProps {
 }
 
 const TicketTrendChart = ({ compact = false }: TicketTrendChartProps) => {
+  const { data: ticketTrendData = [], isLoading } = useTicketTrends();
+
+  if (isLoading) return <div className="h-full w-full flex items-center justify-center text-xs text-muted-foreground">Loading...</div>;
+
   return (
     <div className={compact ? "h-full w-full" : "h-[280px] w-full"}>
       <ResponsiveContainer width="100%" height="100%">
