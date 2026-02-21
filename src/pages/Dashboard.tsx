@@ -107,7 +107,7 @@ const Dashboard = () => {
         {/* Active Tickets */}
         <div 
           className="airbnb-card p-5 cursor-pointer"
-          onClick={() => navigate('/integrations')}
+          onClick={() => navigate('/tickets')}
         >
           <div className="flex items-center justify-between mb-3">
             <div className="w-10 h-10 rounded-xl bg-accent flex items-center justify-center">
@@ -174,7 +174,7 @@ const Dashboard = () => {
         {/* Commits Today */}
         <div 
           className="airbnb-card p-5 cursor-pointer"
-          onClick={() => navigate('/integrations')}
+          onClick={() => navigate('/pull-requests')}
         >
           <div className="flex items-center justify-between mb-3">
             <div className="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-950 flex items-center justify-center">
@@ -194,7 +194,7 @@ const Dashboard = () => {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4 mb-6">
         <div 
           className="airbnb-card p-5 cursor-pointer"
-          onClick={() => navigate('/integrations')}
+          onClick={() => navigate('/tickets')}
         >
           <div className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-4">Ticket Trends</div>
           <div className="h-[180px]">
@@ -203,7 +203,7 @@ const Dashboard = () => {
         </div>
         <div 
           className="airbnb-card p-5 cursor-pointer"
-          onClick={() => navigate('/integrations')}
+          onClick={() => navigate('/tickets')}
         >
           <div className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-4">Sprint Burndown</div>
           <div className="h-[180px]">
@@ -212,7 +212,7 @@ const Dashboard = () => {
         </div>
         <div 
           className="airbnb-card p-5 cursor-pointer"
-          onClick={() => navigate('/integrations')}
+          onClick={() => navigate('/pull-requests')}
         >
           <div className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-4">PR Activity</div>
           <div className="h-[180px]">
