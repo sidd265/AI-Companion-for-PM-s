@@ -18,18 +18,18 @@ export const TicketStatusFilter = ({ tickets, activeStatus, onStatusChange }: Ti
   const isAll = !activeStatus || activeStatus === 'all';
 
   return (
-    <div className="flex items-center gap-1.5 flex-wrap">
-      {/* All pill */}
+    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
+      {/* All tile */}
       <button
         onClick={() => onStatusChange(undefined)}
-        className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all ${
+        className={`flex flex-col items-center justify-center gap-1.5 rounded-2xl border-2 px-4 py-5 transition-all ${
           isAll
-            ? 'bg-foreground text-background shadow-sm'
-            : 'bg-muted/60 text-muted-foreground hover:bg-muted hover:text-foreground'
+            ? 'bg-foreground text-background border-foreground shadow-lg scale-[1.02]'
+            : 'bg-card text-muted-foreground border-border hover:border-foreground/30 hover:shadow-md'
         }`}
       >
-        All
-        <span className="text-xs opacity-70">{tickets.length}</span>
+        <span className="text-2xl font-bold leading-none">{tickets.length}</span>
+        <span className="text-xs font-semibold uppercase tracking-wider">All</span>
       </button>
 
       {statuses.map((s) => {
@@ -40,15 +40,17 @@ export const TicketStatusFilter = ({ tickets, activeStatus, onStatusChange }: Ti
           <button
             key={s.key}
             onClick={() => onStatusChange(isActive ? undefined : s.key)}
-            className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all ${
+            className={`flex flex-col items-center justify-center gap-1.5 rounded-2xl border-2 px-4 py-5 transition-all ${
               isActive
-                ? 'bg-foreground text-background shadow-sm'
-                : 'bg-muted/60 text-muted-foreground hover:bg-muted hover:text-foreground'
+                ? 'bg-foreground text-background border-foreground shadow-lg scale-[1.02]'
+                : 'bg-card text-muted-foreground border-border hover:border-foreground/30 hover:shadow-md'
             }`}
           >
-            <span className={`w-2.5 h-2.5 rounded-full ${s.dot}`} />
-            {s.key}
-            <span className="text-xs opacity-70">{count}</span>
+            <div className="flex items-center gap-2">
+              <span className={`w-3 h-3 rounded-full ${s.dot}`} />
+              <span className="text-2xl font-bold leading-none">{count}</span>
+            </div>
+            <span className="text-xs font-semibold uppercase tracking-wider">{s.key}</span>
           </button>
         );
       })}
