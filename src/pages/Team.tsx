@@ -6,6 +6,7 @@ import AddMemberModal from '@/components/AddMemberModal';
 import { useTeamMembers, useTeamStats, useAllExpertise } from '@/hooks/useTeamData';
 import { StatCardSkeleton, TeamMemberCardSkeleton } from '@/components/skeletons/PageSkeletons';
 import { Skeleton } from '@/components/ui/skeleton';
+import ErrorState from '@/components/ErrorState';
 
 const TeamMemberModal = ({ member, onClose }: { member: TeamMember; onClose: () => void }) => {
   return (
@@ -118,11 +119,11 @@ const Team = () => {
   const [showAddMember, setShowAddMember] = useState(false);
 
   const { data: allExpertise, isLoading: expertiseLoading } = useAllExpertise();
-  const { data: filteredMembers, isLoading: membersLoading } = useTeamMembers({
+  const { data: filteredMembers, isLoading: membersLoading, isError: membersError, refetch: refetchMembers } = useTeamMembers({
     search: searchQuery || undefined,
     expertise: selectedExpertise.length > 0 ? selectedExpertise : undefined,
   });
-  const { data: teamStats, isLoading: statsLoading } = useTeamStats();
+  const { data: teamStats, isLoading: statsLoading, isError: statsError, refetch: refetchStats } = useTeamStats();
 
   const toggleExpertise = (skill: string) => {
     setSelectedExpertise(prev => 
@@ -145,7 +146,9 @@ const Team = () => {
         </button>
       </div>
 
-      {statsLoading ? (
+      {statsError ? (
+        <div className="mb-6 md:mb-10"><ErrorState compact message="Couldn't load team stats" onRetry={() => refetchStats()} /></div>
+      ) : statsLoading ? (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-6 md:mb-10">
           {Array.from({ length: 4 }).map((_, i) => <StatCardSkeleton key={i} />)}
         </div>
@@ -191,7 +194,9 @@ const Team = () => {
         </div>
       </div>
 
-      {membersLoading ? (
+      {membersError ? (
+        <ErrorState title="Couldn't load team members" message="There was a problem loading the team list. Please try again." onRetry={() => refetchMembers()} />
+      ) : membersLoading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
           {Array.from({ length: 6 }).map((_, i) => <TeamMemberCardSkeleton key={i} />)}
         </div>

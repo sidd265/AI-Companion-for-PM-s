@@ -5,6 +5,7 @@ import { useDashboardStats, useCurrentUser } from '@/hooks/useDashboardData';
 import { useTeamMembers } from '@/hooks/useTeamData';
 import { SidebarStatsSkeleton } from '@/components/skeletons/PageSkeletons';
 import { Skeleton } from '@/components/ui/skeleton';
+import ErrorState from '@/components/ErrorState';
 
 const navItems = [
   { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
@@ -22,7 +23,7 @@ export const Sidebar = () => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isStatsExpanded, setIsStatsExpanded] = useState(true);
 
-  const { data: stats, isLoading: statsLoading } = useDashboardStats();
+  const { data: stats, isLoading: statsLoading, isError: statsError, refetch: refetchStats } = useDashboardStats();
   const { data: user, isLoading: userLoading } = useCurrentUser();
   const { data: members, isLoading: membersLoading } = useTeamMembers();
 
@@ -81,6 +82,7 @@ export const Sidebar = () => {
           </button>
 
           {isStatsExpanded && (
+            statsError ? <div className="px-3 py-2"><ErrorState compact message="Stats unavailable" onRetry={() => refetchStats()} /></div> :
             (statsLoading || membersLoading) ? <SidebarStatsSkeleton /> : (
               <div className="space-y-1 mt-1">
                 <div onClick={() => navigate('/tickets')} className="flex items-center gap-3 px-3 py-2 rounded-xl bg-secondary/50 hover:bg-secondary cursor-pointer transition-colors">

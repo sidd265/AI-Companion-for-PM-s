@@ -36,20 +36,33 @@ import {
   RepoGridSkeleton,
 } from '@/components/skeletons/PageSkeletons';
 import { Skeleton } from '@/components/ui/skeleton';
+import ErrorState from '@/components/ErrorState';
 
 const Dashboard = () => {
   const navigate = useNavigate();
   const [showCreateTicket, setShowCreateTicket] = useState(false);
   
-  const { data: stats, isLoading: statsLoading } = useDashboardStats();
-  const { data: activity, isLoading: activityLoading } = useRecentActivity();
-  const { data: ticketsByStatus, isLoading: statusLoading } = useTicketsByStatus();
-  const { data: ticketsByPriority, isLoading: priorityLoading } = useTicketsByPriority();
-  const { data: teamWorkload, isLoading: workloadLoading } = useTeamWorkload();
-  const { data: repositories, isLoading: reposLoading } = useRepositorySummaries();
-  const { data: openPRs, isLoading: prsLoading } = useOpenPullRequests();
+  const { data: stats, isLoading: statsLoading, isError: statsError, refetch: refetchStats } = useDashboardStats();
+  const { data: activity, isLoading: activityLoading, isError: activityError, refetch: refetchActivity } = useRecentActivity();
+  const { data: ticketsByStatus, isLoading: statusLoading, isError: statusError, refetch: refetchStatus } = useTicketsByStatus();
+  const { data: ticketsByPriority, isLoading: priorityLoading, isError: priorityError, refetch: refetchPriority } = useTicketsByPriority();
+  const { data: teamWorkload, isLoading: workloadLoading, isError: workloadError, refetch: refetchWorkload } = useTeamWorkload();
+  const { data: repositories, isLoading: reposLoading, isError: reposError, refetch: refetchRepos } = useRepositorySummaries();
+  const { data: openPRs, isLoading: prsLoading, isError: prsError, refetch: refetchPRs } = useOpenPullRequests();
   const { data: totalTickets } = useTotalTicketCount();
   const { data: user, isLoading: userLoading } = useCurrentUser();
+
+  // Check if all major queries failed
+  const hasCriticalError = statsError && activityError && workloadError && reposError;
+  const refetchAll = () => { refetchStats(); refetchActivity(); refetchStatus(); refetchPriority(); refetchWorkload(); refetchRepos(); refetchPRs(); };
+
+  if (hasCriticalError) {
+    return (
+      <div className="px-4 py-4 md:px-8 md:py-6">
+        <ErrorState title="Unable to load dashboard" message="We couldn't load your dashboard data. Please check your connection and try again." onRetry={refetchAll} />
+      </div>
+    );
+  }
 
   const getGreeting = () => {
     const hour = new Date().getHours();
@@ -113,7 +126,9 @@ const Dashboard = () => {
       </div>
 
       {/* Stat Cards */}
-      {statsLoading ? (
+      {statsError ? (
+        <div className="mb-6"><ErrorState compact message="Couldn't load stats" onRetry={() => refetchStats()} /></div>
+      ) : statsLoading ? (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-6">
           {Array.from({ length: 4 }).map((_, i) => <StatCardSkeleton key={i} />)}
         </div>
@@ -210,7 +225,7 @@ const Dashboard = () => {
 
       {/* Activity Row */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-6">
-        {activityLoading ? <ActivityListSkeleton /> : (
+        {activityError ? <ErrorState compact message="Couldn't load activity" onRetry={() => refetchActivity()} /> : activityLoading ? <ActivityListSkeleton /> : (
           <div className="airbnb-card-static overflow-hidden">
             <div className="px-5 py-4 border-b border-border">
               <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Recent Activity</span>
@@ -232,7 +247,7 @@ const Dashboard = () => {
           </div>
         )}
 
-        {prsLoading ? <ActivityListSkeleton /> : (
+        {prsError ? <ErrorState compact message="Couldn't load pull requests" onRetry={() => refetchPRs()} /> : prsLoading ? <ActivityListSkeleton /> : (
           <div className="airbnb-card-static overflow-hidden cursor-pointer" onClick={() => navigate('/pull-requests')}>
             <div className="px-5 py-4 border-b border-border flex items-center justify-between">
               <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Open Pull Requests</span>
@@ -258,7 +273,7 @@ const Dashboard = () => {
           </div>
         )}
 
-        {statusLoading ? <BreakdownSkeleton /> : (
+        {statusError ? <ErrorState compact message="Couldn't load ticket status" onRetry={() => refetchStatus()} /> : statusLoading ? <BreakdownSkeleton /> : (
           <div className="airbnb-card-static p-5">
             <div className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-4">Ticket Status</div>
             <div className="space-y-2">
@@ -276,7 +291,7 @@ const Dashboard = () => {
           </div>
         )}
 
-        {priorityLoading ? <BreakdownSkeleton /> : (
+        {priorityError ? <ErrorState compact message="Couldn't load priorities" onRetry={() => refetchPriority()} /> : priorityLoading ? <BreakdownSkeleton /> : (
           <div className="airbnb-card-static p-5">
             <div className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-4">Priority</div>
             <div className="space-y-2">
@@ -298,7 +313,7 @@ const Dashboard = () => {
 
       {/* Bottom Row */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
-        {workloadLoading ? <TeamWorkloadSkeleton /> : (
+        {workloadError ? <ErrorState compact message="Couldn't load team workload" onRetry={() => refetchWorkload()} /> : workloadLoading ? <TeamWorkloadSkeleton /> : (
           <div className="airbnb-card-static p-5">
             <div className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-4">Team Workload</div>
             <div className="grid grid-cols-3 sm:grid-cols-6 gap-4">
@@ -316,7 +331,7 @@ const Dashboard = () => {
           </div>
         )}
 
-        {reposLoading ? <RepoGridSkeleton /> : (
+        {reposError ? <ErrorState compact message="Couldn't load repositories" onRetry={() => refetchRepos()} /> : reposLoading ? <RepoGridSkeleton /> : (
           <div className="airbnb-card-static p-5">
             <div className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-4">Repositories</div>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">

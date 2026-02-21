@@ -3,6 +3,7 @@ import { Github, Trello, MessageCircle, Check, X, Settings, RefreshCw, ExternalL
 import { motion, AnimatePresence } from 'framer-motion';
 import { useIntegrationStatuses, useIntegrationRepositories } from '@/hooks/useIntegrations';
 import { IntegrationCardSkeleton } from '@/components/skeletons/PageSkeletons';
+import ErrorState from '@/components/ErrorState';
 
 interface IntegrationDrawerProps {
   type: 'github' | 'jira' | 'slack';
@@ -97,7 +98,7 @@ const IntegrationDrawer = ({ type, onClose }: IntegrationDrawerProps) => {
 
 const Integrations = () => {
   const [activeDrawer, setActiveDrawer] = useState<'github' | 'jira' | 'slack' | null>(null);
-  const { data: integrations, isLoading } = useIntegrationStatuses();
+  const { data: integrations, isLoading, isError, refetch } = useIntegrationStatuses();
 
   const integrationCards = [
     { id: 'github' as const, name: 'GitHub', description: 'Connect repositories to analyze code and pull requests', icon: Github, iconBg: 'bg-gray-900 dark:bg-gray-100', iconColor: 'text-white dark:text-gray-900', connected: integrations?.github.connected ?? false, info: integrations?.github.connected ? `Connected as @${integrations.github.username} · Syncing ${integrations.github.repos} repositories` : null },
@@ -112,7 +113,9 @@ const Integrations = () => {
         <p className="text-base text-muted-foreground">Connect your tools to unlock the full power of AM PM</p>
       </div>
 
-      {isLoading ? (
+      {isError ? (
+        <ErrorState title="Couldn't load integrations" message="There was a problem loading your integrations. Please try again." onRetry={() => refetch()} />
+      ) : isLoading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
           {Array.from({ length: 3 }).map((_, i) => <IntegrationCardSkeleton key={i} />)}
         </div>
