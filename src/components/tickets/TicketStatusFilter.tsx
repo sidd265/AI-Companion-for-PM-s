@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from 'react';
 import type { JiraTicket } from '@/data/mockData';
 
 interface TicketStatusFilterProps {
@@ -14,12 +15,39 @@ const statuses: { key: JiraTicket['status']; dot: string; tint: string; activeBg
   { key: 'Blocked', dot: 'bg-destructive', tint: 'bg-red-50 dark:bg-red-950/40 border-red-200 dark:border-red-800 hover:border-red-400', activeBg: 'bg-red-600 text-white border-red-600' },
 ];
 
+const AnimatedCount = ({ value }: { value: number }) => {
+  const [display, setDisplay] = useState(value);
+  const prev = useRef(value);
+  const rafRef = useRef<number>();
+
+  useEffect(() => {
+    const from = prev.current;
+    const to = value;
+    prev.current = value;
+    if (from === to) return;
+
+    const duration = 350;
+    const start = performance.now();
+
+    const tick = (now: number) => {
+      const t = Math.min((now - start) / duration, 1);
+      const eased = 1 - Math.pow(1 - t, 3); // easeOutCubic
+      setDisplay(Math.round(from + (to - from) * eased));
+      if (t < 1) rafRef.current = requestAnimationFrame(tick);
+    };
+
+    rafRef.current = requestAnimationFrame(tick);
+    return () => { if (rafRef.current) cancelAnimationFrame(rafRef.current); };
+  }, [value]);
+
+  return <span className="text-2xl font-bold leading-none tabular-nums">{display}</span>;
+};
+
 export const TicketStatusFilter = ({ tickets, activeStatus, onStatusChange }: TicketStatusFilterProps) => {
   const isAll = !activeStatus || activeStatus === 'all';
 
   return (
     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
-      {/* All tile */}
       <button
         onClick={() => onStatusChange(undefined)}
         className={`flex flex-col items-center justify-center gap-1.5 rounded-2xl border-2 px-4 py-5 transition-all ${
@@ -28,7 +56,7 @@ export const TicketStatusFilter = ({ tickets, activeStatus, onStatusChange }: Ti
             : 'bg-card text-muted-foreground border-border hover:border-foreground/30 hover:shadow-md'
         }`}
       >
-        <span className="text-2xl font-bold leading-none">{tickets.length}</span>
+        <AnimatedCount value={tickets.length} />
         <span className="text-xs font-semibold uppercase tracking-wider">All</span>
       </button>
 
@@ -48,7 +76,7 @@ export const TicketStatusFilter = ({ tickets, activeStatus, onStatusChange }: Ti
           >
             <div className="flex items-center gap-2">
               <span className={`w-3 h-3 rounded-full ${s.dot}`} />
-              <span className="text-2xl font-bold leading-none">{count}</span>
+              <AnimatedCount value={count} />
             </div>
             <span className="text-xs font-semibold uppercase tracking-wider">{s.key}</span>
           </button>
