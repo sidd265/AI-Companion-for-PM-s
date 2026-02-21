@@ -4,6 +4,7 @@ import { type Conversation, type Message } from '@/data/mockData';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useConversations } from '@/hooks/useChatData';
 import { createConversation, deleteConversation as deleteConversationService, generateAIResponse } from '@/services/chat';
+import { ConversationListSkeleton } from '@/components/skeletons/PageSkeletons';
 
 interface AttachedFile {
   id: string;
@@ -14,7 +15,7 @@ interface AttachedFile {
 }
 
 const ChatAssistant = () => {
-  const { data: initialConversations } = useConversations();
+  const { data: initialConversations, isLoading: conversationsLoading } = useConversations();
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
   const [inputValue, setInputValue] = useState('');
@@ -24,7 +25,6 @@ const ChatAssistant = () => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Sync initial data from hook
   useEffect(() => {
     if (initialConversations && conversations.length === 0) {
       setConversations(initialConversations);
@@ -34,13 +34,8 @@ const ChatAssistant = () => {
 
   const activeConversation = conversations.find(c => c.id === activeConversationId);
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
-
-  useEffect(() => {
-    scrollToBottom();
-  }, [activeConversation?.messages]);
+  const scrollToBottom = () => { messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }); };
+  useEffect(() => { scrollToBottom(); }, [activeConversation?.messages]);
 
   const handleNewChat = async () => {
     const newConversation = await createConversation();
@@ -53,31 +48,19 @@ const ChatAssistant = () => {
     e.stopPropagation();
     await deleteConversationService(id);
     setConversations(conversations.filter(c => c.id !== id));
-    if (activeConversationId === id) {
-      setActiveConversationId(conversations[0]?.id || null);
-    }
+    if (activeConversationId === id) setActiveConversationId(conversations[0]?.id || null);
   };
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files) return;
-    const newFiles: AttachedFile[] = Array.from(files).map(file => ({
-      id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
-      name: file.name,
-      type: file.type,
-      size: file.size,
-      url: URL.createObjectURL(file)
-    }));
+    const newFiles: AttachedFile[] = Array.from(files).map(file => ({ id: Date.now().toString() + Math.random().toString(36).substr(2, 9), name: file.name, type: file.type, size: file.size, url: URL.createObjectURL(file) }));
     setAttachedFiles(prev => [...prev, ...newFiles]);
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
   const removeAttachedFile = (id: string) => {
-    setAttachedFiles(prev => {
-      const file = prev.find(f => f.id === id);
-      if (file) URL.revokeObjectURL(file.url);
-      return prev.filter(f => f.id !== id);
-    });
+    setAttachedFiles(prev => { const file = prev.find(f => f.id === id); if (file) URL.revokeObjectURL(file.url); return prev.filter(f => f.id !== id); });
   };
 
   const formatFileSize = (bytes: number) => {
@@ -88,29 +71,15 @@ const ChatAssistant = () => {
 
   const handleSendMessage = async () => {
     if ((!inputValue.trim() && attachedFiles.length === 0) || !activeConversationId) return;
-
     const fileNames = attachedFiles.map(f => f.name);
     const messageContent = inputValue.trim() + (fileNames.length > 0 ? `\n\n📎 Attached: ${fileNames.join(', ')}` : '');
-
-    const userMessage: Message = {
-      id: Date.now().toString(),
-      role: 'user',
-      content: messageContent,
-      timestamp: new Date().toISOString(),
-      attachments: attachedFiles.map(f => ({ name: f.name, type: f.type, size: f.size, url: f.url }))
-    };
+    const userMessage: Message = { id: Date.now().toString(), role: 'user', content: messageContent, timestamp: new Date().toISOString(), attachments: attachedFiles.map(f => ({ name: f.name, type: f.type, size: f.size, url: f.url })) };
 
     setConversations(prev => prev.map(conv => {
       if (conv.id === activeConversationId) {
         const isFirstMessage = conv.messages.length === 0;
         const title = inputValue.trim() || (fileNames.length > 0 ? `Files: ${fileNames[0]}` : 'New conversation');
-        return {
-          ...conv,
-          title: isFirstMessage ? title.slice(0, 40) : conv.title,
-          preview: (inputValue || fileNames.join(', ')).slice(0, 60),
-          updatedAt: new Date().toISOString(),
-          messages: [...conv.messages, userMessage]
-        };
+        return { ...conv, title: isFirstMessage ? title.slice(0, 40) : conv.title, preview: (inputValue || fileNames.join(', ')).slice(0, 60), updatedAt: new Date().toISOString(), messages: [...conv.messages, userMessage] };
       }
       return conv;
     }));
@@ -122,52 +91,30 @@ const ChatAssistant = () => {
 
     setTimeout(async () => {
       const aiResponse = await generateAIResponse(activeConversationId, query);
-      const assistantMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        role: 'assistant',
-        content: aiResponse,
-        timestamp: new Date().toISOString()
-      };
-
-      setConversations(prev => prev.map(conv => {
-        if (conv.id === activeConversationId) {
-          return { ...conv, messages: [...conv.messages, assistantMessage] };
-        }
-        return conv;
-      }));
+      const assistantMessage: Message = { id: (Date.now() + 1).toString(), role: 'assistant', content: aiResponse, timestamp: new Date().toISOString() };
+      setConversations(prev => prev.map(conv => { if (conv.id === activeConversationId) return { ...conv, messages: [...conv.messages, assistantMessage] }; return conv; }));
       setIsTyping(false);
     }, 1500);
   };
 
-  const formatDate = (timestamp: string) => {
-    const date = new Date(timestamp);
-    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-  };
+  const formatDate = (timestamp: string) => new Date(timestamp).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 
   const renderMessageContent = (content: string) => {
     const lines = content.split('\n');
     return lines.map((line, i) => {
       if (line.match(/^\d+\.\s+\*\*.*?\*\*/)) {
         const match = line.match(/^(\d+\.)\s+\*\*(.*?)\*\*(.*)$/);
-        if (match) {
-          return (<p key={i} className="my-1.5"><span className="text-foreground">{match[1]} </span><span className="font-semibold text-foreground">{match[2]}</span><span className="text-muted-foreground">{match[3]}</span></p>);
-        }
+        if (match) return (<p key={i} className="my-1.5"><span className="text-foreground">{match[1]} </span><span className="font-semibold text-foreground">{match[2]}</span><span className="text-muted-foreground">{match[3]}</span></p>);
       }
-      if (line.startsWith('**') && line.endsWith('**')) {
-        return (<p key={i} className="font-semibold text-foreground my-2">{line.replace(/\*\*/g, '')}</p>);
-      }
-      if (line.startsWith('- ')) {
-        return (<p key={i} className="text-muted-foreground pl-4 my-1">• {line.slice(2).replace(/\*\*(.*?)\*\*/g, '$1')}</p>);
-      }
+      if (line.startsWith('**') && line.endsWith('**')) return (<p key={i} className="font-semibold text-foreground my-2">{line.replace(/\*\*/g, '')}</p>);
+      if (line.startsWith('- ')) return (<p key={i} className="text-muted-foreground pl-4 my-1">• {line.slice(2).replace(/\*\*(.*?)\*\*/g, '$1')}</p>);
       if (line.trim() === '') return <br key={i} />;
-      const processedLine = line.replace(/\*\*(.*?)\*\*/g, '$1');
-      return (<p key={i} className="text-muted-foreground my-1">{processedLine}</p>);
+      return (<p key={i} className="text-muted-foreground my-1">{line.replace(/\*\*(.*?)\*\*/g, '$1')}</p>);
     });
   };
 
   return (
     <div className="flex flex-col md:flex-row h-full">
-      {/* Chat Sidebar */}
       <div className="w-full md:w-[280px] border-b md:border-b-0 md:border-r border-border bg-secondary/30 flex flex-col max-h-[40vh] md:max-h-none">
         <div className="p-4 border-b border-border">
           <div className="flex items-center gap-2 text-foreground mb-4">
@@ -175,51 +122,43 @@ const ChatAssistant = () => {
             <span className="text-base font-semibold">Chat Assistant</span>
           </div>
           <button onClick={handleNewChat} className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-primary hover:bg-primary/90 rounded-full text-primary-foreground transition-colors">
-            <Plus className="w-4 h-4" />
-            <span className="text-sm font-medium">New Chat</span>
+            <Plus className="w-4 h-4" /><span className="text-sm font-medium">New Chat</span>
           </button>
         </div>
         <div className="flex-1 overflow-y-auto p-2">
-          {conversations.map(conv => (
-            <div key={conv.id} onClick={() => setActiveConversationId(conv.id)} className={`group flex items-center justify-between px-4 py-3 rounded-xl cursor-pointer transition-all mb-1 ${activeConversationId === conv.id ? 'bg-card border-l-2 border-l-primary shadow-sm' : 'hover:bg-card/50'}`}>
-              <div className="flex-1 min-w-0">
-                <div className="text-sm text-foreground truncate font-medium">{conv.title}</div>
-                <div className="text-xs text-muted-foreground truncate">{conv.preview || 'No messages yet'}</div>
+          {conversationsLoading ? <ConversationListSkeleton /> : (
+            conversations.map(conv => (
+              <div key={conv.id} onClick={() => setActiveConversationId(conv.id)} className={`group flex items-center justify-between px-4 py-3 rounded-xl cursor-pointer transition-all mb-1 ${activeConversationId === conv.id ? 'bg-card border-l-2 border-l-primary shadow-sm' : 'hover:bg-card/50'}`}>
+                <div className="flex-1 min-w-0">
+                  <div className="text-sm text-foreground truncate font-medium">{conv.title}</div>
+                  <div className="text-xs text-muted-foreground truncate">{conv.preview || 'No messages yet'}</div>
+                </div>
+                <button onClick={e => handleDeleteConversation(conv.id, e)} className="opacity-0 group-hover:opacity-100 p-1.5 hover:bg-secondary rounded-lg transition-opacity">
+                  <Trash2 className="w-3.5 h-3.5 text-muted-foreground" />
+                </button>
               </div>
-              <button onClick={e => handleDeleteConversation(conv.id, e)} className="opacity-0 group-hover:opacity-100 p-1.5 hover:bg-secondary rounded-lg transition-opacity">
-                <Trash2 className="w-3.5 h-3.5 text-muted-foreground" />
-              </button>
-            </div>
-          ))}
+            ))
+          )}
         </div>
       </div>
 
-      {/* Chat Area */}
       <div className="flex-1 flex flex-col bg-background">
         {activeConversation ? (
           <>
             <div className="px-8 py-5 border-b border-border">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-gradient-to-br from-primary to-primary/70 rounded-xl flex items-center justify-center">
-                  <Sparkles className="w-5 h-5 text-primary-foreground" />
-                </div>
+                <div className="w-10 h-10 bg-gradient-to-br from-primary to-primary/70 rounded-xl flex items-center justify-center"><Sparkles className="w-5 h-5 text-primary-foreground" /></div>
                 <div>
                   <h1 className="text-lg font-semibold text-foreground">{activeConversation.title}</h1>
-                  <button className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors">
-                    {formatDate(activeConversation.updatedAt)}
-                    <ChevronDown className="w-3 h-3" />
-                  </button>
+                  <button className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors">{formatDate(activeConversation.updatedAt)}<ChevronDown className="w-3 h-3" /></button>
                 </div>
               </div>
             </div>
-
             <div className="flex-1 overflow-y-auto">
               <div className="max-w-[800px] mx-auto px-8 py-6">
                 {activeConversation.messages.length === 0 ? (
                   <div className="flex flex-col items-center justify-center h-[400px] text-center">
-                    <div className="w-16 h-16 bg-gradient-to-br from-primary to-primary/70 rounded-2xl flex items-center justify-center mb-5">
-                      <Sparkles className="w-8 h-8 text-primary-foreground" />
-                    </div>
+                    <div className="w-16 h-16 bg-gradient-to-br from-primary to-primary/70 rounded-2xl flex items-center justify-center mb-5"><Sparkles className="w-8 h-8 text-primary-foreground" /></div>
                     <h2 className="text-2xl font-bold text-foreground mb-2">How can I help you today?</h2>
                     <p className="text-base text-muted-foreground max-w-[400px]">Ask me about your repositories, Jira tickets, team assignments, or any project-related questions.</p>
                   </div>
@@ -229,17 +168,9 @@ const ChatAssistant = () => {
                       {activeConversation.messages.map(message => (
                         <motion.div key={message.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.15 }}>
                           {message.role === 'user' ? (
-                            <div className="flex justify-end">
-                              <div className="bg-primary text-primary-foreground rounded-2xl rounded-br-md px-5 py-3 max-w-[70%]">
-                                <p className="text-sm">{message.content}</p>
-                              </div>
-                            </div>
+                            <div className="flex justify-end"><div className="bg-primary text-primary-foreground rounded-2xl rounded-br-md px-5 py-3 max-w-[70%]"><p className="text-sm">{message.content}</p></div></div>
                           ) : (
-                            <div className="flex justify-start">
-                              <div className="bg-card border border-border rounded-2xl rounded-bl-md px-5 py-4 max-w-[85%] shadow-sm">
-                                <div className="text-sm leading-relaxed">{renderMessageContent(message.content)}</div>
-                              </div>
-                            </div>
+                            <div className="flex justify-start"><div className="bg-card border border-border rounded-2xl rounded-bl-md px-5 py-4 max-w-[85%] shadow-sm"><div className="text-sm leading-relaxed">{renderMessageContent(message.content)}</div></div></div>
                           )}
                         </motion.div>
                       ))}
@@ -259,7 +190,6 @@ const ChatAssistant = () => {
                 )}
               </div>
             </div>
-
             <div className="px-8 py-5 border-t border-border">
               <div className="max-w-[800px] mx-auto">
                 {attachedFiles.length > 0 && (
@@ -267,40 +197,27 @@ const ChatAssistant = () => {
                     {attachedFiles.map(file => (
                       <div key={file.id} className="flex items-center gap-2 bg-secondary rounded-xl px-3 py-2 border border-border">
                         {file.type.startsWith('image/') ? (<ImageIcon className="w-4 h-4 text-primary" />) : (<FileText className="w-4 h-4 text-muted-foreground" />)}
-                        <div className="flex flex-col">
-                          <span className="text-xs text-foreground truncate max-w-[150px]">{file.name}</span>
-                          <span className="text-[10px] text-muted-foreground">{formatFileSize(file.size)}</span>
-                        </div>
-                        <button onClick={() => removeAttachedFile(file.id)} className="p-1 hover:bg-card rounded-lg transition-colors">
-                          <X className="w-3.5 h-3.5 text-muted-foreground" />
-                        </button>
+                        <div className="flex flex-col"><span className="text-xs text-foreground truncate max-w-[150px]">{file.name}</span><span className="text-[10px] text-muted-foreground">{formatFileSize(file.size)}</span></div>
+                        <button onClick={() => removeAttachedFile(file.id)} className="p-1 hover:bg-card rounded-lg transition-colors"><X className="w-3.5 h-3.5 text-muted-foreground" /></button>
                       </div>
                     ))}
                   </div>
                 )}
                 <input ref={fileInputRef} type="file" multiple onChange={handleFileSelect} className="hidden" accept="image/*,.pdf,.doc,.docx,.txt,.md,.json,.csv" />
                 <div className="flex items-center gap-3 bg-card rounded-2xl px-4 py-3 border border-border shadow-sm">
-                  <button onClick={() => fileInputRef.current?.click()} className="p-2 hover:bg-secondary rounded-xl transition-colors">
-                    <Paperclip className="w-5 h-5 text-muted-foreground" />
-                  </button>
+                  <button onClick={() => fileInputRef.current?.click()} className="p-2 hover:bg-secondary rounded-xl transition-colors"><Paperclip className="w-5 h-5 text-muted-foreground" /></button>
                   <input ref={textareaRef as any} type="text" value={inputValue} onChange={e => setInputValue(e.target.value)} onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSendMessage(); } }} placeholder="Ask about repositories, tickets, or team assignments..." className="flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground outline-none" />
                   <button onClick={handleSendMessage} disabled={(!inputValue.trim() && attachedFiles.length === 0) || isTyping} className={`p-2.5 rounded-xl transition-all ${(inputValue.trim() || attachedFiles.length > 0) && !isTyping ? 'bg-primary hover:bg-primary/90' : 'bg-secondary cursor-not-allowed'}`}>
                     <Send className={`w-4 h-4 ${(inputValue.trim() || attachedFiles.length > 0) && !isTyping ? 'text-primary-foreground' : 'text-muted-foreground'}`} />
                   </button>
                 </div>
-                <div className="flex justify-end mt-2">
-                  <button className="p-1.5 hover:bg-secondary rounded-lg transition-colors">
-                    <Settings2 className="w-4 h-4 text-muted-foreground" />
-                  </button>
-                </div>
+                <div className="flex justify-end mt-2"><button className="p-1.5 hover:bg-secondary rounded-lg transition-colors"><Settings2 className="w-4 h-4 text-muted-foreground" /></button></div>
               </div>
             </div>
           </>
         ) : (
           <div className="flex-1 flex items-center justify-center">
-            <div className="text-center">
-              <p className="text-base text-muted-foreground">Select a conversation or start a new chat</p>
-            </div>
+            <div className="text-center"><p className="text-base text-muted-foreground">Select a conversation or start a new chat</p></div>
           </div>
         )}
       </div>
