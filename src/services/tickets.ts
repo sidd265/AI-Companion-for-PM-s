@@ -64,6 +64,22 @@ export function getUniqueProjects(): string[] {
 }
 
 /**
+ * Create a new ticket.
+ * TODO: Replace with edge function call → Jira REST API POST /rest/api/3/issue
+ */
+export async function createTicket(data: {
+  title: string;
+  description?: string;
+  priority: JiraTicket['priority'];
+  type: JiraTicket['type'];
+  project: string;
+  assigneeId?: string;
+}): Promise<{ success: boolean; key?: string }> {
+  console.log('createTicket called with:', data);
+  return { success: true, key: `PROJ-${Math.floor(1000 + Math.random() * 9000)}` };
+}
+
+/**
  * Build a Jira ticket URL.
  * When backend is added, use the real JIRA_BASE_URL from config/env.
  */

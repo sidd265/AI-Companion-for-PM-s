@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { X } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { toast } from 'sonner';
+import { addTeamMember } from '@/services/team';
 
 interface AddMemberModalProps {
   open: boolean;
@@ -25,11 +26,12 @@ const AddMemberModal = ({ open, onClose }: AddMemberModalProps) => {
     );
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!name.trim() || !email.trim()) {
       toast.error('Please fill in name and email');
       return;
     }
+    await addTeamMember({ name, email, role, github, slack, expertise: selectedExpertise });
     toast.success(`${name} added to the team!`);
     setName('');
     setEmail('');
@@ -58,111 +60,55 @@ const AddMemberModal = ({ open, onClose }: AddMemberModalProps) => {
         className="relative bg-card rounded-3xl shadow-2xl w-full max-w-[560px] max-h-[90vh] overflow-y-auto"
       >
         <div className="p-8">
-          <button
-            onClick={onClose}
-            className="absolute top-6 right-6 p-2 hover:bg-secondary rounded-xl transition-colors"
-          >
+          <button onClick={onClose} className="absolute top-6 right-6 p-2 hover:bg-secondary rounded-xl transition-colors">
             <X className="w-5 h-5 text-muted-foreground" />
           </button>
 
           <h2 className="text-2xl font-bold text-foreground mb-6">Add Team Member</h2>
 
-          {/* Name & Email */}
           <div className="grid grid-cols-2 gap-4 mb-5">
             <div>
               <label className="block text-sm font-medium text-muted-foreground mb-2">Full Name</label>
-              <input
-                type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="Jane Doe"
-                className="airbnb-input w-full"
-              />
+              <input type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="Jane Doe" className="airbnb-input w-full" />
             </div>
             <div>
               <label className="block text-sm font-medium text-muted-foreground mb-2">Email</label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="jane@company.com"
-                className="airbnb-input w-full"
-              />
+              <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="jane@company.com" className="airbnb-input w-full" />
             </div>
           </div>
 
-          {/* Role */}
           <div className="mb-5">
             <label className="block text-sm font-medium text-muted-foreground mb-2">Role</label>
             <div className="flex flex-wrap gap-2">
               {roles.map((r) => (
-                <button
-                  key={r}
-                  onClick={() => setRole(r)}
-                  className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-all ${
-                    role === r
-                      ? 'bg-primary text-primary-foreground border-primary'
-                      : 'bg-card text-foreground border-border hover:bg-secondary'
-                  }`}
-                >
-                  {r}
-                </button>
+                <button key={r} onClick={() => setRole(r)} className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-all ${role === r ? 'bg-primary text-primary-foreground border-primary' : 'bg-card text-foreground border-border hover:bg-secondary'}`}>{r}</button>
               ))}
             </div>
           </div>
 
-          {/* GitHub & Slack */}
           <div className="grid grid-cols-2 gap-4 mb-5">
             <div>
               <label className="block text-sm font-medium text-muted-foreground mb-2">GitHub</label>
-              <input
-                type="text"
-                value={github}
-                onChange={(e) => setGithub(e.target.value)}
-                placeholder="@username"
-                className="airbnb-input w-full"
-              />
+              <input type="text" value={github} onChange={(e) => setGithub(e.target.value)} placeholder="@username" className="airbnb-input w-full" />
             </div>
             <div>
               <label className="block text-sm font-medium text-muted-foreground mb-2">Slack</label>
-              <input
-                type="text"
-                value={slack}
-                onChange={(e) => setSlack(e.target.value)}
-                placeholder="@username"
-                className="airbnb-input w-full"
-              />
+              <input type="text" value={slack} onChange={(e) => setSlack(e.target.value)} placeholder="@username" className="airbnb-input w-full" />
             </div>
           </div>
 
-          {/* Expertise */}
           <div className="mb-8">
             <label className="block text-sm font-medium text-muted-foreground mb-2">Expertise</label>
             <div className="flex flex-wrap gap-2">
               {expertiseOptions.map((skill) => (
-                <button
-                  key={skill}
-                  onClick={() => toggleExpertise(skill)}
-                  className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-all ${
-                    selectedExpertise.includes(skill)
-                      ? 'bg-primary text-primary-foreground border-primary'
-                      : 'bg-card text-foreground border-border hover:bg-secondary'
-                  }`}
-                >
-                  {skill}
-                </button>
+                <button key={skill} onClick={() => toggleExpertise(skill)} className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-all ${selectedExpertise.includes(skill) ? 'bg-primary text-primary-foreground border-primary' : 'bg-card text-foreground border-border hover:bg-secondary'}`}>{skill}</button>
               ))}
             </div>
           </div>
 
-          {/* Actions */}
           <div className="flex gap-3">
-            <button onClick={onClose} className="flex-1 airbnb-btn-secondary rounded-full py-3">
-              Cancel
-            </button>
-            <button onClick={handleSubmit} className="flex-1 airbnb-btn-pill py-3">
-              Add Member
-            </button>
+            <button onClick={onClose} className="flex-1 airbnb-btn-secondary rounded-full py-3">Cancel</button>
+            <button onClick={handleSubmit} className="flex-1 airbnb-btn-pill py-3">Add Member</button>
           </div>
         </div>
       </motion.div>
