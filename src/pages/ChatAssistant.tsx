@@ -1,11 +1,13 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { Plus, Send, ChevronDown, Paperclip, Settings2, Trash2, Sparkles, X, FileText, Image as ImageIcon } from 'lucide-react';
 import { type Conversation, type Message } from '@/data/mockData';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useConversations } from '@/hooks/useChatData';
-import { createConversation, deleteConversation as deleteConversationService, generateAIResponse } from '@/services/chat';
+import { createConversation, deleteConversation as deleteConversationService, streamChat } from '@/services/chat';
 import { ConversationListSkeleton } from '@/components/skeletons/PageSkeletons';
 import ErrorState from '@/components/ErrorState';
+import ReactMarkdown from 'react-markdown';
+import { toast } from 'sonner';
 
 interface AttachedFile {
   id: string;
@@ -20,11 +22,12 @@ const ChatAssistant = () => {
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
   const [inputValue, setInputValue] = useState('');
-  const [isTyping, setIsTyping] = useState(false);
+  const [isStreaming, setIsStreaming] = useState(false);
   const [attachedFiles, setAttachedFiles] = useState<AttachedFile[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const streamContentRef = useRef('');
 
   useEffect(() => {
     if (initialConversations && conversations.length === 0) {
@@ -70,14 +73,42 @@ const ChatAssistant = () => {
     return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
   };
 
+  const upsertAssistantMessage = useCallback((convId: string, content: string) => {
+    setConversations(prev => prev.map(conv => {
+      if (conv.id !== convId) return conv;
+      const msgs = [...conv.messages];
+      const last = msgs[msgs.length - 1];
+      if (last?.role === 'assistant' && last.id.startsWith('streaming-')) {
+        msgs[msgs.length - 1] = { ...last, content };
+      } else {
+        msgs.push({ id: 'streaming-' + Date.now(), role: 'assistant', content, timestamp: new Date().toISOString() });
+      }
+      return { ...conv, messages: msgs };
+    }));
+  }, []);
+
+  const finalizeAssistantMessage = useCallback((convId: string) => {
+    setConversations(prev => prev.map(conv => {
+      if (conv.id !== convId) return conv;
+      const msgs = conv.messages.map(m =>
+        m.id.startsWith('streaming-') ? { ...m, id: Date.now().toString() } : m
+      );
+      const lastMsg = msgs[msgs.length - 1];
+      return { ...conv, messages: msgs, preview: lastMsg?.content.slice(0, 60) ?? conv.preview };
+    }));
+  }, []);
+
   const handleSendMessage = async () => {
-    if ((!inputValue.trim() && attachedFiles.length === 0) || !activeConversationId) return;
+    if ((!inputValue.trim() && attachedFiles.length === 0) || !activeConversationId || isStreaming) return;
+
     const fileNames = attachedFiles.map(f => f.name);
     const messageContent = inputValue.trim() + (fileNames.length > 0 ? `\n\n📎 Attached: ${fileNames.join(', ')}` : '');
     const userMessage: Message = { id: Date.now().toString(), role: 'user', content: messageContent, timestamp: new Date().toISOString(), attachments: attachedFiles.map(f => ({ name: f.name, type: f.type, size: f.size, url: f.url })) };
 
+    const convId = activeConversationId;
+
     setConversations(prev => prev.map(conv => {
-      if (conv.id === activeConversationId) {
+      if (conv.id === convId) {
         const isFirstMessage = conv.messages.length === 0;
         const title = inputValue.trim() || (fileNames.length > 0 ? `Files: ${fileNames[0]}` : 'New conversation');
         return { ...conv, title: isFirstMessage ? title.slice(0, 40) : conv.title, preview: (inputValue || fileNames.join(', ')).slice(0, 60), updatedAt: new Date().toISOString(), messages: [...conv.messages, userMessage] };
@@ -85,34 +116,35 @@ const ChatAssistant = () => {
       return conv;
     }));
 
-    const query = inputValue;
+    // Build message history for the API
+    const currentConv = conversations.find(c => c.id === convId);
+    const history = [
+      ...(currentConv?.messages ?? []).map(m => ({ role: m.role as 'user' | 'assistant', content: m.content })),
+      { role: 'user' as const, content: messageContent },
+    ];
+
     setInputValue('');
     setAttachedFiles([]);
-    setIsTyping(true);
+    setIsStreaming(true);
+    streamContentRef.current = '';
 
-    setTimeout(async () => {
-      const aiResponse = await generateAIResponse(activeConversationId, query);
-      const assistantMessage: Message = { id: (Date.now() + 1).toString(), role: 'assistant', content: aiResponse, timestamp: new Date().toISOString() };
-      setConversations(prev => prev.map(conv => { if (conv.id === activeConversationId) return { ...conv, messages: [...conv.messages, assistantMessage] }; return conv; }));
-      setIsTyping(false);
-    }, 1500);
+    await streamChat({
+      messages: history,
+      onDelta: (chunk) => {
+        streamContentRef.current += chunk;
+        upsertAssistantMessage(convId, streamContentRef.current);
+      },
+      onDone: () => {
+        finalizeAssistantMessage(convId);
+        setIsStreaming(false);
+      },
+      onError: (error) => {
+        toast.error(error.message);
+      },
+    });
   };
 
   const formatDate = (timestamp: string) => new Date(timestamp).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-
-  const renderMessageContent = (content: string) => {
-    const lines = content.split('\n');
-    return lines.map((line, i) => {
-      if (line.match(/^\d+\.\s+\*\*.*?\*\*/)) {
-        const match = line.match(/^(\d+\.)\s+\*\*(.*?)\*\*(.*)$/);
-        if (match) return (<p key={i} className="my-1.5"><span className="text-foreground">{match[1]} </span><span className="font-semibold text-foreground">{match[2]}</span><span className="text-muted-foreground">{match[3]}</span></p>);
-      }
-      if (line.startsWith('**') && line.endsWith('**')) return (<p key={i} className="font-semibold text-foreground my-2">{line.replace(/\*\*/g, '')}</p>);
-      if (line.startsWith('- ')) return (<p key={i} className="text-muted-foreground pl-4 my-1">• {line.slice(2).replace(/\*\*(.*?)\*\*/g, '$1')}</p>);
-      if (line.trim() === '') return <br key={i} />;
-      return (<p key={i} className="text-muted-foreground my-1">{line.replace(/\*\*(.*?)\*\*/g, '$1')}</p>);
-    });
-  };
 
   return (
     <div className="flex flex-col md:flex-row h-full">
@@ -169,14 +201,20 @@ const ChatAssistant = () => {
                       {activeConversation.messages.map(message => (
                         <motion.div key={message.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.15 }}>
                           {message.role === 'user' ? (
-                            <div className="flex justify-end"><div className="bg-primary text-primary-foreground rounded-2xl rounded-br-md px-5 py-3 max-w-[70%]"><p className="text-sm">{message.content}</p></div></div>
+                            <div className="flex justify-end"><div className="bg-primary text-primary-foreground rounded-2xl rounded-br-md px-5 py-3 max-w-[70%]"><p className="text-sm whitespace-pre-wrap">{message.content}</p></div></div>
                           ) : (
-                            <div className="flex justify-start"><div className="bg-card border border-border rounded-2xl rounded-bl-md px-5 py-4 max-w-[85%] shadow-sm"><div className="text-sm leading-relaxed">{renderMessageContent(message.content)}</div></div></div>
+                            <div className="flex justify-start">
+                              <div className="bg-card border border-border rounded-2xl rounded-bl-md px-5 py-4 max-w-[85%] shadow-sm">
+                                <div className="text-sm leading-relaxed prose prose-sm dark:prose-invert max-w-none">
+                                  <ReactMarkdown>{message.content}</ReactMarkdown>
+                                </div>
+                              </div>
+                            </div>
                           )}
                         </motion.div>
                       ))}
                     </AnimatePresence>
-                    {isTyping && (
+                    {isStreaming && activeConversation.messages[activeConversation.messages.length - 1]?.role !== 'assistant' && (
                       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex items-center gap-2 py-3">
                         <div className="flex gap-1">
                           <span className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
@@ -207,9 +245,9 @@ const ChatAssistant = () => {
                 <input ref={fileInputRef} type="file" multiple onChange={handleFileSelect} className="hidden" accept="image/*,.pdf,.doc,.docx,.txt,.md,.json,.csv" />
                 <div className="flex items-center gap-3 bg-card rounded-2xl px-4 py-3 border border-border shadow-sm">
                   <button onClick={() => fileInputRef.current?.click()} className="p-2 hover:bg-secondary rounded-xl transition-colors"><Paperclip className="w-5 h-5 text-muted-foreground" /></button>
-                  <input ref={textareaRef as any} type="text" value={inputValue} onChange={e => setInputValue(e.target.value)} onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSendMessage(); } }} placeholder="Ask about repositories, tickets, or team assignments..." className="flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground outline-none" />
-                  <button onClick={handleSendMessage} disabled={(!inputValue.trim() && attachedFiles.length === 0) || isTyping} className={`p-2.5 rounded-xl transition-all ${(inputValue.trim() || attachedFiles.length > 0) && !isTyping ? 'bg-primary hover:bg-primary/90' : 'bg-secondary cursor-not-allowed'}`}>
-                    <Send className={`w-4 h-4 ${(inputValue.trim() || attachedFiles.length > 0) && !isTyping ? 'text-primary-foreground' : 'text-muted-foreground'}`} />
+                  <input ref={textareaRef as any} type="text" value={inputValue} onChange={e => setInputValue(e.target.value)} onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSendMessage(); } }} placeholder="Ask about repositories, tickets, or team assignments..." className="flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground outline-none" disabled={isStreaming} />
+                  <button onClick={handleSendMessage} disabled={(!inputValue.trim() && attachedFiles.length === 0) || isStreaming} className={`p-2.5 rounded-xl transition-all ${(inputValue.trim() || attachedFiles.length > 0) && !isStreaming ? 'bg-primary hover:bg-primary/90' : 'bg-secondary cursor-not-allowed'}`}>
+                    <Send className={`w-4 h-4 ${(inputValue.trim() || attachedFiles.length > 0) && !isStreaming ? 'text-primary-foreground' : 'text-muted-foreground'}`} />
                   </button>
                 </div>
                 <div className="flex justify-end mt-2"><button className="p-1.5 hover:bg-secondary rounded-lg transition-colors"><Settings2 className="w-4 h-4 text-muted-foreground" /></button></div>

@@ -1,24 +1,21 @@
 /**
  * Chat / AI assistant data service layer.
  *
- * Currently returns mock data and client-side AI responses.
- * TODO: Replace with backend API calls (LLM integration) when Cloud is enabled.
+ * Streaming chat is configured to call a backend edge function at
+ * VITE_SUPABASE_URL/functions/v1/chat. Until the backend is deployed,
+ * a mock fallback streams a canned response client-side.
  */
 
 import { conversations as initialConversations, type Conversation, type Message } from '@/data/mockData';
 
-/**
- * Fetch all conversations.
- * TODO: Replace with edge function call → conversations API
- */
+// ---------------------------------------------------------------------------
+// Conversation CRUD (unchanged mock stubs)
+// ---------------------------------------------------------------------------
+
 export async function fetchConversations(): Promise<Conversation[]> {
   return initialConversations;
 }
 
-/**
- * Create a new conversation.
- * TODO: Replace with edge function call → conversations API POST
- */
 export async function createConversation(): Promise<Conversation> {
   return {
     id: Date.now().toString(),
@@ -30,19 +27,11 @@ export async function createConversation(): Promise<Conversation> {
   };
 }
 
-/**
- * Delete a conversation by ID.
- * TODO: Replace with edge function call → conversations API DELETE
- */
 export async function deleteConversation(id: string): Promise<{ success: boolean }> {
   console.log('deleteConversation called with:', id);
   return { success: true };
 }
 
-/**
- * Send a user message to a conversation.
- * TODO: Replace with edge function call → messages API POST
- */
 export async function sendMessage(
   conversationId: string,
   content: string,
@@ -57,68 +46,154 @@ export async function sendMessage(
   };
 }
 
+// ---------------------------------------------------------------------------
+// Streaming AI chat
+// ---------------------------------------------------------------------------
+
+type ChatMessage = { role: 'user' | 'assistant'; content: string };
+
+const CHAT_URL = import.meta.env.VITE_SUPABASE_URL
+  ? `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/chat`
+  : null;
+
 /**
- * Generate an AI response for a conversation.
- * TODO: Replace with edge function call → LLM API (OpenAI, etc.)
+ * Stream an AI response from the backend edge function.
+ * Falls back to a mock response when no backend URL is configured.
  */
-export async function generateAIResponse(
-  _conversationId: string,
-  query: string,
-): Promise<string> {
-  const lowerQuery = query.toLowerCase();
-
-  if (lowerQuery.includes('payment') || lowerQuery.includes('refund')) {
-    return `The payment refund flow works in three main steps:
-
-1. **Request Validation:** When a refund is requested, the system first validates the original transaction and checks if it's eligible for refund.
-
-2. **Stripe Integration:** The service communicates with Stripe's Refund API to process the actual refund.
-
-3. **Database Update:** After successful processing, the transaction status is updated in our database.
-
-Would you like me to show you who has worked on this feature recently?`;
+export async function streamChat({
+  messages,
+  onDelta,
+  onDone,
+  onError,
+}: {
+  messages: ChatMessage[];
+  onDelta: (text: string) => void;
+  onDone: () => void;
+  onError?: (error: Error) => void;
+}) {
+  // ---- Mock fallback when backend isn't configured yet ----
+  if (!CHAT_URL) {
+    await streamMockResponse(messages, onDelta, onDone);
+    return;
   }
 
-  if (lowerQuery.includes('assign') || lowerQuery.includes('who should')) {
-    return `Based on expertise and current workload, I recommend:
+  try {
+    const resp = await fetch(CHAT_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
+          ? { Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}` }
+          : {}),
+      },
+      body: JSON.stringify({ messages }),
+    });
 
-1. **Top Recommendation: Sarah Chen**
-   - 85% expertise match (Python, AWS, Backend)
-   - 60% current capacity (has bandwidth)
-   - 15 commits to similar services
+    if (resp.status === 429) {
+      onError?.(new Error('Rate limit exceeded. Please try again in a moment.'));
+      onDone();
+      return;
+    }
+    if (resp.status === 402) {
+      onError?.(new Error('AI usage limit reached. Please add credits to continue.'));
+      onDone();
+      return;
+    }
+    if (!resp.ok || !resp.body) {
+      throw new Error(`AI request failed (${resp.status})`);
+    }
 
-2. **Alternative: James Park**
-   - 75% expertise match
-   - 70% capacity (moderately busy)
+    const reader = resp.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = '';
+    let streamDone = false;
 
-Would you like me to create a Jira ticket and assign it automatically?`;
+    while (!streamDone) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+
+      let newlineIndex: number;
+      while ((newlineIndex = buffer.indexOf('\n')) !== -1) {
+        let line = buffer.slice(0, newlineIndex);
+        buffer = buffer.slice(newlineIndex + 1);
+
+        if (line.endsWith('\r')) line = line.slice(0, -1);
+        if (line.startsWith(':') || line.trim() === '') continue;
+        if (!line.startsWith('data: ')) continue;
+
+        const jsonStr = line.slice(6).trim();
+        if (jsonStr === '[DONE]') { streamDone = true; break; }
+
+        try {
+          const parsed = JSON.parse(jsonStr);
+          const content = parsed.choices?.[0]?.delta?.content as string | undefined;
+          if (content) onDelta(content);
+        } catch {
+          buffer = line + '\n' + buffer;
+          break;
+        }
+      }
+    }
+
+    // Flush remaining buffer
+    if (buffer.trim()) {
+      for (let raw of buffer.split('\n')) {
+        if (!raw) continue;
+        if (raw.endsWith('\r')) raw = raw.slice(0, -1);
+        if (raw.startsWith(':') || raw.trim() === '') continue;
+        if (!raw.startsWith('data: ')) continue;
+        const jsonStr = raw.slice(6).trim();
+        if (jsonStr === '[DONE]') continue;
+        try {
+          const parsed = JSON.parse(jsonStr);
+          const content = parsed.choices?.[0]?.delta?.content as string | undefined;
+          if (content) onDelta(content);
+        } catch { /* ignore */ }
+      }
+    }
+
+    onDone();
+  } catch (e) {
+    const error = e instanceof Error ? e : new Error('Unknown streaming error');
+    console.error('streamChat error:', error);
+    onError?.(error);
+    onDone();
   }
+}
 
-  if (lowerQuery.includes('sprint') || lowerQuery.includes('status') || lowerQuery.includes('progress')) {
-    return `**Sprint Progress Summary**
+// ---------------------------------------------------------------------------
+// Mock streaming fallback (simulates token-by-token delivery)
+// ---------------------------------------------------------------------------
 
-Overall: 56% complete (18/32 tickets)
+async function streamMockResponse(
+  messages: ChatMessage[],
+  onDelta: (text: string) => void,
+  onDone: () => void,
+) {
+  const lastUser = messages.filter(m => m.role === 'user').pop()?.content ?? '';
+  const response = getMockAnswer(lastUser);
+  const words = response.split(' ');
 
-- **Done:** 18 tickets
-- **In Progress:** 6 tickets
-- **To Do:** 6 tickets
-- **Blocked:** 2 tickets
-
-**Risks:**
-- 2 tickets are blocked and need attention
-- 7 tickets are unassigned
-
-Would you like me to show the blocked tickets?`;
+  for (let i = 0; i < words.length; i++) {
+    await new Promise(r => setTimeout(r, 30 + Math.random() * 40));
+    onDelta((i === 0 ? '' : ' ') + words[i]);
   }
+  onDone();
+}
 
-  return `I understand you're asking about "${query}".
+function getMockAnswer(query: string): string {
+  const q = query.toLowerCase();
+  if (q.includes('payment') || q.includes('refund'))
+    return 'The payment refund flow works in three main steps:\n\n1. **Request Validation** — the system validates the original transaction and checks refund eligibility.\n2. **Stripe Integration** — the service calls Stripe\'s Refund API.\n3. **Database Update** — the transaction status is updated after processing.\n\nWould you like me to show who worked on this feature recently?';
+  if (q.includes('assign') || q.includes('who should'))
+    return 'Based on expertise and current workload, I recommend:\n\n1. **Sarah Chen** — 85% expertise match, 60% capacity, 15 commits to similar services.\n2. **James Park** — 75% expertise match, 70% capacity.\n\nWould you like me to create a ticket and assign it?';
+  if (q.includes('sprint') || q.includes('status') || q.includes('progress'))
+    return '**Sprint Progress Summary**\n\nOverall: 56% complete (18/32 tickets)\n\n- **Done:** 18 tickets\n- **In Progress:** 6 tickets\n- **To Do:** 6 tickets\n- **Blocked:** 2 tickets\n\nWould you like me to show the blocked tickets?';
+  return `I can help you with:\n\n- **Repository analysis** — code structure and recent changes\n- **Task assignment** — optimal team member suggestions\n- **Sprint tracking** — progress and blockers\n- **Team insights** — capacity and expertise\n\nCould you provide more details about what you'd like to know?`;
+}
 
-I can help you with:
-
-1. **Repository analysis** - Explain code structure and recent changes
-2. **Task assignment** - Suggest optimal team member assignments
-3. **Sprint tracking** - Review progress and identify blockers
-4. **Team insights** - Analyze capacity and expertise
-
-Could you provide more specific details about what you'd like to know?`;
+/** @deprecated Use streamChat instead */
+export async function generateAIResponse(_conversationId: string, query: string): Promise<string> {
+  return getMockAnswer(query);
 }
