@@ -13,13 +13,16 @@ import type { JiraTicket } from '@/data/mockData';
 import { TicketStatusFilter } from '@/components/tickets/TicketStatusFilter';
 import { TicketCard } from '@/components/tickets/TicketCard';
 import { KanbanBoard } from '@/components/tickets/KanbanBoard';
+import { useSearchParams } from 'react-router-dom';
 
 type ViewMode = 'list' | 'board';
 
 const Tickets = () => {
+  const [searchParams] = useSearchParams();
   const [tickets, setTickets] = useState<JiraTicket[]>([]);
   const [allTickets, setAllTickets] = useState<JiraTicket[]>([]);
-  const [filters, setFilters] = useState<TicketFilters>({});
+  const initialStatus = searchParams.get('status') || undefined;
+  const [filters, setFilters] = useState<TicketFilters>({ status: initialStatus as TicketFilters['status'] });
   const [search, setSearch] = useState('');
   const [viewMode, setViewMode] = useState<ViewMode>('list');
   const projects = useMemo(() => getUniqueProjects(), []);

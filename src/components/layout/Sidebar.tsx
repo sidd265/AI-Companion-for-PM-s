@@ -14,10 +14,10 @@ const navItems = [
 ];
 
 const quickStats = [
-  { label: 'Reviews', value: dashboardStats.needsAttention.pendingReviews, icon: Eye, color: 'text-orange-500', bgColor: 'bg-orange-50', route: '/integrations' },
-  { label: 'Unassigned', value: dashboardStats.needsAttention.unassignedTickets, icon: Target, color: 'text-amber-500', bgColor: 'bg-amber-50', route: '/integrations' },
-  { label: 'Blocked', value: dashboardStats.needsAttention.blockedTasks, icon: AlertCircle, color: 'text-red-500', bgColor: 'bg-red-50', route: '/integrations' },
-  { label: 'Due Soon', value: 8, icon: Calendar, color: 'text-purple-500', bgColor: 'bg-purple-50', route: '/integrations' }
+  { label: 'Reviews', value: dashboardStats.needsAttention.pendingReviews, icon: Eye, color: 'text-orange-500', bgColor: 'bg-orange-50', route: '/tickets?status=In+Review' },
+  { label: 'Unassigned', value: dashboardStats.needsAttention.unassignedTickets, icon: Target, color: 'text-amber-500', bgColor: 'bg-amber-50', route: '/tickets?status=To+Do' },
+  { label: 'Blocked', value: dashboardStats.needsAttention.blockedTasks, icon: AlertCircle, color: 'text-red-500', bgColor: 'bg-red-50', route: '/tickets?status=Blocked' },
+  { label: 'Due Soon', value: 8, icon: Calendar, color: 'text-purple-500', bgColor: 'bg-purple-50', route: '/tickets' }
 ];
 
 export const Sidebar = () => {
