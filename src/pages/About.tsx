@@ -1,8 +1,10 @@
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Navbar } from '@/components/landing/Navbar';
 import { CTASection } from '@/components/landing/CTASection';
 import { Footer } from '@/components/landing/Footer';
-import { teamMembers } from '@/data/mockData';
+import { fetchTeamMembers } from '@/services/team';
+import type { TeamMember } from '@/data/mockData';
 import { Target, Zap, Shield, Heart } from 'lucide-react';
 
 const values = [
@@ -13,6 +15,12 @@ const values = [
 ];
 
 const About = () => {
+  const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
+
+  useEffect(() => {
+    fetchTeamMembers().then(setTeamMembers);
+  }, []);
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       <Navbar />

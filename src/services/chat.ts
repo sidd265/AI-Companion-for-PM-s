@@ -1,53 +1,151 @@
 /**
  * Chat / AI assistant data service layer.
  *
- * Streaming chat is configured to call a backend edge function at
- * VITE_SUPABASE_URL/functions/v1/chat. Until the backend is deployed,
- * a mock fallback streams a canned response client-side.
+ * Conversation CRUD uses Supabase. Streaming chat keeps mock AI fallback.
  */
 
-import { conversations as initialConversations, type Conversation, type Message } from '@/data/mockData';
+import { supabase } from '@/lib/supabase';
+import type { Conversation, Message } from '@/data/mockData';
 
 // ---------------------------------------------------------------------------
-// Conversation CRUD (unchanged mock stubs)
+// Row types
+// ---------------------------------------------------------------------------
+
+interface ConversationRow {
+  id: string;
+  title: string;
+  created_at: string;
+  updated_at: string;
+}
+
+interface MessageRow {
+  id: string;
+  conversation_id: string;
+  role: string;
+  content: string;
+  attachments: unknown;
+  created_at: string;
+}
+
+function rowToConversation(row: ConversationRow, messages: Message[]): Conversation {
+  return {
+    id: row.id,
+    title: row.title,
+    preview: messages[0]?.content.slice(0, 80) ?? '',
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+    messages,
+  };
+}
+
+function rowToMessage(row: MessageRow): Message {
+  return {
+    id: row.id,
+    role: row.role as 'user' | 'assistant',
+    content: row.content,
+    timestamp: row.created_at,
+    attachments: row.attachments as Message['attachments'],
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Conversation CRUD
 // ---------------------------------------------------------------------------
 
 export async function fetchConversations(): Promise<Conversation[]> {
-  return initialConversations;
+  const { data: convRows, error } = await supabase
+    .from('conversations')
+    .select('*')
+    .order('updated_at', { ascending: false });
+
+  if (error || !convRows) return [];
+
+  const convs = convRows as ConversationRow[];
+  const results: Conversation[] = [];
+  for (const conv of convs) {
+    const { data: msgRows } = await supabase
+      .from('messages')
+      .select('*')
+      .eq('conversation_id', conv.id)
+      .order('created_at', { ascending: true });
+
+    const messages = msgRows ? (msgRows as MessageRow[]).map(rowToMessage) : [];
+    results.push(rowToConversation(conv, messages));
+  }
+
+  return results;
 }
 
 export async function createConversation(): Promise<Conversation> {
-  return {
-    id: Date.now().toString(),
-    title: 'New conversation',
-    preview: '',
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-    messages: [],
-  };
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) {
+    return {
+      id: Date.now().toString(),
+      title: 'New conversation',
+      preview: '',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      messages: [],
+    };
+  }
+
+  const { data, error } = await supabase
+    .from('conversations')
+    .insert({ user_id: user.id, title: 'New conversation' })
+    .select()
+    .single();
+
+  if (error || !data) {
+    return {
+      id: Date.now().toString(),
+      title: 'New conversation',
+      preview: '',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      messages: [],
+    };
+  }
+
+  return rowToConversation(data as ConversationRow, []);
 }
 
 export async function deleteConversation(id: string): Promise<{ success: boolean }> {
-  void id;
-  return { success: true };
+  const { error } = await supabase.from('conversations').delete().eq('id', id);
+  return { success: !error };
 }
 
 export async function sendMessage(
-  _conversationId: string,
+  conversationId: string,
   content: string,
   attachments?: { name: string; type: string; size: number; url: string }[],
 ): Promise<Message> {
-  return {
-    id: Date.now().toString(),
-    role: 'user',
-    content,
-    timestamp: new Date().toISOString(),
-    attachments,
-  };
+  const { data, error } = await supabase
+    .from('messages')
+    .insert({
+      conversation_id: conversationId,
+      role: 'user',
+      content,
+      attachments: attachments ?? null,
+    })
+    .select()
+    .single();
+
+  if (error || !data) {
+    return {
+      id: Date.now().toString(),
+      role: 'user',
+      content,
+      timestamp: new Date().toISOString(),
+      attachments,
+    };
+  }
+
+  return rowToMessage(data as MessageRow);
 }
 
 // ---------------------------------------------------------------------------
-// Streaming AI chat
+// Streaming AI chat (kept as-is — mock fallback + edge function support)
 // ---------------------------------------------------------------------------
 
 type ChatMessage = { role: 'user' | 'assistant'; content: string };
@@ -56,10 +154,6 @@ const CHAT_URL = import.meta.env.VITE_SUPABASE_URL
   ? `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/chat`
   : null;
 
-/**
- * Stream an AI response from the backend edge function.
- * Falls back to a mock response when no backend URL is configured.
- */
 export async function streamChat({
   messages,
   onDelta,
@@ -71,7 +165,6 @@ export async function streamChat({
   onDone: () => void;
   onError?: (error: Error) => void;
 }) {
-  // ---- Mock fallback when backend isn't configured yet ----
   if (!CHAT_URL) {
     await streamMockResponse(messages, onDelta, onDone);
     return;
@@ -136,7 +229,6 @@ export async function streamChat({
       }
     }
 
-    // Flush remaining buffer
     if (buffer.trim()) {
       for (let raw of buffer.split('\n')) {
         if (!raw) continue;
@@ -163,7 +255,7 @@ export async function streamChat({
 }
 
 // ---------------------------------------------------------------------------
-// Mock streaming fallback (simulates token-by-token delivery)
+// Mock streaming fallback
 // ---------------------------------------------------------------------------
 
 async function streamMockResponse(

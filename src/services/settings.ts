@@ -6,7 +6,6 @@
  */
 
 import { supabase } from '@/lib/supabase';
-import { currentUser } from '@/data/mockData';
 
 export interface UserProfile {
   id: string;
@@ -53,8 +52,13 @@ function rowToProfile(row: ProfileRow): UserProfile {
  * Falls back to mock data if no authenticated user.
  */
 export async function fetchUserProfile(): Promise<UserProfile> {
+  const DEFAULT_PROFILE: UserProfile = {
+    id: '', name: 'Guest', initials: 'G', role: 'Member',
+    email: '', timezone: 'UTC', avatarColor: '#888888',
+  };
+
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return currentUser;
+  if (!user) return DEFAULT_PROFILE;
 
   const { data, error } = await supabase
     .from('profiles')
@@ -62,7 +66,7 @@ export async function fetchUserProfile(): Promise<UserProfile> {
     .eq('id', user.id)
     .single();
 
-  if (error || !data) return currentUser;
+  if (error || !data) return DEFAULT_PROFILE;
 
   return rowToProfile(data as ProfileRow);
 }

@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { Search, ExternalLink, List, LayoutGrid, X } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import {
@@ -24,7 +24,7 @@ const Tickets = () => {
   const [filters, setFilters] = useState<TicketFilters>({});
   const [search, setSearch] = useState('');
   const [viewMode, setViewMode] = useState<ViewMode>('list');
-  const projects = useMemo(() => getUniqueProjects(), []);
+  const [projects, setProjects] = useState<string[]>([]);
 
   // Sync status from URL query params
   useEffect(() => {
@@ -34,6 +34,7 @@ const Tickets = () => {
 
   useEffect(() => {
     fetchTickets().then(setAllTickets);
+    getUniqueProjects().then(setProjects);
   }, []);
 
   useEffect(() => {

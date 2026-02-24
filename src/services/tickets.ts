@@ -1,23 +1,10 @@
 /**
- * Ticket / Jira data service layer.
- *
- * Currently returns mock data.
- *
- * When backend (Lovable Cloud) is added, replace the function bodies
- * with real Jira REST API calls via an edge function. The edge function
- * should call:
- *   GET /rest/api/3/search   — to fetch issues (JQL-based)
- *   GET /rest/api/3/project  — to list projects
- *
- * Jira API docs: https://developer.atlassian.com/cloud/jira/platform/rest/v3/
- *
- * Required secrets (to be stored in Cloud):
- *   JIRA_BASE_URL  — e.g. https://yourcompany.atlassian.net
- *   JIRA_EMAIL     — Jira account email
- *   JIRA_API_TOKEN — API token from https://id.atlassian.com/manage-profile/security/api-tokens
+ * Ticket data service layer.
+ * Queries Supabase tickets table.
  */
 
-import { jiraTickets, type JiraTicket } from '@/data/mockData';
+import { supabase } from '@/lib/supabase';
+import type { JiraTicket } from '@/data/mockData';
 
 export interface TicketFilters {
   status?: 'all' | JiraTicket['status'];
@@ -26,30 +13,60 @@ export interface TicketFilters {
   search?: string;
 }
 
+interface TicketWithProject {
+  id: string;
+  title: string;
+  description: string | null;
+  status: string;
+  priority: string;
+  type: string;
+  project_id: string;
+  assignee_id: string | null;
+  jira_key: string | null;
+  story_points: number | null;
+  created_at: string;
+  updated_at: string;
+  projects: { name: string; key: string } | null;
+}
+
+function rowToTicket(row: TicketWithProject): JiraTicket {
+  return {
+    id: row.id,
+    key: row.jira_key ?? row.id.slice(0, 8).toUpperCase(),
+    title: row.title,
+    status: row.status as JiraTicket['status'],
+    priority: row.priority as JiraTicket['priority'],
+    project: row.projects?.name ?? 'Unknown',
+    type: row.type as JiraTicket['type'],
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  };
+}
+
 /**
  * Fetch tickets with optional filters.
- * TODO: Replace with edge function call → Jira REST API /rest/api/3/search
  */
 export async function fetchTickets(filters?: TicketFilters): Promise<JiraTicket[]> {
-  let tickets = [...jiraTickets];
+  let query = supabase.from('tickets').select('*, projects(name, key)');
 
   if (filters?.status && filters.status !== 'all') {
-    tickets = tickets.filter((t) => t.status === filters.status);
+    query = query.eq('status', filters.status);
   }
   if (filters?.priority && filters.priority !== 'all') {
-    tickets = tickets.filter((t) => t.priority === filters.priority);
-  }
-  if (filters?.project) {
-    tickets = tickets.filter((t) => t.project === filters.project);
+    query = query.eq('priority', filters.priority);
   }
   if (filters?.search) {
-    const q = filters.search.toLowerCase();
-    tickets = tickets.filter(
-      (t) =>
-        t.title.toLowerCase().includes(q) ||
-        t.key.toLowerCase().includes(q) ||
-        t.project.toLowerCase().includes(q),
-    );
+    const q = `%${filters.search}%`;
+    query = query.or(`title.ilike.${q},jira_key.ilike.${q}`);
+  }
+
+  const { data, error } = await query.order('updated_at', { ascending: false });
+  if (error || !data) return [];
+
+  let tickets = (data as TicketWithProject[]).map(rowToTicket);
+
+  if (filters?.project) {
+    tickets = tickets.filter(t => t.project === filters.project);
   }
 
   return tickets;
@@ -57,17 +74,18 @@ export async function fetchTickets(filters?: TicketFilters): Promise<JiraTicket[
 
 /**
  * Get unique project names.
- * TODO: Replace with edge function call → Jira REST API /rest/api/3/project
  */
-export function getUniqueProjects(): string[] {
-  return [...new Set(jiraTickets.map((t) => t.project))];
+export async function getUniqueProjects(): Promise<string[]> {
+  const { data, error } = await supabase.from('projects').select('name');
+  if (error || !data) return [];
+
+  return (data as { name: string }[]).map(r => r.name);
 }
 
 /**
  * Create a new ticket.
- * TODO: Replace with edge function call → Jira REST API POST /rest/api/3/issue
  */
-export async function createTicket(data: {
+export async function createTicket(ticketData: {
   title: string;
   description?: string;
   priority: JiraTicket['priority'];
@@ -75,13 +93,31 @@ export async function createTicket(data: {
   project: string;
   assigneeId?: string;
 }): Promise<{ success: boolean; key?: string }> {
-  void data;
-  return { success: true, key: `PROJ-${Math.floor(1000 + Math.random() * 9000)}` };
+  const { data: project } = await supabase
+    .from('projects')
+    .select('id, key')
+    .eq('name', ticketData.project)
+    .single();
+
+  if (!project) return { success: false };
+
+  const proj = project as { id: string; key: string };
+  const { data, error } = await supabase.from('tickets').insert({
+    title: ticketData.title,
+    description: ticketData.description ?? null,
+    priority: ticketData.priority,
+    type: ticketData.type,
+    project_id: proj.id,
+    assignee_id: ticketData.assigneeId ?? null,
+    jira_key: `${proj.key}-${Math.floor(1000 + Math.random() * 9000)}`,
+  }).select('jira_key').single();
+
+  if (error) return { success: false };
+  return { success: true, key: (data as { jira_key: string } | null)?.jira_key ?? undefined };
 }
 
 /**
  * Build a Jira ticket URL.
- * When backend is added, use the real JIRA_BASE_URL from config/env.
  */
 const JIRA_BASE_URL = import.meta.env.VITE_JIRA_BASE_URL || 'https://company.atlassian.net';
 

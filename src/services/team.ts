@@ -1,11 +1,10 @@
 /**
  * Team data service layer.
- *
- * Currently returns mock data.
- * TODO: Replace with backend API calls when Cloud is enabled.
+ * Queries Supabase team_members table.
  */
 
-import { teamMembers, type TeamMember } from '@/data/mockData';
+import { supabase } from '@/lib/supabase';
+import type { TeamMember } from '@/data/mockData';
 
 export interface TeamFilters {
   search?: string;
@@ -19,55 +18,95 @@ export interface TeamStats {
   expertiseCoverage: number;
 }
 
+interface TeamMemberRow {
+  id: string;
+  name: string;
+  role: string;
+  email: string;
+  github: string | null;
+  slack: string | null;
+  expertise: string[];
+  avatar_color: string;
+  velocity: number;
+  capacity: number;
+  active_tasks: number;
+}
+
+function toInitials(name: string): string {
+  return name.split(' ').map(p => p[0]).join('').toUpperCase().slice(0, 2);
+}
+
+function rowToTeamMember(row: TeamMemberRow): TeamMember {
+  return {
+    id: row.id,
+    name: row.name,
+    initials: toInitials(row.name),
+    role: row.role,
+    email: row.email,
+    github: row.github ?? '',
+    slack: row.slack ?? '',
+    expertise: row.expertise,
+    capacity: row.capacity / 100,
+    currentTasks: [],
+    recentActivity: { commits: 0, reviews: 0, prsOpened: 0 },
+    avatarColor: row.avatar_color,
+  };
+}
+
 /**
  * Fetch team members with optional filters.
- * TODO: Replace with edge function call → team API
  */
 export async function fetchTeamMembers(filters?: TeamFilters): Promise<TeamMember[]> {
-  let members = [...teamMembers];
+  let query = supabase.from('team_members').select('*');
 
   if (filters?.search) {
-    const q = filters.search.toLowerCase();
-    members = members.filter(
-      m =>
-        m.name.toLowerCase().includes(q) ||
-        m.role.toLowerCase().includes(q),
-    );
+    const q = `%${filters.search}%`;
+    query = query.or(`name.ilike.${q},role.ilike.${q}`);
   }
 
   if (filters?.expertise && filters.expertise.length > 0) {
-    members = members.filter(m =>
-      filters.expertise!.some(skill => m.expertise.includes(skill)),
-    );
+    query = query.overlaps('expertise', filters.expertise);
   }
 
-  return members;
+  const { data, error } = await query;
+  if (error || !data) return [];
+
+  return (data as TeamMemberRow[]).map(rowToTeamMember);
 }
 
 /**
  * Fetch aggregate team stats.
- * TODO: Replace with analytics API call
  */
 export async function fetchTeamStats(): Promise<TeamStats> {
+  const { data, error } = await supabase.from('team_members').select('velocity, active_tasks, expertise');
+  if (error || !data || data.length === 0) {
+    return { totalMembers: 0, averageVelocity: 0, activeTasks: 0, expertiseCoverage: 0 };
+  }
+
+  const rows = data as { velocity: number; active_tasks: number; expertise: string[] }[];
+  const allExpertise = new Set(rows.flatMap(r => r.expertise));
+
   return {
-    totalMembers: teamMembers.length,
-    averageVelocity: 42,
-    activeTasks: 24,
-    expertiseCoverage: 94,
+    totalMembers: rows.length,
+    averageVelocity: Math.round(rows.reduce((s, r) => s + r.velocity, 0) / rows.length),
+    activeTasks: rows.reduce((s, r) => s + r.active_tasks, 0),
+    expertiseCoverage: allExpertise.size,
   };
 }
 
 /**
  * Get all unique expertise tags from team members.
- * TODO: Replace with API call
  */
 export async function fetchAllExpertise(): Promise<string[]> {
-  return Array.from(new Set(teamMembers.flatMap(m => m.expertise))).sort();
+  const { data, error } = await supabase.from('team_members').select('expertise');
+  if (error || !data) return [];
+
+  const rows = data as { expertise: string[] }[];
+  return Array.from(new Set(rows.flatMap(r => r.expertise))).sort();
 }
 
 /**
  * Add a new team member.
- * TODO: Replace with edge function call → team API POST
  */
 export async function addTeamMember(member: {
   name: string;
@@ -77,6 +116,15 @@ export async function addTeamMember(member: {
   slack?: string;
   expertise?: string[];
 }): Promise<{ success: boolean }> {
-  void member;
-  return { success: true };
+  const { error } = await supabase.from('team_members').insert({
+    name: member.name,
+    email: member.email,
+    role: member.role,
+    github: member.github ?? null,
+    slack: member.slack ?? null,
+    expertise: member.expertise ?? [],
+    avatar_color: `#${Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0')}`,
+  });
+
+  return { success: !error };
 }
