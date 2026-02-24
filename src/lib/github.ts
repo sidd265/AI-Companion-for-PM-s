@@ -153,7 +153,18 @@ export async function fetchGitHubPRs(
     token,
   );
 
-  return prs.map(pr => ({
+  // Fetch individual PR details in parallel to get additions/deletions
+  // (list endpoint doesn't include them)
+  const detailed = await Promise.all(
+    prs.map(pr =>
+      githubFetch<GHPullRequest>(
+        `/repos/${owner}/${repo}/pulls/${pr.number}`,
+        token,
+      ).catch(() => pr),
+    ),
+  );
+
+  return detailed.map(pr => ({
     id: String(pr.id),
     number: pr.number,
     title: pr.title,
