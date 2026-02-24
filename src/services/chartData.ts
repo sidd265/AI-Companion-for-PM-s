@@ -1,6 +1,8 @@
 // Chart data service layer
-// Currently returns mock data. When backend is ready, replace mock implementations
-// with actual API calls (e.g., supabase queries or edge function invocations).
+// PR activity uses real GitHub API. Ticket trends/sprint burndown stay mock until Jira (Step 5).
+
+import { getGitHubToken } from '@/services/integrations';
+import { fetchGitHubRepos, fetchAllPRActivity } from '@/lib/github';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -31,7 +33,7 @@ export interface PRActivityPoint {
   merged: number;
 }
 
-// ─── Mock Data ────────────────────────────────────────────────────────────────
+// ─── Mock Data (Jira — migrated in Step 5) ──────────────────────────────────
 
 const mockTicketTrends: TicketTrendPoint[] = [
   { date: 'Jan 20', created: 5, completed: 3, inProgress: 8 },
@@ -72,69 +74,9 @@ const mockSprintMeta: SprintMeta = {
   completedPoints: 18,
 };
 
-const mockPRActivityByRepo: Record<string, PRActivityPoint[]> = {
-  'all': [
-    { day: 'Mon', opened: 4, merged: 2 },
-    { day: 'Tue', opened: 6, merged: 5 },
-    { day: 'Wed', opened: 3, merged: 4 },
-    { day: 'Thu', opened: 7, merged: 3 },
-    { day: 'Fri', opened: 5, merged: 6 },
-    { day: 'Sat', opened: 1, merged: 2 },
-    { day: 'Sun', opened: 2, merged: 1 },
-  ],
-  'payment-service': [
-    { day: 'Mon', opened: 2, merged: 1 },
-    { day: 'Tue', opened: 1, merged: 2 },
-    { day: 'Wed', opened: 1, merged: 1 },
-    { day: 'Thu', opened: 3, merged: 1 },
-    { day: 'Fri', opened: 2, merged: 2 },
-    { day: 'Sat', opened: 0, merged: 1 },
-    { day: 'Sun', opened: 1, merged: 0 },
-  ],
-  'user-auth': [
-    { day: 'Mon', opened: 1, merged: 0 },
-    { day: 'Tue', opened: 2, merged: 1 },
-    { day: 'Wed', opened: 1, merged: 2 },
-    { day: 'Thu', opened: 1, merged: 1 },
-    { day: 'Fri', opened: 1, merged: 2 },
-    { day: 'Sat', opened: 0, merged: 0 },
-    { day: 'Sun', opened: 0, merged: 1 },
-  ],
-  'web-frontend': [
-    { day: 'Mon', opened: 1, merged: 1 },
-    { day: 'Tue', opened: 2, merged: 1 },
-    { day: 'Wed', opened: 1, merged: 1 },
-    { day: 'Thu', opened: 2, merged: 1 },
-    { day: 'Fri', opened: 1, merged: 1 },
-    { day: 'Sat', opened: 1, merged: 1 },
-    { day: 'Sun', opened: 1, merged: 0 },
-  ],
-  'api-gateway': [
-    { day: 'Mon', opened: 0, merged: 0 },
-    { day: 'Tue', opened: 1, merged: 1 },
-    { day: 'Wed', opened: 0, merged: 0 },
-    { day: 'Thu', opened: 1, merged: 0 },
-    { day: 'Fri', opened: 1, merged: 1 },
-    { day: 'Sat', opened: 0, merged: 0 },
-    { day: 'Sun', opened: 0, merged: 0 },
-  ],
-  'notification-service': [
-    { day: 'Mon', opened: 0, merged: 0 },
-    { day: 'Tue', opened: 0, merged: 0 },
-    { day: 'Wed', opened: 0, merged: 0 },
-    { day: 'Thu', opened: 0, merged: 0 },
-    { day: 'Fri', opened: 0, merged: 0 },
-    { day: 'Sat', opened: 0, merged: 0 },
-    { day: 'Sun', opened: 0, merged: 0 },
-  ],
-};
-
 // ─── Service Functions ────────────────────────────────────────────────────────
-// Replace these with real API calls when backend is connected.
 
 export async function fetchTicketTrends(): Promise<TicketTrendPoint[]> {
-  // TODO: Replace with real API call, e.g.:
-  // const { data } = await supabase.from('ticket_trends').select('*');
   return mockTicketTrends;
 }
 
@@ -142,11 +84,17 @@ export async function fetchSprintBurndown(): Promise<{
   data: SprintBurndownPoint[];
   meta: SprintMeta;
 }> {
-  // TODO: Replace with real API call
   return { data: mockSprintBurndown, meta: mockSprintMeta };
 }
 
 export async function fetchPRActivity(repo: string = 'all'): Promise<PRActivityPoint[]> {
-  // TODO: Replace with real API call
-  return mockPRActivityByRepo[repo] || mockPRActivityByRepo['all'];
+  const token = await getGitHubToken();
+  if (!token) return [];
+
+  try {
+    const repos = await fetchGitHubRepos(token);
+    return fetchAllPRActivity(token, repos, repo);
+  } catch {
+    return [];
+  }
 }

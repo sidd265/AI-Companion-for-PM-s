@@ -1,21 +1,25 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Github, Trello, MessageCircle, Check, X, Settings, RefreshCw, ExternalLink } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useIntegrationStatuses, useIntegrationRepositories } from '@/hooks/useIntegrations';
 import { IntegrationCardSkeleton } from '@/components/skeletons/PageSkeletons';
 import ErrorState from '@/components/ErrorState';
+import { supabase } from '@/lib/supabase';
+import { storeGitHubConnection, disconnectIntegration } from '@/services/integrations';
+import { useQueryClient } from '@tanstack/react-query';
 
 interface IntegrationDrawerProps {
   type: 'github' | 'jira' | 'slack';
   onClose: () => void;
+  onDisconnect: (type: 'github' | 'jira' | 'slack') => void;
 }
 
-const IntegrationDrawer = ({ type, onClose }: IntegrationDrawerProps) => {
+const IntegrationDrawer = ({ type, onClose, onDisconnect }: IntegrationDrawerProps) => {
   const { data: integrations } = useIntegrationStatuses();
   const { data: repositories } = useIntegrationRepositories();
   const integration = integrations?.[type];
   if (!integration) return null;
-  
+
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50">
       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
@@ -37,12 +41,12 @@ const IntegrationDrawer = ({ type, onClose }: IntegrationDrawerProps) => {
                       <div className="text-xs text-muted-foreground">Connected</div>
                     </div>
                   </div>
-                  <button className="text-sm text-destructive hover:underline font-medium">Disconnect</button>
+                  <button onClick={() => onDisconnect('github')} className="text-sm text-destructive hover:underline font-medium">Disconnect</button>
                 </div>
               </div>
               <div className="mb-6">
                 <h3 className="text-sm font-medium text-foreground mb-3">Repositories ({repositories?.length ?? 0})</h3>
-                <div className="space-y-2">
+                <div className="space-y-2 max-h-[400px] overflow-y-auto">
                   {(repositories ?? []).map(repo => (
                     <label key={repo.id} className="flex items-center gap-3 p-4 border border-border rounded-xl cursor-pointer hover:bg-secondary transition-colors">
                       <input type="checkbox" defaultChecked className="w-4 h-4 rounded border-border text-primary focus:ring-primary" />
@@ -50,9 +54,12 @@ const IntegrationDrawer = ({ type, onClose }: IntegrationDrawerProps) => {
                         <div className="text-sm text-foreground">{repo.name}</div>
                         <div className="text-xs text-muted-foreground">{repo.description}</div>
                       </div>
-                      <span className="airbnb-tag">{repo.language}</span>
+                      {repo.language && <span className="airbnb-tag">{repo.language}</span>}
                     </label>
                   ))}
+                  {repositories?.length === 0 && (
+                    <p className="text-sm text-muted-foreground p-4">No repositories found.</p>
+                  )}
                 </div>
               </div>
               <div className="mb-6">
@@ -78,7 +85,7 @@ const IntegrationDrawer = ({ type, onClose }: IntegrationDrawerProps) => {
                     <div className="text-xs text-muted-foreground">{integrations.jira.projects} projects synced</div>
                   </div>
                 </div>
-                <button className="text-sm text-destructive hover:underline font-medium">Disconnect</button>
+                <button onClick={() => onDisconnect('jira')} className="text-sm text-destructive hover:underline font-medium">Disconnect</button>
               </div>
             </div>
           )}
@@ -99,6 +106,59 @@ const IntegrationDrawer = ({ type, onClose }: IntegrationDrawerProps) => {
 const Integrations = () => {
   const [activeDrawer, setActiveDrawer] = useState<'github' | 'jira' | 'slack' | null>(null);
   const { data: integrations, isLoading, isError, refetch } = useIntegrationStatuses();
+  const queryClient = useQueryClient();
+
+  // Detect GitHub OAuth redirect and store the token
+  const handleGitHubOAuthRedirect = useCallback(async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session?.provider_token) return;
+
+    // Check if we already stored this token
+    const currentStatus = integrations?.github;
+    if (currentStatus?.connected) return;
+
+    // Fetch GitHub username
+    try {
+      const res = await fetch('https://api.github.com/user', {
+        headers: { Authorization: `Bearer ${session.provider_token}`, Accept: 'application/vnd.github.v3+json' },
+      });
+      if (!res.ok) return;
+      const ghUser = await res.json() as { login: string; public_repos: number };
+
+      await storeGitHubConnection(session.provider_token, ghUser.login, ghUser.public_repos);
+      queryClient.invalidateQueries({ queryKey: ['integrations'] });
+    } catch {
+      // Silently fail — user can retry
+    }
+  }, [integrations?.github, queryClient]);
+
+  useEffect(() => {
+    handleGitHubOAuthRedirect();
+  }, [handleGitHubOAuthRedirect]);
+
+  const handleConnectGitHub = async () => {
+    await supabase.auth.signInWithOAuth({
+      provider: 'github',
+      options: {
+        scopes: 'repo read:org read:user',
+        redirectTo: `${window.location.origin}/integrations`,
+      },
+    });
+  };
+
+  const handleDisconnect = async (type: 'github' | 'jira' | 'slack') => {
+    await disconnectIntegration(type);
+    queryClient.invalidateQueries({ queryKey: ['integrations'] });
+    setActiveDrawer(null);
+  };
+
+  const handleConnect = (id: 'github' | 'jira' | 'slack') => {
+    if (id === 'github') {
+      handleConnectGitHub();
+    } else {
+      setActiveDrawer(id);
+    }
+  };
 
   const integrationCards = [
     { id: 'github' as const, name: 'GitHub', description: 'Connect repositories to analyze code and pull requests', icon: Github, iconBg: 'bg-gray-900 dark:bg-gray-100', iconColor: 'text-white dark:text-gray-900', connected: integrations?.github.connected ?? false, info: integrations?.github.connected ? `Connected as @${integrations.github.username} · Syncing ${integrations.github.repos} repositories` : null },
@@ -137,7 +197,7 @@ const Integrations = () => {
                   <button onClick={() => setActiveDrawer(integration.id)} className="airbnb-btn-secondary flex items-center gap-2 py-2 px-4 rounded-full text-sm"><Settings className="w-4 h-4" />Manage</button>
                 </>
               ) : (
-                <button onClick={() => setActiveDrawer(integration.id)} className="airbnb-btn-pill flex items-center gap-2 py-2.5 px-5 text-sm"><ExternalLink className="w-4 h-4" />Connect</button>
+                <button onClick={() => handleConnect(integration.id)} className="airbnb-btn-pill flex items-center gap-2 py-2.5 px-5 text-sm"><ExternalLink className="w-4 h-4" />Connect</button>
               )}
             </div>
           ))}
@@ -159,7 +219,7 @@ const Integrations = () => {
       </div>
 
       <AnimatePresence>
-        {activeDrawer && (<IntegrationDrawer type={activeDrawer} onClose={() => setActiveDrawer(null)} />)}
+        {activeDrawer && (<IntegrationDrawer type={activeDrawer} onClose={() => setActiveDrawer(null)} onDisconnect={handleDisconnect} />)}
       </AnimatePresence>
     </div>
   );

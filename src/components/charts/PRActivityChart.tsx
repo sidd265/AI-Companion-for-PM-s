@@ -1,13 +1,13 @@
-import { useState } from 'react';
-import { 
-  BarChart, 
-  Bar, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
+import { useState, useEffect } from 'react';
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
   ResponsiveContainer,
-  Legend 
+  Legend
 } from 'recharts';
 import {
   Select,
@@ -16,7 +16,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { repositories } from '@/data/mockData';
+import { fetchRepositories } from '@/services/github';
+import type { Repository } from '@/data/mockData';
 import { usePRActivity } from '@/hooks/useChartData';
 
 interface CustomTooltipProps {
@@ -52,7 +53,12 @@ interface PRActivityChartProps {
 
 const PRActivityChart = ({ compact = false }: PRActivityChartProps) => {
   const [selectedRepo, setSelectedRepo] = useState('all');
+  const [repositories, setRepositories] = useState<Repository[]>([]);
   const { data: chartData = [], isLoading } = usePRActivity(selectedRepo);
+
+  useEffect(() => {
+    fetchRepositories().then(setRepositories);
+  }, []);
 
   // Calculate weekly totals
   const totalOpened = chartData.reduce((sum, day) => sum + day.opened, 0);

@@ -1,10 +1,11 @@
 /**
  * GitHub data service layer.
- * Currently returns mock data. Swap the implementations here
- * when a real backend / GitHub API integration is added.
+ * Calls real GitHub API via stored OAuth token.
  */
 
-import { pullRequests, repositories, type GitHubPR, type Repository } from '@/data/mockData';
+import { getGitHubToken } from '@/services/integrations';
+import { fetchGitHubRepos, fetchAllPRs } from '@/lib/github';
+import type { GitHubPR, Repository } from '@/data/mockData';
 
 export interface PRFilters {
   status?: 'all' | 'Open' | 'Merged' | 'Closed';
@@ -13,42 +14,26 @@ export interface PRFilters {
   search?: string;
 }
 
-export async function fetchPullRequests(filters?: PRFilters): Promise<GitHubPR[]> {
-  // TODO: Replace with real API call
-  let prs = [...pullRequests];
-
-  if (filters?.status && filters.status !== 'all') {
-    prs = prs.filter((pr) => pr.status === filters.status);
-  }
-  if (filters?.repo) {
-    prs = prs.filter((pr) => pr.repo === filters.repo);
-  }
-  if (filters?.author) {
-    prs = prs.filter((pr) => pr.author.id === filters.author);
-  }
-  if (filters?.search) {
-    const q = filters.search.toLowerCase();
-    prs = prs.filter(
-      (pr) =>
-        pr.title.toLowerCase().includes(q) ||
-        `#${pr.number}`.includes(q) ||
-        pr.repo.toLowerCase().includes(q),
-    );
-  }
-
-  return prs;
-}
+let _repoCache: Repository[] | null = null;
 
 export async function fetchRepositories(): Promise<Repository[]> {
-  // TODO: Replace with real API call
-  return repositories;
+  const token = await getGitHubToken();
+  if (!token) return [];
+  const repos = await fetchGitHubRepos(token);
+  _repoCache = repos;
+  return repos;
 }
 
-/** Build a GitHub-style URL for a PR (mock). Replace with real URLs later. */
+export async function fetchPullRequests(filters?: PRFilters): Promise<GitHubPR[]> {
+  const token = await getGitHubToken();
+  if (!token) return [];
+
+  const repos = _repoCache ?? await fetchRepositories();
+  if (repos.length === 0) return [];
+
+  return fetchAllPRs(token, repos, filters);
+}
+
 export function getPRUrl(pr: GitHubPR): string {
-  const repo = repositories.find((r) => r.name === pr.repo);
-  if (repo) {
-    return `${repo.url}/pull/${pr.number}`;
-  }
-  return `https://github.com/company/${pr.repo}/pull/${pr.number}`;
+  return `https://github.com/${pr.repo}/pull/${pr.number}`;
 }

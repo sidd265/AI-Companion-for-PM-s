@@ -4,7 +4,8 @@
  */
 
 import { supabase } from '@/lib/supabase';
-import { repositories as mockRepositories, type Repository } from '@/data/mockData';
+import { fetchGitHubRepos } from '@/lib/github';
+import type { Repository } from '@/data/mockData';
 
 export interface IntegrationStatus {
   github: {
@@ -32,6 +33,7 @@ interface IntegrationRow {
   type: string;
   status: string;
   metadata: Record<string, unknown> | null;
+  access_token: string | null;
   updated_at: string;
 }
 
@@ -79,7 +81,7 @@ export async function fetchIntegrationStatuses(): Promise<IntegrationStatus> {
 
   const { data, error } = await supabase
     .from('integrations')
-    .select('id, type, status, metadata, updated_at')
+    .select('id, type, status, metadata, access_token, updated_at')
     .eq('user_id', user.id);
 
   if (error || !data) return EMPTY_STATUS;
@@ -88,11 +90,56 @@ export async function fetchIntegrationStatuses(): Promise<IntegrationStatus> {
 }
 
 /**
- * Fetch repositories for integration management.
- * TODO: Replace with real GitHub API in Step 4.
+ * Get the stored GitHub OAuth token for the current user.
+ * Returns null if GitHub is not connected.
+ */
+export async function getGitHubToken(): Promise<string | null> {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return null;
+
+  const { data, error } = await supabase
+    .from('integrations')
+    .select('access_token')
+    .eq('user_id', user.id)
+    .eq('type', 'github')
+    .eq('status', 'connected')
+    .single();
+
+  if (error || !data) return null;
+  return (data as { access_token: string | null }).access_token;
+}
+
+/**
+ * Fetch repositories using real GitHub API.
  */
 export async function fetchIntegrationRepositories(): Promise<Repository[]> {
-  return mockRepositories;
+  const token = await getGitHubToken();
+  if (!token) return [];
+  return fetchGitHubRepos(token);
+}
+
+/**
+ * Store GitHub OAuth token and metadata after OAuth redirect.
+ */
+export async function storeGitHubConnection(
+  token: string,
+  username: string,
+  repoCount: number,
+): Promise<{ success: boolean }> {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { success: false };
+
+  const { error } = await supabase
+    .from('integrations')
+    .upsert({
+      user_id: user.id,
+      type: 'github',
+      status: 'connected',
+      access_token: token,
+      metadata: { username, repos: repoCount },
+    }, { onConflict: 'user_id,type' });
+
+  return { success: !error };
 }
 
 /**
@@ -118,7 +165,7 @@ export async function disconnectIntegration(type: 'github' | 'jira' | 'slack'): 
 
   const { error } = await supabase
     .from('integrations')
-    .update({ status: 'disconnected', access_token: null, refresh_token: null })
+    .update({ status: 'disconnected', access_token: null, refresh_token: null, metadata: null })
     .eq('user_id', user.id)
     .eq('type', type);
 
