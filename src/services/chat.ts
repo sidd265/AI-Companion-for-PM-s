@@ -28,12 +28,12 @@ export async function createConversation(): Promise<Conversation> {
 }
 
 export async function deleteConversation(id: string): Promise<{ success: boolean }> {
-  console.log('deleteConversation called with:', id);
+  void id;
   return { success: true };
 }
 
 export async function sendMessage(
-  conversationId: string,
+  _conversationId: string,
   content: string,
   attachments?: { name: string; type: string; size: number; url: string }[],
 ): Promise<Message> {

@@ -226,7 +226,7 @@ export const HeroDashboardGraphic = () => {
         {/* Ticket notification */}
         <motion.div
           initial={{ opacity: 0, scale: 0.8, y: 30 }}
-          animate={{ opacity: 1, scale: 1, y: 0, ...floatAnimation(0, 8) }}
+          animate={{ opacity: 1, scale: 1, ...floatAnimation(0, 8) }}
           transition={{ type: 'spring', stiffness: 100, damping: 18, delay: 1.5 }}
           className="absolute -top-6 -right-3 md:-top-4 md:-right-6 w-52 md:w-60 bg-card border border-border rounded-xl p-3.5 shadow-xl z-10"
         >
@@ -249,7 +249,7 @@ export const HeroDashboardGraphic = () => {
         {/* AI Chat bubble */}
         <motion.div
           initial={{ opacity: 0, scale: 0.8, y: 30 }}
-          animate={{ opacity: 1, scale: 1, y: 0, ...floatAnimation(1, 5) }}
+          animate={{ opacity: 1, scale: 1, ...floatAnimation(1, 5) }}
           transition={{ type: 'spring', stiffness: 100, damping: 18, delay: 1.7 }}
           className="absolute -bottom-4 -left-3 md:-bottom-6 md:-left-6 w-56 md:w-64 bg-card border border-primary/30 rounded-xl p-3.5 shadow-xl z-10 animate-[pulseGlow_3s_ease-in-out_infinite]"
         >
@@ -281,7 +281,7 @@ export const HeroDashboardGraphic = () => {
         {/* Activity feed */}
         <motion.div
           initial={{ opacity: 0, scale: 0.8, y: 30 }}
-          animate={{ opacity: 1, scale: 1, y: 0, ...floatAnimation(0.5, 6) }}
+          animate={{ opacity: 1, scale: 1, ...floatAnimation(0.5, 6) }}
           transition={{ type: 'spring', stiffness: 100, damping: 18, delay: 1.9 }}
           className="absolute -bottom-2 right-4 md:-bottom-5 md:right-8 w-44 md:w-48 bg-card border border-border rounded-xl p-3 shadow-xl z-10"
         >

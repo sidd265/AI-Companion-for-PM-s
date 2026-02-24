@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, MessageSquare, Puzzle, Users, Settings, ChevronLeft, ChevronRight, ChevronDown, Eye, Target, AlertCircle, Calendar, GitPullRequest, FileText, ClipboardList } from 'lucide-react';
+import { LayoutDashboard, MessageSquare, Puzzle, Users, Settings, ChevronLeft, ChevronRight, ChevronDown, Eye, Target, AlertCircle, Calendar, GitPullRequest, FileText, ClipboardList, LogOut } from 'lucide-react';
 import { useDashboardStats, useCurrentUser } from '@/hooks/useDashboardData';
 import { useTeamMembers } from '@/hooks/useTeamData';
+import { useAuth } from '@/contexts/AuthContext';
 import { SidebarStatsSkeleton } from '@/components/skeletons/PageSkeletons';
 import { Skeleton } from '@/components/ui/skeleton';
 import ErrorState from '@/components/ErrorState';
@@ -23,6 +24,7 @@ export const Sidebar = () => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isStatsExpanded, setIsStatsExpanded] = useState(true);
 
+  const { signOut } = useAuth();
   const { data: stats, isLoading: statsLoading, isError: statsError, refetch: refetchStats } = useDashboardStats();
   const { data: user, isLoading: userLoading } = useCurrentUser();
   const { data: members, isLoading: membersLoading } = useTeamMembers();
@@ -156,6 +158,15 @@ export const Sidebar = () => {
                   <div className="text-sm font-medium text-foreground truncate">{user?.name ?? ''}</div>
                   <div className="text-xs text-muted-foreground truncate">{user?.role ?? ''}</div>
                 </div>
+              )}
+              {!isCollapsed && (
+                <button
+                  onClick={() => signOut()}
+                  className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
+                  title="Sign out"
+                >
+                  <LogOut className="w-4 h-4" />
+                </button>
               )}
             </>
           )}

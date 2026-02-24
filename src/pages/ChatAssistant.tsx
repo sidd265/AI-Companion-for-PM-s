@@ -25,7 +25,7 @@ const ChatAssistant = () => {
   const [isStreaming, setIsStreaming] = useState(false);
   const [attachedFiles, setAttachedFiles] = useState<AttachedFile[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const textareaRef = useRef<HTMLInputElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const streamContentRef = useRef('');
 
@@ -245,7 +245,7 @@ const ChatAssistant = () => {
                 <input ref={fileInputRef} type="file" multiple onChange={handleFileSelect} className="hidden" accept="image/*,.pdf,.doc,.docx,.txt,.md,.json,.csv" />
                 <div className="flex items-center gap-3 bg-card rounded-2xl px-4 py-3 border border-border shadow-sm">
                   <button onClick={() => fileInputRef.current?.click()} className="p-2 hover:bg-secondary rounded-xl transition-colors"><Paperclip className="w-5 h-5 text-muted-foreground" /></button>
-                  <input ref={textareaRef as any} type="text" value={inputValue} onChange={e => setInputValue(e.target.value)} onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSendMessage(); } }} placeholder="Ask about repositories, tickets, or team assignments..." className="flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground outline-none" disabled={isStreaming} />
+                  <input ref={textareaRef} type="text" value={inputValue} onChange={e => setInputValue(e.target.value)} onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSendMessage(); } }} placeholder="Ask about repositories, tickets, or team assignments..." className="flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground outline-none" disabled={isStreaming} />
                   <button onClick={handleSendMessage} disabled={(!inputValue.trim() && attachedFiles.length === 0) || isStreaming} className={`p-2.5 rounded-xl transition-all ${(inputValue.trim() || attachedFiles.length > 0) && !isStreaming ? 'bg-primary hover:bg-primary/90' : 'bg-secondary cursor-not-allowed'}`}>
                     <Send className={`w-4 h-4 ${(inputValue.trim() || attachedFiles.length > 0) && !isStreaming ? 'text-primary-foreground' : 'text-muted-foreground'}`} />
                   </button>

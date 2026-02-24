@@ -1,5 +1,5 @@
-import { useState, useMemo } from 'react';
-import { Link } from 'react-router-dom';
+import { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Mail, Lock, Eye, EyeOff, ArrowRight, User, Check, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -9,6 +9,7 @@ import { Separator } from '@/components/ui/separator';
 import { Checkbox } from '@/components/ui/checkbox';
 import { toast } from 'sonner';
 import { AuthBrandingPanel } from '@/components/auth/AuthBrandingPanel';
+import { useAuth } from '@/contexts/AuthContext';
 
 const getPasswordStrength = (pw: string) => {
   const checks = [
@@ -38,22 +39,29 @@ const Signup = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const { signUp, signInWithGoogle } = useAuth();
+  const navigate = useNavigate();
 
-  const handleSignup = (e: React.FormEvent) => {
+  const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!agreedToTerms) {
       toast.error('Please agree to the terms and conditions.');
       return;
     }
     setIsLoading(true);
-    setTimeout(() => {
-      setIsLoading(false);
-      toast.success('Sign up functionality requires backend integration.');
-    }, 1000);
+    const { error } = await signUp(email, password, name);
+    setIsLoading(false);
+    if (error) {
+      toast.error(error.message);
+    } else {
+      toast.success('Account created! Check your email to verify.');
+      navigate('/login');
+    }
   };
 
-  const handleGoogleSignup = () => {
-    toast.info('Google OAuth requires backend integration.');
+  const handleGoogleSignup = async () => {
+    const { error } = await signInWithGoogle();
+    if (error) toast.error(error.message);
   };
 
   return (

@@ -49,7 +49,7 @@ export async function fetchIntegrationRepositories(): Promise<Repository[]> {
  * TODO: Replace with OAuth flow / edge function call
  */
 export async function connectIntegration(type: 'github' | 'jira' | 'slack'): Promise<{ success: boolean }> {
-  console.log('connectIntegration called for:', type);
+  void type;
   return { success: true };
 }
 
@@ -58,7 +58,7 @@ export async function connectIntegration(type: 'github' | 'jira' | 'slack'): Pro
  * TODO: Replace with edge function call → integrations API DELETE
  */
 export async function disconnectIntegration(type: 'github' | 'jira' | 'slack'): Promise<{ success: boolean }> {
-  console.log('disconnectIntegration called for:', type);
+  void type;
   return { success: true };
 }
 
@@ -67,6 +67,6 @@ export async function disconnectIntegration(type: 'github' | 'jira' | 'slack'): 
  * TODO: Replace with edge function call → integrations API POST /sync
  */
 export async function syncIntegration(type: 'github' | 'jira' | 'slack'): Promise<{ success: boolean }> {
-  console.log('syncIntegration called for:', type);
+  void type;
   return { success: true };
 }

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Mail, Lock, Eye, EyeOff, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -8,24 +8,31 @@ import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { toast } from 'sonner';
 import { AuthBrandingPanel } from '@/components/auth/AuthBrandingPanel';
+import { useAuth } from '@/contexts/AuthContext';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const { signIn, signInWithGoogle } = useAuth();
+  const navigate = useNavigate();
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    setTimeout(() => {
-      setIsLoading(false);
-      toast.success('Login functionality requires backend integration.');
-    }, 1000);
+    const { error } = await signIn(email, password);
+    setIsLoading(false);
+    if (error) {
+      toast.error(error.message);
+    } else {
+      navigate('/dashboard');
+    }
   };
 
-  const handleGoogleLogin = () => {
-    toast.info('Google OAuth requires backend integration.');
+  const handleGoogleLogin = async () => {
+    const { error } = await signInWithGoogle();
+    if (error) toast.error(error.message);
   };
 
   return (

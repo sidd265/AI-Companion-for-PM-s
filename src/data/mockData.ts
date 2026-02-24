@@ -87,7 +87,7 @@ export interface Message {
   timestamp: string;
   component?: {
     type: 'repo_summary' | 'assignment_suggestion' | 'ticket_list';
-    data: any;
+    data: Record<string, unknown>;
   };
   attachments?: {
     name: string;

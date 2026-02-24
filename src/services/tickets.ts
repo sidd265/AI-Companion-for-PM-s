@@ -75,7 +75,7 @@ export async function createTicket(data: {
   project: string;
   assigneeId?: string;
 }): Promise<{ success: boolean; key?: string }> {
-  console.log('createTicket called with:', data);
+  void data;
   return { success: true, key: `PROJ-${Math.floor(1000 + Math.random() * 9000)}` };
 }
 
@@ -83,7 +83,7 @@ export async function createTicket(data: {
  * Build a Jira ticket URL.
  * When backend is added, use the real JIRA_BASE_URL from config/env.
  */
-const JIRA_BASE_URL = 'https://company.atlassian.net';
+const JIRA_BASE_URL = import.meta.env.VITE_JIRA_BASE_URL || 'https://company.atlassian.net';
 
 export function getTicketUrl(ticket: JiraTicket): string {
   return `${JIRA_BASE_URL}/browse/${ticket.key}`;

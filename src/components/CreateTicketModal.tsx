@@ -31,7 +31,7 @@ const CreateTicketModal = ({ open, onClose }: CreateTicketModalProps) => {
       toast.error('Please enter a ticket title');
       return;
     }
-    const result = await createTicket({
+    await createTicket({
       title,
       description,
       priority,

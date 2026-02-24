@@ -29,7 +29,6 @@ import {
 } from '@/hooks/useDashboardData';
 import {
   StatCardSkeleton,
-  ChartCardSkeleton,
   ActivityListSkeleton,
   BreakdownSkeleton,
   TeamWorkloadSkeleton,

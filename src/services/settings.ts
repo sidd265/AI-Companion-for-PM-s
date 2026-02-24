@@ -1,10 +1,11 @@
 /**
  * Settings / user profile data service layer.
  *
- * Currently returns mock data.
- * TODO: Replace with backend API calls when Cloud is enabled.
+ * Reads and writes profile data from Supabase.
+ * Falls back to mock data when Supabase is not configured.
  */
 
+import { supabase } from '@/lib/supabase';
 import { currentUser } from '@/data/mockData';
 
 export interface UserProfile {
@@ -17,26 +18,65 @@ export interface UserProfile {
   avatarColor: string;
 }
 
-/**
- * Fetch current user profile.
- * TODO: Replace with auth/user API call
- */
-export async function fetchUserProfile(): Promise<UserProfile> {
-  return currentUser;
+function toInitials(name: string): string {
+  return name
+    .split(' ')
+    .map(p => p[0])
+    .join('')
+    .toUpperCase()
+    .slice(0, 2);
 }
 
 /**
- * Update user profile.
- * TODO: Replace with edge function call → user API PUT
+ * Fetch current user profile from Supabase.
+ * Falls back to mock data if no authenticated user.
  */
-export async function updateUserProfile(data: Partial<UserProfile>): Promise<{ success: boolean }> {
-  console.log('updateUserProfile called with:', data);
-  return { success: true };
+export async function fetchUserProfile(): Promise<UserProfile> {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return currentUser;
+
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('*')
+    .eq('id', user.id)
+    .single();
+
+  if (error || !data) return currentUser;
+
+  return {
+    id: data.id,
+    name: data.name,
+    initials: toInitials(data.name),
+    role: data.role,
+    email: data.email,
+    timezone: data.timezone,
+    avatarColor: data.avatar_color,
+  };
+}
+
+/**
+ * Update user profile in Supabase.
+ */
+export async function updateUserProfile(updates: Partial<UserProfile>): Promise<{ success: boolean }> {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { success: false };
+
+  const { error } = await supabase
+    .from('profiles')
+    .update({
+      ...(updates.name !== undefined && { name: updates.name }),
+      ...(updates.role !== undefined && { role: updates.role }),
+      ...(updates.timezone !== undefined && { timezone: updates.timezone }),
+      ...(updates.avatarColor !== undefined && { avatar_color: updates.avatarColor }),
+    })
+    .eq('id', user.id);
+
+  return { success: !error };
 }
 
 /**
  * Update notification preferences.
- * TODO: Replace with edge function call → preferences API PUT
+ * TODO: Add notification_preferences column or table in Step 6 (Slack).
  */
 export async function updateNotificationPreferences(prefs: {
   email?: boolean;
@@ -44,24 +84,22 @@ export async function updateNotificationPreferences(prefs: {
   desktop?: boolean;
   events?: Record<string, boolean>;
 }): Promise<{ success: boolean }> {
-  console.log('updateNotificationPreferences called with:', prefs);
+  void prefs;
   return { success: true };
 }
 
 /**
  * Export all user data.
- * TODO: Replace with edge function call → data export API
+ * TODO: Implement via Edge Function.
  */
 export async function exportUserData(): Promise<{ success: boolean; downloadUrl?: string }> {
-  console.log('exportUserData called');
   return { success: true };
 }
 
 /**
  * Delete the user account.
- * TODO: Replace with edge function call → account deletion API
+ * TODO: Implement via Edge Function (needs service_role key).
  */
 export async function deleteAccount(): Promise<{ success: boolean }> {
-  console.log('deleteAccount called');
   return { success: true };
 }

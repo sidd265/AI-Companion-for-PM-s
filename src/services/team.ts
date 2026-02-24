@@ -77,7 +77,6 @@ export async function addTeamMember(member: {
   slack?: string;
   expertise?: string[];
 }): Promise<{ success: boolean }> {
-  // Placeholder — currently just returns success
-  console.log('addTeamMember called with:', member);
+  void member;
   return { success: true };
 }

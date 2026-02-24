@@ -88,7 +88,7 @@ const Tickets = () => {
             </button>
           </div>
           <a
-            href="https://company.atlassian.net"
+            href={import.meta.env.VITE_JIRA_BASE_URL || 'https://company.atlassian.net'}
             target="_blank"
             rel="noopener noreferrer"
             className="airbnb-btn-secondary flex items-center gap-2 !px-3 !py-1.5 text-xs"

@@ -5,6 +5,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "next-themes";
+import { AuthProvider } from "@/contexts/AuthContext";
+import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { AppLayout } from "@/components/layout/AppLayout";
 import Dashboard from "@/pages/Dashboard";
 import ChatAssistant from "@/pages/ChatAssistant";
@@ -17,7 +19,7 @@ import Landing from "@/pages/Landing";
 import About from "@/pages/About";
 import Login from "@/pages/Login";
 import Signup from "@/pages/Signup";
-import NotFound from "./pages/NotFound";
+import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
 
@@ -29,22 +31,26 @@ const App = () => (
           <Toaster />
           <Sonner />
           <BrowserRouter>
-            <Routes>
-              <Route path="/" element={<Landing />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/signup" element={<Signup />} />
-              <Route path="/about" element={<About />} />
-              <Route element={<AppLayout />}>
-                <Route path="/dashboard" element={<Dashboard />} />
-                <Route path="/chat" element={<ChatAssistant />} />
-                <Route path="/integrations" element={<Integrations />} />
-                <Route path="/pull-requests" element={<PullRequests />} />
-                <Route path="/tickets" element={<Tickets />} />
-                <Route path="/team" element={<Team />} />
-                <Route path="/settings" element={<Settings />} />
-              </Route>
-              <Route path="*" element={<NotFound />} />
-            </Routes>
+            <AuthProvider>
+              <Routes>
+                <Route path="/" element={<Landing />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/signup" element={<Signup />} />
+                <Route path="/about" element={<About />} />
+                <Route element={<ProtectedRoute />}>
+                  <Route element={<AppLayout />}>
+                    <Route path="/dashboard" element={<Dashboard />} />
+                    <Route path="/chat" element={<ChatAssistant />} />
+                    <Route path="/integrations" element={<Integrations />} />
+                    <Route path="/pull-requests" element={<PullRequests />} />
+                    <Route path="/tickets" element={<Tickets />} />
+                    <Route path="/team" element={<Team />} />
+                    <Route path="/settings" element={<Settings />} />
+                  </Route>
+                </Route>
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </AuthProvider>
           </BrowserRouter>
         </TooltipProvider>
       </ThemeProvider>
