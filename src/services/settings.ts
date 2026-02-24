@@ -2,7 +2,7 @@
  * Settings / user profile data service layer.
  *
  * Reads and writes profile data from Supabase.
- * Falls back to mock data when Supabase is not configured.
+ * Falls back to mock data when no authenticated user exists.
  */
 
 import { supabase } from '@/lib/supabase';
@@ -18,6 +18,15 @@ export interface UserProfile {
   avatarColor: string;
 }
 
+interface ProfileRow {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+  timezone: string;
+  avatar_color: string;
+}
+
 function toInitials(name: string): string {
   return name
     .split(' ')
@@ -25,6 +34,18 @@ function toInitials(name: string): string {
     .join('')
     .toUpperCase()
     .slice(0, 2);
+}
+
+function rowToProfile(row: ProfileRow): UserProfile {
+  return {
+    id: row.id,
+    name: row.name,
+    initials: toInitials(row.name),
+    role: row.role,
+    email: row.email,
+    timezone: row.timezone,
+    avatarColor: row.avatar_color,
+  };
 }
 
 /**
@@ -37,21 +58,13 @@ export async function fetchUserProfile(): Promise<UserProfile> {
 
   const { data, error } = await supabase
     .from('profiles')
-    .select('*')
+    .select('id, name, email, role, timezone, avatar_color')
     .eq('id', user.id)
     .single();
 
   if (error || !data) return currentUser;
 
-  return {
-    id: data.id,
-    name: data.name,
-    initials: toInitials(data.name),
-    role: data.role,
-    email: data.email,
-    timezone: data.timezone,
-    avatarColor: data.avatar_color,
-  };
+  return rowToProfile(data as ProfileRow);
 }
 
 /**
@@ -61,14 +74,15 @@ export async function updateUserProfile(updates: Partial<UserProfile>): Promise<
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { success: false };
 
+  const payload: Record<string, string> = {};
+  if (updates.name !== undefined) payload.name = updates.name;
+  if (updates.role !== undefined) payload.role = updates.role;
+  if (updates.timezone !== undefined) payload.timezone = updates.timezone;
+  if (updates.avatarColor !== undefined) payload.avatar_color = updates.avatarColor;
+
   const { error } = await supabase
     .from('profiles')
-    .update({
-      ...(updates.name !== undefined && { name: updates.name }),
-      ...(updates.role !== undefined && { role: updates.role }),
-      ...(updates.timezone !== undefined && { timezone: updates.timezone }),
-      ...(updates.avatarColor !== undefined && { avatar_color: updates.avatarColor }),
-    })
+    .update(payload)
     .eq('id', user.id);
 
   return { success: !error };
