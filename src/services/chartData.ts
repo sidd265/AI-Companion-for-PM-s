@@ -1,8 +1,9 @@
 // Chart data service layer
-// PR activity uses real GitHub API. Ticket trends/sprint burndown stay mock until Jira (Step 5).
+// PR activity uses real GitHub API. Ticket trends/sprint burndown use Jira API with mock fallback.
 
-import { getGitHubToken } from '@/services/integrations';
+import { getGitHubToken, getJiraCredentials } from '@/services/integrations';
 import { fetchGitHubRepos, fetchAllPRActivity } from '@/lib/github';
+import { fetchTicketTrendsFromJira, fetchSprintBurndownFromJira } from '@/lib/jira';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -33,7 +34,7 @@ export interface PRActivityPoint {
   merged: number;
 }
 
-// ─── Mock Data (Jira — migrated in Step 5) ──────────────────────────────────
+// ─── Mock Data (fallback when Jira not connected) ───────────────────────────
 
 const mockTicketTrends: TicketTrendPoint[] = [
   { date: 'Jan 20', created: 5, completed: 3, inProgress: 8 },
@@ -77,14 +78,30 @@ const mockSprintMeta: SprintMeta = {
 // ─── Service Functions ────────────────────────────────────────────────────────
 
 export async function fetchTicketTrends(): Promise<TicketTrendPoint[]> {
-  return mockTicketTrends;
+  const creds = await getJiraCredentials();
+  if (!creds) return mockTicketTrends;
+
+  try {
+    return await fetchTicketTrendsFromJira(creds.cloudId, creds.accessToken, creds.refreshToken);
+  } catch {
+    return mockTicketTrends;
+  }
 }
 
 export async function fetchSprintBurndown(): Promise<{
   data: SprintBurndownPoint[];
   meta: SprintMeta;
 }> {
-  return { data: mockSprintBurndown, meta: mockSprintMeta };
+  const creds = await getJiraCredentials();
+  if (!creds) return { data: mockSprintBurndown, meta: mockSprintMeta };
+
+  try {
+    const result = await fetchSprintBurndownFromJira(creds.cloudId, creds.accessToken, creds.refreshToken);
+    if (!result) return { data: mockSprintBurndown, meta: mockSprintMeta };
+    return result;
+  } catch {
+    return { data: mockSprintBurndown, meta: mockSprintMeta };
+  }
 }
 
 export async function fetchPRActivity(repo: string = 'all'): Promise<PRActivityPoint[]> {

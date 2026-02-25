@@ -82,6 +82,8 @@ create table public.tickets (
   project_id uuid references public.projects(id) on delete cascade not null,
   assignee_id uuid references public.profiles(id) on delete set null,
   jira_key text,
+  jira_issue_id text,
+  jira_source boolean not null default false,
   story_points integer,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
@@ -90,6 +92,7 @@ create table public.tickets (
 create index idx_tickets_project on public.tickets(project_id);
 create index idx_tickets_assignee on public.tickets(assignee_id);
 create index idx_tickets_status on public.tickets(status);
+create unique index idx_tickets_jira_issue_id on public.tickets(jira_issue_id) where jira_issue_id is not null;
 
 alter table public.tickets enable row level security;
 

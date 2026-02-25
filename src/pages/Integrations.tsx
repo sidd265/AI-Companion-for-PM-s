@@ -5,7 +5,9 @@ import { useIntegrationStatuses, useIntegrationRepositories } from '@/hooks/useI
 import { IntegrationCardSkeleton } from '@/components/skeletons/PageSkeletons';
 import ErrorState from '@/components/ErrorState';
 import { supabase } from '@/lib/supabase';
-import { storeGitHubConnection, disconnectIntegration } from '@/services/integrations';
+import { storeGitHubConnection, storeJiraConnection, disconnectIntegration } from '@/services/integrations';
+import { fetchJiraProjects } from '@/lib/jira';
+import { syncJiraTickets } from '@/services/jira';
 import { useQueryClient } from '@tanstack/react-query';
 
 interface IntegrationDrawerProps {
@@ -75,19 +77,31 @@ const IntegrationDrawer = ({ type, onClose, onDisconnect }: IntegrationDrawerPro
             </>
           )}
           {type === 'jira' && integration.connected && integrations && (
-            <div className="mb-6">
-              <h3 className="text-sm font-medium text-foreground mb-3">Connected Site</h3>
-              <div className="flex items-center justify-between p-4 bg-secondary rounded-2xl">
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center"><Trello className="w-6 h-6 text-white" /></div>
-                  <div>
-                    <div className="text-sm font-medium text-foreground">{integrations.jira.site}</div>
-                    <div className="text-xs text-muted-foreground">{integrations.jira.projects} projects synced</div>
+            <>
+              <div className="mb-6">
+                <h3 className="text-sm font-medium text-foreground mb-3">Connected Site</h3>
+                <div className="flex items-center justify-between p-4 bg-secondary rounded-2xl">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center"><Trello className="w-6 h-6 text-white" /></div>
+                    <div>
+                      <div className="text-sm font-medium text-foreground">{integrations.jira.site}</div>
+                      <div className="text-xs text-muted-foreground">{integrations.jira.projects} projects synced</div>
+                    </div>
                   </div>
+                  <button onClick={() => onDisconnect('jira')} className="text-sm text-destructive hover:underline font-medium">Disconnect</button>
                 </div>
-                <button onClick={() => onDisconnect('jira')} className="text-sm text-destructive hover:underline font-medium">Disconnect</button>
               </div>
-            </div>
+              <div className="mb-6">
+                <h3 className="text-sm font-medium text-foreground mb-3">Sync Settings</h3>
+                <div className="flex items-center justify-between p-4 border border-border rounded-xl">
+                  <div>
+                    <div className="text-sm text-foreground">Last Synced</div>
+                    <div className="text-xs text-muted-foreground">{integrations.jira.lastSync ? new Date(integrations.jira.lastSync).toLocaleString() : 'Never'}</div>
+                  </div>
+                  <button onClick={async () => { await syncJiraTickets(); }} className="airbnb-btn-secondary flex items-center gap-2 py-2 px-4 rounded-full"><RefreshCw className="w-4 h-4" />Sync Now</button>
+                </div>
+              </div>
+            </>
           )}
           {type === 'slack' && !integration.connected && (
             <div className="text-center py-12">
@@ -136,6 +150,49 @@ const Integrations = () => {
     handleGitHubOAuthRedirect();
   }, [handleGitHubOAuthRedirect]);
 
+  // Detect Jira OAuth redirect
+  const handleJiraOAuthRedirect = useCallback(async () => {
+    const params = new URLSearchParams(window.location.search);
+    const code = params.get('code');
+    const state = params.get('state');
+    if (!code || state !== 'jira') return;
+
+    // Clear query string to prevent double-processing
+    window.history.replaceState({}, '', '/integrations');
+
+    try {
+      const { data, error } = await supabase.functions.invoke('jira-oauth', {
+        body: { action: 'exchange', code, redirect_uri: `${window.location.origin}/integrations` },
+      });
+      if (error || !data?.access_token) return;
+
+      // Fetch project count
+      const projects = await fetchJiraProjects(data.cloud_id, data.access_token, data.refresh_token);
+
+      await storeJiraConnection({
+        accessToken: data.access_token,
+        refreshToken: data.refresh_token,
+        cloudId: data.cloud_id,
+        siteName: data.site_name,
+        siteUrl: data.site_url,
+        projectCount: projects.length,
+      });
+
+      // Trigger initial sync
+      await syncJiraTickets();
+
+      queryClient.invalidateQueries({ queryKey: ['integrations'] });
+      queryClient.invalidateQueries({ queryKey: ['chart'] });
+      queryClient.invalidateQueries({ queryKey: ['tickets'] });
+    } catch {
+      // Silently fail — user can retry
+    }
+  }, [queryClient]);
+
+  useEffect(() => {
+    handleJiraOAuthRedirect();
+  }, [handleJiraOAuthRedirect]);
+
   const handleConnectGitHub = async () => {
     await supabase.auth.signInWithOAuth({
       provider: 'github',
@@ -144,6 +201,22 @@ const Integrations = () => {
         redirectTo: `${window.location.origin}/integrations`,
       },
     });
+  };
+
+  const handleConnectJira = () => {
+    const clientId = import.meta.env.VITE_JIRA_CLIENT_ID;
+    if (!clientId) return;
+
+    const params = new URLSearchParams({
+      audience: 'api.atlassian.com',
+      client_id: clientId,
+      scope: 'read:jira-work write:jira-work offline_access',
+      redirect_uri: `${window.location.origin}/integrations`,
+      state: 'jira',
+      response_type: 'code',
+      prompt: 'consent',
+    });
+    window.location.href = `https://auth.atlassian.com/authorize?${params}`;
   };
 
   const handleDisconnect = async (type: 'github' | 'jira' | 'slack') => {
@@ -155,6 +228,8 @@ const Integrations = () => {
   const handleConnect = (id: 'github' | 'jira' | 'slack') => {
     if (id === 'github') {
       handleConnectGitHub();
+    } else if (id === 'jira') {
+      handleConnectJira();
     } else {
       setActiveDrawer(id);
     }

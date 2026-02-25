@@ -173,10 +173,79 @@ export async function disconnectIntegration(type: 'github' | 'jira' | 'slack'): 
 }
 
 /**
+ * Get stored Jira OAuth credentials for the current user.
+ * Returns null if Jira is not connected.
+ */
+export async function getJiraCredentials(): Promise<{
+  accessToken: string;
+  refreshToken: string;
+  cloudId: string;
+  siteUrl: string;
+} | null> {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return null;
+
+  const { data, error } = await supabase
+    .from('integrations')
+    .select('access_token, refresh_token, metadata')
+    .eq('user_id', user.id)
+    .eq('type', 'jira')
+    .eq('status', 'connected')
+    .single();
+
+  if (error || !data) return null;
+  const row = data as { access_token: string | null; refresh_token: string | null; metadata: Record<string, unknown> | null };
+  if (!row.access_token || !row.refresh_token || !row.metadata?.cloud_id) return null;
+
+  return {
+    accessToken: row.access_token,
+    refreshToken: row.refresh_token,
+    cloudId: row.metadata.cloud_id as string,
+    siteUrl: (row.metadata.site as string) ?? '',
+  };
+}
+
+/**
+ * Store Jira OAuth tokens and metadata after OAuth redirect.
+ */
+export async function storeJiraConnection(params: {
+  accessToken: string;
+  refreshToken: string;
+  cloudId: string;
+  siteName: string;
+  siteUrl: string;
+  projectCount: number;
+}): Promise<{ success: boolean }> {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { success: false };
+
+  const { error } = await supabase
+    .from('integrations')
+    .upsert({
+      user_id: user.id,
+      type: 'jira',
+      status: 'connected',
+      access_token: params.accessToken,
+      refresh_token: params.refreshToken,
+      metadata: {
+        cloud_id: params.cloudId,
+        site: params.siteUrl,
+        site_name: params.siteName,
+        projects: params.projectCount,
+      },
+    }, { onConflict: 'user_id,type' });
+
+  return { success: !error };
+}
+
+/**
  * Trigger a sync for an integration.
- * TODO: Replace with edge function call in Steps 4-6.
  */
 export async function syncIntegration(type: 'github' | 'jira' | 'slack'): Promise<{ success: boolean }> {
-  void type;
+  if (type === 'jira') {
+    const { syncJiraTickets } = await import('@/services/jira');
+    const result = await syncJiraTickets();
+    return { success: result.errors === 0 };
+  }
   return { success: true };
 }

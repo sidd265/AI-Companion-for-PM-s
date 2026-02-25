@@ -70,6 +70,8 @@ export interface Database {
           project_id: string;
           assignee_id: string | null;
           jira_key: string | null;
+          jira_issue_id: string | null;
+          jira_source: boolean;
           story_points: number | null;
           created_at: string;
           updated_at: string;
@@ -84,6 +86,8 @@ export interface Database {
           project_id: string;
           assignee_id?: string | null;
           jira_key?: string | null;
+          jira_issue_id?: string | null;
+          jira_source?: boolean;
           story_points?: number | null;
           created_at?: string;
           updated_at?: string;
@@ -97,6 +101,8 @@ export interface Database {
           project_id?: string;
           assignee_id?: string | null;
           jira_key?: string | null;
+          jira_issue_id?: string | null;
+          jira_source?: boolean;
           story_points?: number | null;
           updated_at?: string;
         };
