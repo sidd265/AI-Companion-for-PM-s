@@ -17,6 +17,8 @@
  * - Fetch failures per-repo are caught and skipped silently
  */
 
+import { buildDemoGitHubContext } from './_demo.ts';
+
 import type {
   DetectedIntent,
   GitHubCreds,
@@ -231,6 +233,11 @@ export async function buildGitHubContext(
   creds: GitHubCreds,
   intent: DetectedIntent,
 ): Promise<string> {
+  // Demo mode: return rich pre-built context instead of making real API calls
+  if (creds.token === 'DEMO_MODE') {
+    return buildDemoGitHubContext(intent);
+  }
+
   const parts: string[] = [];
 
   // ── 1. Repo inventory (always) ──

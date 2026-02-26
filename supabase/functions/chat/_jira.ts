@@ -18,6 +18,7 @@
 
 import type { DetectedIntent, JiraCreds, JiraProjectSummary, JiraIssue } from './_types.ts';
 import { sanitizeExternalText } from './_security.ts';
+import { buildDemoJiraContext } from './_demo.ts';
 
 const FIELDS_BASE  = 'summary,status,priority,assignee,reporter,project,issuetype,created,updated,labels';
 const FIELDS_FULL  = `${FIELDS_BASE},description,comment,parent,sprint`;
@@ -165,6 +166,11 @@ export async function buildJiraContext(
   creds: JiraCreds,
   intent: DetectedIntent,
 ): Promise<string> {
+  // Demo mode: return rich pre-built context instead of making real API calls
+  if (creds.apiToken === 'DEMO_MODE') {
+    return buildDemoJiraContext(intent);
+  }
+
   const parts: string[] = [];
   const validTicket  = safeTicketKey(intent.ticketHint);
   const validProject = safeProjectKey(intent.projectHint);

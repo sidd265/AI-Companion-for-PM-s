@@ -3,7 +3,13 @@ import { Plus, Send, ChevronDown, Paperclip, Settings2, Trash2, Sparkles, X, Fil
 import { type Conversation, type Message } from '@/data/mockData';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useConversations } from '@/hooks/useChatData';
-import { createConversation, deleteConversation as deleteConversationService, streamChat } from '@/services/chat';
+import {
+  createConversation,
+  deleteConversation as deleteConversationService,
+  streamChat,
+  saveMessage,
+  updateConversationTitle,
+} from '@/services/chat';
 import { ConversationListSkeleton } from '@/components/skeletons/PageSkeletons';
 import ErrorState from '@/components/ErrorState';
 import ReactMarkdown from 'react-markdown';
@@ -107,17 +113,29 @@ const ChatAssistant = () => {
 
     const convId = activeConversationId;
 
+    // Determine if this is the first message (used to set the conversation title)
+    const currentConv = conversations.find(c => c.id === convId);
+    const isFirstMessage = (currentConv?.messages.length ?? 0) === 0;
+    const newTitle = inputValue.trim() || (fileNames.length > 0 ? `Files: ${fileNames[0]}` : 'New conversation');
+
     setConversations(prev => prev.map(conv => {
       if (conv.id === convId) {
-        const isFirstMessage = conv.messages.length === 0;
-        const title = inputValue.trim() || (fileNames.length > 0 ? `Files: ${fileNames[0]}` : 'New conversation');
-        return { ...conv, title: isFirstMessage ? title.slice(0, 40) : conv.title, preview: (inputValue || fileNames.join(', ')).slice(0, 60), updatedAt: new Date().toISOString(), messages: [...conv.messages, userMessage] };
+        return {
+          ...conv,
+          title: isFirstMessage ? newTitle.slice(0, 40) : conv.title,
+          preview: (inputValue || fileNames.join(', ')).slice(0, 60),
+          updatedAt: new Date().toISOString(),
+          messages: [...conv.messages, userMessage],
+        };
       }
       return conv;
     }));
 
+    // Persist user message + (optionally) update title in Supabase — fire-and-forget
+    saveMessage(convId, 'user', messageContent);
+    if (isFirstMessage) updateConversationTitle(convId, newTitle.slice(0, 40));
+
     // Build message history for the API
-    const currentConv = conversations.find(c => c.id === convId);
     const history = [
       ...(currentConv?.messages ?? []).map(m => ({ role: m.role as 'user' | 'assistant', content: m.content })),
       { role: 'user' as const, content: messageContent },
@@ -137,6 +155,10 @@ const ChatAssistant = () => {
       onDone: () => {
         finalizeAssistantMessage(convId);
         setIsStreaming(false);
+        // Persist AI response to Supabase — fire-and-forget
+        if (streamContentRef.current) {
+          saveMessage(convId, 'assistant', streamContentRef.current);
+        }
       },
       onError: (error) => {
         toast.error(error.message);
