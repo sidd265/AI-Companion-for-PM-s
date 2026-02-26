@@ -25,11 +25,20 @@ export class JiraApiError extends Error {
 // ---------------------------------------------------------------------------
 
 async function refreshJiraToken(refreshToken: string): Promise<{ access_token: string; refresh_token: string }> {
-  const { data, error } = await supabase.functions.invoke('jira-oauth', {
-    body: { action: 'refresh', refresh_token: refreshToken },
+  const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+  const supabaseKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+  const res = await fetch(`${supabaseUrl}/functions/v1/jira-oauth`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${supabaseKey}`,
+      'apikey': supabaseKey,
+    },
+    body: JSON.stringify({ action: 'refresh', refresh_token: refreshToken }),
   });
+  const data = await res.json();
 
-  if (error || !data?.access_token) {
+  if (!res.ok || !data?.access_token) {
     throw new JiraApiError(401, 'Failed to refresh Jira token');
   }
 

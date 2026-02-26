@@ -161,9 +161,20 @@ const Integrations = () => {
     window.history.replaceState({}, '', '/integrations');
 
     try {
-      const { data, error } = await supabase.functions.invoke('jira-oauth', {
-        body: { action: 'exchange', code, redirect_uri: `${window.location.origin}/integrations` },
+      // Use fetch directly with anon key — edge function doesn't need user JWT
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+      const supabaseKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+      const res = await fetch(`${supabaseUrl}/functions/v1/jira-oauth`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${supabaseKey}`,
+          'apikey': supabaseKey,
+        },
+        body: JSON.stringify({ action: 'exchange', code, redirect_uri: `${window.location.origin}/integrations` }),
       });
+      const data = await res.json();
+      const error = !res.ok ? data : null;
       if (error || !data?.access_token) return;
 
       // Fetch project count
