@@ -1,19 +1,19 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Github, Trello, MessageCircle, Check, X, Settings, RefreshCw, ExternalLink } from 'lucide-react';
+import { Github, Trello, MessageCircle, Check, X, Settings, RefreshCw, ExternalLink, GitBranch } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useIntegrationStatuses, useIntegrationRepositories } from '@/hooks/useIntegrations';
 import { IntegrationCardSkeleton } from '@/components/skeletons/PageSkeletons';
 import ErrorState from '@/components/ErrorState';
 import { supabase } from '@/lib/supabase';
-import { storeGitHubConnection, storeJiraConnection, disconnectIntegration } from '@/services/integrations';
+import { storeGitHubConnection, storeJiraConnection, storeBitbucketConnection, disconnectIntegration } from '@/services/integrations';
 import { fetchJiraProjects } from '@/lib/jira';
 import { syncJiraTickets } from '@/services/jira';
 import { useQueryClient } from '@tanstack/react-query';
 
 interface IntegrationDrawerProps {
-  type: 'github' | 'jira' | 'slack';
+  type: 'github' | 'jira' | 'slack' | 'bitbucket';
   onClose: () => void;
-  onDisconnect: (type: 'github' | 'jira' | 'slack') => void;
+  onDisconnect: (type: 'github' | 'jira' | 'slack' | 'bitbucket') => void;
 }
 
 const IntegrationDrawer = ({ type, onClose, onDisconnect }: IntegrationDrawerProps) => {
@@ -111,6 +111,33 @@ const IntegrationDrawer = ({ type, onClose, onDisconnect }: IntegrationDrawerPro
               <button className="airbnb-btn-pill">Connect Slack</button>
             </div>
           )}
+          {type === 'bitbucket' && integration.connected && integrations && (
+            <>
+              <div className="mb-6">
+                <h3 className="text-sm font-medium text-foreground mb-3">Connected Account</h3>
+                <div className="flex items-center justify-between p-4 bg-secondary rounded-2xl">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 bg-[#0052CC] rounded-xl flex items-center justify-center"><GitBranch className="w-6 h-6 text-white" /></div>
+                    <div>
+                      <div className="text-sm font-medium text-foreground">@{integrations.bitbucket.username}</div>
+                      <div className="text-xs text-muted-foreground">Workspace: {integrations.bitbucket.workspace}</div>
+                    </div>
+                  </div>
+                  <button onClick={() => onDisconnect('bitbucket')} className="text-sm text-destructive hover:underline font-medium">Disconnect</button>
+                </div>
+              </div>
+              <div className="mb-6">
+                <h3 className="text-sm font-medium text-foreground mb-3">Sync Settings</h3>
+                <div className="flex items-center justify-between p-4 border border-border rounded-xl">
+                  <div>
+                    <div className="text-sm text-foreground">Last Synced</div>
+                    <div className="text-xs text-muted-foreground">{integrations.bitbucket.lastSync ? new Date(integrations.bitbucket.lastSync).toLocaleString() : 'Never'}</div>
+                  </div>
+                  <button className="airbnb-btn-secondary flex items-center gap-2 py-2 px-4 rounded-full"><RefreshCw className="w-4 h-4" />Sync Now</button>
+                </div>
+              </div>
+            </>
+          )}
         </div>
       </motion.div>
     </motion.div>
@@ -118,7 +145,7 @@ const IntegrationDrawer = ({ type, onClose, onDisconnect }: IntegrationDrawerPro
 };
 
 const Integrations = () => {
-  const [activeDrawer, setActiveDrawer] = useState<'github' | 'jira' | 'slack' | null>(null);
+  const [activeDrawer, setActiveDrawer] = useState<'github' | 'jira' | 'slack' | 'bitbucket' | null>(null);
   const { data: integrations, isLoading, isError, refetch } = useIntegrationStatuses();
   const queryClient = useQueryClient();
 
@@ -204,6 +231,49 @@ const Integrations = () => {
     handleJiraOAuthRedirect();
   }, [handleJiraOAuthRedirect]);
 
+  // Detect Bitbucket OAuth redirect
+  const handleBitbucketOAuthRedirect = useCallback(async () => {
+    const params = new URLSearchParams(window.location.search);
+    const code = params.get('code');
+    const state = params.get('state');
+    if (!code || state !== 'bitbucket') return;
+
+    // Clear query string to prevent double-processing
+    window.history.replaceState({}, '', '/integrations');
+
+    try {
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+      const supabaseKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+      const res = await fetch(`${supabaseUrl}/functions/v1/bitbucket-oauth`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${supabaseKey}`,
+          'apikey': supabaseKey,
+        },
+        body: JSON.stringify({ action: 'exchange', code, redirect_uri: `${window.location.origin}/integrations` }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data?.access_token) return;
+
+      await storeBitbucketConnection({
+        accessToken: data.access_token,
+        refreshToken: data.refresh_token,
+        username: data.username,
+        workspace: data.primary_workspace,
+        repoCount: data.workspace_count ?? 0,
+      });
+
+      queryClient.invalidateQueries({ queryKey: ['integrations'] });
+    } catch {
+      // Silently fail — user can retry
+    }
+  }, [queryClient]);
+
+  useEffect(() => {
+    handleBitbucketOAuthRedirect();
+  }, [handleBitbucketOAuthRedirect]);
+
   const handleConnectGitHub = async () => {
     await supabase.auth.signInWithOAuth({
       provider: 'github',
@@ -212,6 +282,20 @@ const Integrations = () => {
         redirectTo: `${window.location.origin}/integrations`,
       },
     });
+  };
+
+  const handleConnectBitbucket = () => {
+    const clientId = import.meta.env.VITE_BITBUCKET_CLIENT_ID;
+    if (!clientId) return;
+
+    const params = new URLSearchParams({
+      client_id: clientId,
+      response_type: 'code',
+      scope: 'account repository pullrequest',
+      redirect_uri: `${window.location.origin}/integrations`,
+      state: 'bitbucket',
+    });
+    window.location.href = `https://bitbucket.org/site/oauth2/authorize?${params}`;
   };
 
   const handleConnectJira = () => {
@@ -230,17 +314,19 @@ const Integrations = () => {
     window.location.href = `https://auth.atlassian.com/authorize?${params}`;
   };
 
-  const handleDisconnect = async (type: 'github' | 'jira' | 'slack') => {
+  const handleDisconnect = async (type: 'github' | 'jira' | 'slack' | 'bitbucket') => {
     await disconnectIntegration(type);
     queryClient.invalidateQueries({ queryKey: ['integrations'] });
     setActiveDrawer(null);
   };
 
-  const handleConnect = (id: 'github' | 'jira' | 'slack') => {
+  const handleConnect = (id: 'github' | 'jira' | 'slack' | 'bitbucket') => {
     if (id === 'github') {
       handleConnectGitHub();
     } else if (id === 'jira') {
       handleConnectJira();
+    } else if (id === 'bitbucket') {
+      handleConnectBitbucket();
     } else {
       setActiveDrawer(id);
     }
@@ -249,6 +335,7 @@ const Integrations = () => {
   const integrationCards = [
     { id: 'github' as const, name: 'GitHub', description: 'Connect repositories to analyze code and pull requests', icon: Github, iconBg: 'bg-gray-900 dark:bg-gray-100', iconColor: 'text-white dark:text-gray-900', connected: integrations?.github.connected ?? false, info: integrations?.github.connected ? `Connected as @${integrations.github.username} · Syncing ${integrations.github.repos} repositories` : null },
     { id: 'jira' as const, name: 'Jira', description: 'Connect projects to track tickets and assignments', icon: Trello, iconBg: 'bg-blue-600', iconColor: 'text-white', connected: integrations?.jira.connected ?? false, info: integrations?.jira.connected ? `Connected to ${integrations.jira.site} · ${integrations.jira.projects} projects` : null },
+    { id: 'bitbucket' as const, name: 'Bitbucket', description: 'Connect repositories and pull requests from Bitbucket', icon: GitBranch, iconBg: 'bg-[#0052CC]', iconColor: 'text-white', connected: integrations?.bitbucket.connected ?? false, info: integrations?.bitbucket.connected ? `Connected as @${integrations.bitbucket.username} · Workspace: ${integrations.bitbucket.workspace}` : null },
     { id: 'slack' as const, name: 'Slack', description: 'Get notifications and updates in Slack channels', icon: MessageCircle, iconBg: 'bg-purple-600', iconColor: 'text-white', connected: integrations?.slack.connected ?? false, info: null },
   ];
 

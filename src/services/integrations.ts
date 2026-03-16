@@ -26,6 +26,13 @@ export interface IntegrationStatus {
     channels?: number;
     lastSync?: string | null;
   };
+  bitbucket: {
+    connected: boolean;
+    username?: string;
+    workspace?: string;
+    repos?: number;
+    lastSync?: string;
+  };
 }
 
 interface IntegrationRow {
@@ -41,6 +48,7 @@ const EMPTY_STATUS: IntegrationStatus = {
   github: { connected: false },
   jira: { connected: false },
   slack: { connected: false, workspace: null, channels: 0, lastSync: null },
+  bitbucket: { connected: false },
 };
 
 function rowsToStatus(rows: IntegrationRow[]): IntegrationStatus {
@@ -49,6 +57,7 @@ function rowsToStatus(rows: IntegrationRow[]): IntegrationStatus {
   const gh = find('github');
   const jr = find('jira');
   const sl = find('slack');
+  const bb = find('bitbucket');
 
   return {
     github: {
@@ -68,6 +77,13 @@ function rowsToStatus(rows: IntegrationRow[]): IntegrationStatus {
       workspace: sl?.metadata?.workspace as string | null | undefined,
       channels: sl?.metadata?.channels as number | undefined,
       lastSync: sl?.updated_at ?? null,
+    },
+    bitbucket: {
+      connected: bb?.status === 'connected',
+      username: bb?.metadata?.username as string | undefined,
+      workspace: bb?.metadata?.workspace as string | undefined,
+      repos: bb?.metadata?.repos as number | undefined,
+      lastSync: bb?.updated_at,
     },
   };
 }
@@ -145,7 +161,7 @@ export async function storeGitHubConnection(
 /**
  * Connect an integration (upsert row).
  */
-export async function connectIntegration(type: 'github' | 'jira' | 'slack'): Promise<{ success: boolean }> {
+export async function connectIntegration(type: 'github' | 'jira' | 'slack' | 'bitbucket'): Promise<{ success: boolean }> {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { success: false };
 
@@ -159,7 +175,7 @@ export async function connectIntegration(type: 'github' | 'jira' | 'slack'): Pro
 /**
  * Disconnect an integration.
  */
-export async function disconnectIntegration(type: 'github' | 'jira' | 'slack'): Promise<{ success: boolean }> {
+export async function disconnectIntegration(type: 'github' | 'jira' | 'slack' | 'bitbucket'): Promise<{ success: boolean }> {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { success: false };
 
@@ -239,9 +255,70 @@ export async function storeJiraConnection(params: {
 }
 
 /**
+ * Store Bitbucket OAuth tokens and metadata after OAuth redirect.
+ */
+export async function storeBitbucketConnection(params: {
+  accessToken: string;
+  refreshToken: string;
+  username: string;
+  workspace: string;
+  repoCount: number;
+}): Promise<{ success: boolean }> {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { success: false };
+
+  const { error } = await supabase
+    .from('integrations')
+    .upsert({
+      user_id: user.id,
+      type: 'bitbucket',
+      status: 'connected',
+      access_token: params.accessToken,
+      refresh_token: params.refreshToken,
+      metadata: {
+        username: params.username,
+        workspace: params.workspace,
+        repos: params.repoCount,
+      },
+    }, { onConflict: 'user_id,type' });
+
+  return { success: !error };
+}
+
+/**
+ * Get stored Bitbucket OAuth credentials for the current user.
+ */
+export async function getBitbucketCredentials(): Promise<{
+  accessToken: string;
+  refreshToken: string;
+  workspace: string;
+} | null> {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return null;
+
+  const { data, error } = await supabase
+    .from('integrations')
+    .select('access_token, refresh_token, metadata')
+    .eq('user_id', user.id)
+    .eq('type', 'bitbucket')
+    .eq('status', 'connected')
+    .single();
+
+  if (error || !data) return null;
+  const row = data as { access_token: string | null; refresh_token: string | null; metadata: Record<string, unknown> | null };
+  if (!row.access_token || !row.refresh_token) return null;
+
+  return {
+    accessToken: row.access_token,
+    refreshToken: row.refresh_token,
+    workspace: (row.metadata?.workspace as string) ?? '',
+  };
+}
+
+/**
  * Trigger a sync for an integration.
  */
-export async function syncIntegration(type: 'github' | 'jira' | 'slack'): Promise<{ success: boolean }> {
+export async function syncIntegration(type: 'github' | 'jira' | 'slack' | 'bitbucket'): Promise<{ success: boolean }> {
   if (type === 'jira') {
     const { syncJiraTickets } = await import('@/services/jira');
     const result = await syncJiraTickets();
